@@ -1,0 +1,20 @@
+citHeader("To cite the R package 'chipenrich' in publications use:")
+
+citEntry(
+  entry  = "article",
+  title  = "ChIP-Enrich: Gene set enrichment testing for ChIP-Seq data",
+  author = personList(
+    as.person("Ryan Welch"),
+    as.person("Chee Lee"),
+    as.person("Richard Alex Smith"),
+    as.person("Paul Imbriano"),
+    as.person("Laura J Scott"),
+    as.person("Maureen A Sartor")
+  ),
+  year = 2012,
+	journal = "In Preparation",
+  note = paste("R package version",meta$Version),
+  textVersion = "Welch RP, Lee C, Smith RA, Imbriano P, Scott LJ, Sartor MA. 2012. ChIP-Enrich: Gene set enrichment testing for ChIP-Seq data (in preparation.)"
+)
+
+citFooter("This free open-source software implements academic research by the authors and co-workers. If you use it, please support the project by citing the appropriate journal articles.")
