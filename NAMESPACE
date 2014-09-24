@@ -1,12 +1,12 @@
 export("chipenrich");
 export("plot_spline_length");
 export("plot_dist_to_tss");
+export("plot_gene_coverage");
 export("plot_expected_peaks");
 exportPattern("supported_.*");
 
 import(stringr);
 importFrom(plyr,rbind.fill);
-importFrom(reshape,merge_all);
 import(methods);
 import(GenomicRanges);
 import(IRanges);
@@ -14,4 +14,6 @@ import(mgcv);
 import(lattice);
 import(latticeExtra);
 import(grid);
+import(parallel);
+import(rms);
 import(chipenrich.data);

@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+os = Sys.info()[1]
 library(chipenrich.data);
 library(mgcv);
 library(IRanges);
@@ -7,21 +8,27 @@ library(lattice);
 library(latticeExtra);
 library(grid);
 library(stringr);
-library(reshape);
+library(rms);
+library(parallel);
 
 SUPPORTED_METHODS = list(
   'chipenrich' = "test_gam",
-  'fet' = "test_fisher_exact"
+  'fet' = "test_fisher_exact",
+  'broadenrich' = "test_gam_ratio"
 );
 
 HIDDEN_METHODS = list(
-  'binomial' = "test_binomial"
+  'binomial' = "test_binomial",
+  'chipapprox' = 'test_approx',
+  'broadenrich_splineless' = "test_gam_ratio_splineless"
 );
 
 METHOD_NAMES = list(
 	'fet' = "Fisher's Exact Test",
-	'binomial' = "Binomial Test",
-	'chipenrich' = "ChIP-Enrich"
+	'chipenrich' = "ChIP-Enrich",
+	'broadenrich' = "Broad-Enrich",
+	'chipapprox' = "ChIP-Enrich Approximate",
+	'broadenrich_splineless' = "Broad-Enrich Splineless"
 );
 
 read_bed = function(file_path) {
@@ -97,6 +104,12 @@ load_peaks = function(dframe) {
   return(chroms);
 }
 
+reduce_peaks = function(peaks) {
+	peaks = lapply(peaks, IRanges::reduce)
+	return(peaks)
+}
+
+# Used in chipenrich(...) with method!='broadenrich'
 assign_peaks = function(peaks,locusdef,tss,midpoint=T) {
   results = list();
   
@@ -169,6 +182,9 @@ assign_peaks = function(peaks,locusdef,tss,midpoint=T) {
       nearest_tss_gene_strand=as.character(strand(tss_hits))
     );
     
+    # A hash on chrom, peak_start, peak_end to assign unique peak_id
+    d$hash = apply(cbind(as.character(d$chrom),d$peak_start,d$peak_end),1,paste,collapse='')
+    
 		# if (midpoint) {
 			# d = data.frame(
 				# chrom=chrom,
@@ -198,11 +214,92 @@ assign_peaks = function(peaks,locusdef,tss,midpoint=T) {
   if (length(results) == 0) {
     return(NULL);
   } else{
-    result = merge_all(results);
+    result = Reduce(rbind,results);
+  
+    # Give each peak a unique ID based on chrom, peak_start, peak_end
+	unique_peaks = apply(unique(cbind(as.character(result$chrom),result$peak_start,result$peak_end)),1,paste,collapse='')
+	unique_peaks = data.frame('hash'=unique_peaks,'peak_id'=1:length(unique_peaks),stringsAsFactors=F)
+	
+	result = merge(result,unique_peaks,by='hash')
+  
     return(result);
   }
 }
 
+# Used in chipenrich(...) with method='broadenrich'
+assign_peak_segments = function(peaks,locusdef) {
+  results = list();
+  
+  for (chrom in names(peaks)) {
+    if (!chrom %in% names(locusdef@chrom2iranges)) {
+      next;
+    }
+    
+    # Pull out IRanges objects for peaks and gene loci
+    peak_ranges = peaks[[chrom]];
+    gene_ranges = locusdef@chrom2iranges[[chrom]];
+    
+	# Find overlapping peaks without restricting to the midpoint
+	# of the peak. NOTE: Peaks may be assigned to multiple genes.
+    overlaps = findOverlaps(peak_ranges,gene_ranges);
+    overlap_matrix = IRanges::as.matrix(overlaps);
+	
+    if (length(overlaps) == 0) {
+	  # There were no peak overlaps with gene loci on this chromosome. 
+      next;
+    }
+    
+    # Pull out matches
+    matched_peaks = peak_ranges[overlap_matrix[,1]];
+    matched_genes = gene_ranges[overlap_matrix[,2]];
+	    
+    # Get peak/gene start and end points for full peaks
+    peak_start = start(matched_peaks)
+    peak_end = end(matched_peaks)
+    gene_start = start(matched_genes)
+    gene_end = end(matched_genes)
+    
+    # Get overlap start and end and compute overlap in bp
+    overlap_start = apply(cbind(peak_start, gene_start), 1, max)
+	overlap_end = apply(cbind(peak_end, gene_end), 1, min)
+	peak_overlap = overlap_end - overlap_start
+    
+    d = data.frame(
+      'chrom'=chrom,
+      'peak_start'=peak_start,
+      'peak_end'=peak_end,
+      'gene_locus_start'=gene_start,
+      'gene_locus_end'=gene_end,
+      'geneid'=names(matched_genes),
+	  'overlap_start'=overlap_start,
+	  'overlap_end'=overlap_end,
+	  'peak_overlap'=peak_overlap
+    );
+    
+    # A hash on chrom, peak_start, peak_end to assign unique peak_id
+    d$hash = apply(cbind(as.character(d$chrom),d$peak_start,d$peak_end),1,paste,collapse='')
+    
+    results[[chrom]] = d;
+  }
+  
+  if (length(results) == 0) {
+    return(NULL);
+  } else{
+    result = Reduce(rbind,results);
+    
+    # Give each peak a unique ID based on chrom, peak_start, peak_end
+	unique_peaks = apply(unique(cbind(as.character(result$chrom),result$peak_start,result$peak_end)),1,paste,collapse='')
+	unique_peaks = data.frame('hash'=unique_peaks,'peak_id'=1:length(unique_peaks),stringsAsFactors=F)
+	
+	result = merge(result,unique_peaks,by='hash')
+    
+    return(result);
+  }
+}
+
+# Used in plot_expected_peaks(...) and chipenrich(...)
+# Resulting columns are:
+# geneid, length, log10_length, num_peaks, peak
 num_peaks_per_gene = function(assigned_peaks,locusdef,mappa=NULL) { 
   # Add in gene lengths to locusdef data. 
   d = locusdef@dframe;
@@ -235,6 +332,182 @@ num_peaks_per_gene = function(assigned_peaks,locusdef,mappa=NULL) {
   return(result);
 }
 
+# Used for method='broadenrich'
+# Adds peak_overlap, ratio columns to peaks per gene result
+calc_peak_gene_overlap = function(assigned_peaks, ppg) {
+	# Sum up the lengths for each peak in a gene
+	rpg = stats::aggregate(peak_overlap ~ geneid, assigned_peaks, sum)
+	
+	d_rpg = data.frame(geneid = rpg$geneid, peak_overlap = rpg$peak_overlap, stringsAsFactors=F)
+	
+	result = merge(ppg, d_rpg, by='geneid', all.x=T)
+	result$peak_overlap[is.na(result$peak_overlap)] = 0
+	
+	result$ratio = result$peak_overlap / result$length
+	
+	result$ratio[result$ratio > 1] = 1
+	
+	# Order by number of peaks in a gene. 
+	result = result[order(result$num_peaks,decreasing=T),]
+	
+	return(result)
+}
+
+# Used for method='chipapprox'
+# Identical to post-mappa part of calc_weights_gam(...)
+# Adds weight, prob_peak, resid.dev columns to peaks per gene result
+calc_approx_weights = function(ppg,mappa) {
+  d = ppg
+  
+  # Create model. 
+  model = "peak ~ s(log10_length,bs='cr')";
+  
+  # Compute binomial spline fit.
+  fit = gam(as.formula(model),data=d,family="binomial");
+  
+  # Compute weights for each gene, based on the predicted prob(peak) for each gene. 
+  ppeak = fitted(fit);
+  w0 = 1 / (ppeak/mean(d$peak,na.rm=T));
+  w0 = w0 / mean(w0,na.rm=T);
+  
+  d$weight = w0;
+  d$prob_peak = ppeak;
+  d$resid.dev = resid(fit,type="deviance");
+  
+  cols = c("geneid","length","log10_length","mappa","num_peaks","peak","weight","prob_peak","resid.dev");
+  if (is.null(mappa)) {
+    cols = setdiff(cols,c("mappa"));
+  }
+  d = subset(d,select=cols);
+  
+  return(d);
+}
+
+# Randomize the locus definition @dframe and rebuild the @granges and @chrom2iranges
+randomize_locusdef = function(ldef, resolution=50) {
+	message('Extracting definition data frame..')
+	ldef_df = ldef@dframe
+	
+	message('Splitting data frame on chrom..')
+	ldef_chrom = split(ldef_df, f=ldef_df$chrom)
+	
+	message('Working within each chrom..')
+	ldef_chrom = lapply(ldef_chrom, function(lc) {
+		chrom = unique(lc$chrom)
+		
+		message(paste('	On chrom',chrom))
+		
+		# Collapse consecutive rows of the ldef when the geneid is the same
+			# Split by geneid
+			message('		Splitting chrom on gene id..')
+			lc_geneid = split(lc, lc$geneid)
+			
+			# For each geneid df, create an IRanges object to apply IRanges::reduce to
+			message('		Applying IRanges::reduce to each gene id group..')
+			lc_geneid_ir = lapply(lc_geneid, function(lcg) {
+				geneid = unique(lcg$geneid)
+				
+				ir = IRanges(start=lcg$start, end = lcg$end, names=lcg$geneid)
+				ir = IRanges::reduce(ir)
+				names(ir) = rep.int(geneid, length(ir))
+				
+				return(as.data.frame(ir, stringsAsFactors=F))
+			})
+		
+		# Now put all the data.framed IRange objects back together
+		message('		Collapsing reduced definition..')
+		lc_collapsed = Reduce(rbind, lc_geneid_ir)
+		
+		# Add chromosome column back, rename names column, and sort columns
+		message('		Formatting reduced definition..')
+		lc_collapsed$chrom = chrom 
+		colnames(lc_collapsed) = c('start','end','width','geneid','chrom')
+		lc_collapsed = lc_collapsed[,c('geneid','chrom','start','end')]
+		
+		# Sort lc_collapsed by the starting position and rename rownames
+		message('		Sorting reduced definition..')
+		lc_collapsed = lc_collapsed[order(lc_collapsed$start),]
+		rownames(lc_collapsed) = 1:nrow(lc_collapsed)
+		
+		# Form groups
+		group = floor(as.numeric(rownames(lc_collapsed))+(resolution-1))/resolution
+		group = floor(group)
+		
+		# Split the chromosome into parts by group
+		message(paste('		Shuffling within bins of', resolution, 'genes'))
+		split_lc = split(lc_collapsed, group)
+		split_lc = lapply(split_lc, function(bin){
+			reordering = sample(1:nrow(bin), nrow(bin))
+			
+			# Scramble geneids
+			data.frame('geneid' = bin$geneid[reordering], bin[,2:ncol(bin)], stringsAsFactors=F)
+		})
+		lc = Reduce(rbind, split_lc)
+		
+		return(lc)
+	})
+	
+	message('Done rejiggering genomic locations for data frame..')
+	ldef_df = Reduce(rbind, ldef_chrom)
+	
+	message('Creating new GenomicRanges object..')
+	ldef_gr = GRanges(
+		seqnames = ldef_df$chrom,
+		ranges = IRanges(start=ldef_df$start, end=ldef_df$end),
+		names = ldef_df$geneid
+	)
+	
+	message('Creating new IRanges object..')
+	chroms = c(paste('chr',1:22,sep=''),'chrX','chrY')
+	
+	chr_list = chroms
+	names(chr_list) = chroms
+	
+	ldef_ir = lapply(chr_list, function(chr) {
+		sub_ldef_df = subset(ldef_df, chrom==chr)
+		
+		ir = IRanges(start=sub_ldef_df$start, end=sub_ldef_df$end, names=sub_ldef_df$geneid)
+		return(ir)
+	})
+	
+	ldef@dframe = ldef_df
+	ldef@granges = ldef_gr
+	ldef@chrom2iranges = ldef_ir
+	
+	return(ldef)
+}
+
+# Randomize ppg after all additions have been made across all genes
+randomize_ppg_all = function(ppg) {
+	ppg = ppg[order(ppg$length),]
+	rownames(ppg) = 1:nrow(ppg)
+	
+	reordering = sample(1:nrow(ppg), nrow(ppg))
+	ppg = data.frame('geneid'=ppg$geneid, ppg[reordering,2:ncol(ppg)], stringsAsFactors=F)
+	
+	return(ppg)
+}
+
+# Randomize ppg after all additions have been made within length bins
+randomize_ppg_length = function(ppg) {
+	ppg = ppg[order(ppg$length),]
+	rownames(ppg) = 1:nrow(ppg)
+	
+	group = floor(as.numeric(rownames(ppg))+99)/100
+	group = floor(group)
+	
+	split_ppg = split(ppg, group)
+	split_ppg = lapply(split_ppg, function(bin){
+		reordering = sample(1:nrow(bin), nrow(bin))
+		
+		data.frame('geneid'=bin$geneid, bin[reordering,2:ncol(bin)], stringsAsFactors=F)
+	})
+	ppg = Reduce(rbind, split_ppg)
+	
+	return(ppg)
+}
+
+# Used in ..plot_spline_length(...)
 add_emp_peak = function(gpw,bin_size=25) {
   d = gpw;
   d = d[order(d$log10_length),];
@@ -245,6 +518,7 @@ add_emp_peak = function(gpw,bin_size=25) {
   d;
 }
 
+# Used in plot_spline_mappa(...)
 add_emp_peak_mappa = function(gpw,bin_size=25) {
   d = gpw;
   d = d[order(d$mappa),];
@@ -255,6 +529,7 @@ add_emp_peak_mappa = function(gpw,bin_size=25) {
   d;
 }
 
+# Used in ..plot_spline_length(...)
 avg_binned_peak = function(gpw,bin_size=25) {
   d = gpw;
   d = d[order(d$log10_length),];
@@ -266,6 +541,7 @@ avg_binned_peak = function(gpw,bin_size=25) {
   bygroup;
 }
 
+# Used in plot_spline_mappa(...)
 avg_binned_peak_mappa = function(gpw,bin_size=25) {
   d = gpw;
   d = d[order(d$mappa),];
@@ -277,6 +553,18 @@ avg_binned_peak_mappa = function(gpw,bin_size=25) {
   bygroup;
 }
 
+# Used in ..plot_gene_coverage(...)
+avg_binned_coverage = function(gpw,bin_size=25) {
+  d = gpw;
+  d = d[order(d$log10_length),];
+  d$group = ceiling((1:dim(d)[1])/bin_size);
+  
+  bygroup = stats::aggregate(cbind(ratio,log10_length) ~ group,d,mean);
+  names(bygroup) = c("group","ratio","log_avg_length");
+  bygroup;
+}
+
+# Never used
 make_gpw = function(locusdef,peak_genes) {
   d = locusdef@dframe;
   
@@ -300,6 +588,7 @@ make_gpw = function(locusdef,peak_genes) {
   return(subset(d,select=c("geneid","length","log10_length","peak")));
 }
 
+# Used in ..plot_spline_length(...)
 calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
   d = locusdef@dframe;
   
@@ -527,7 +816,153 @@ test_binomial = function(geneset,ppg) {
   return(results);
 }
 
-test_gam = function(geneset,gpw) { 
+# Extracted contents of for loop implementation in test_gam and test_gam_ratio to 
+# enable multicore processing of genesets. This function gets called in mclapply
+# in both test_gam and test_gam_ratio, while using the correct model, and reporting
+# the correct information based on the method parameter.
+single_gam = function(go_id, geneset, gpw, method, model) {
+	
+	final_model = as.formula(model);
+	
+	# Genes in the geneset  
+	go_genes = geneset@set.gene[[go_id]];
+	
+	# Filter genes in the geneset to only those in the gpw table.
+	# The gpw table will be truncated depending on which geneset type we're in.
+	go_genes = go_genes[go_genes %in% gpw$geneid];
+	
+	# Background genes and the background presence of a peak
+	b_genes = gpw$geneid %in% go_genes;
+	sg_go = gpw$peak[b_genes];
+ 	
+ 	# Information about the geneset
+	r_go_id = go_id;
+	r_go_genes_num = length(go_genes);
+	r_go_genes_avg_length = mean(gpw$length[b_genes]);
+    
+    # Information about peak genes
+	go_genes_peak = gpw$geneid[b_genes][sg_go==1];
+	r_go_genes_peak = paste(go_genes_peak,collapse=", ");
+	r_go_genes_peak_num = length(go_genes_peak);
+    
+    # Information specific to broadenrich
+	if(method == 'broadenrich' || method == 'broadenrich_splineless') {
+		r_go_genes_avg_coverage = mean(gpw$ratio[b_genes]);
+	}
+    
+    # Small correction for case where every gene in this geneset has a peak. 
+	if (all(as.logical(sg_go))) {
+	  cont_length = quantile(gpw$length,0.0025);
+  
+	  if(method == 'chipenrich') {
+		  cont_gene = data.frame(
+			geneid = "continuity_correction",
+			length = cont_length,
+			log10_length = log10(cont_length),
+			num_peaks = 0,
+			peak = 0,
+			stringsAsFactors = F
+		  );
+	  } else if (method == 'broadenrich' || method == 'broadenrich_splineless') {
+		  cont_gene = data.frame(
+			geneid = "continuity_correction",
+			length = cont_length,
+			log10_length = log10(cont_length),
+			num_peaks = 0,
+			peak = 0,
+			peak_overlap = 0,
+			ratio = 0,
+			stringsAsFactors = F
+		  );
+	  }
+  
+	  if ("mappa" %in% names(gpw)) {
+		cont_gene$mappa = 1;
+	  }
+	  gpw = rbind(gpw,cont_gene);
+	  b_genes = c(b_genes,1);
+
+	  message(sprintf("Applying correction for geneset %s with %i genes...",go_id,length(go_genes)));
+	}
+    
+    # Logistic regression works no matter the method because final_model is chosen above
+    # and the data required from gpw will automatically be correct based on the method used.
+    fit = gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="binomial");
+    
+	# Results from the logistic regression
+    r_effect = coef(fit)[2];
+    r_pval = summary(fit)$p.table[2,4];
+	
+	# The only difference between chipenrich and broadenrich here is
+	# the Geneset Avg Gene Coverage column
+	if(method == 'chipenrich') {
+		out = data.frame(
+			"P.value"=r_pval, 
+			"Geneset ID"=r_go_id, 
+			"N Geneset Genes"=r_go_genes_num, 
+			"Geneset Peak Genes"=r_go_genes_peak, 
+			"N Geneset Peak Genes"=r_go_genes_peak_num, 
+			"Effect"=r_effect, 
+			"Odds.Ratio"=exp(r_effect),
+			"Geneset Avg Gene Length"=r_go_genes_avg_length,
+			stringsAsFactors=F);
+	} else if (method == 'broadenrich' || method == 'broadenrich_splineless') {
+		out = data.frame(
+			"P.value"=r_pval, 
+			"Geneset ID"=r_go_id, 
+			"N Geneset Genes"=r_go_genes_num, 
+			"Geneset Peak Genes"=r_go_genes_peak, 
+			"N Geneset Peak Genes"=r_go_genes_peak_num, 
+			"Effect"=r_effect, 
+			"Odds.Ratio"=exp(r_effect),
+			"Geneset Avg Gene Length"=r_go_genes_avg_length,
+			"Geneset Avg Gene Coverage"=r_go_genes_avg_coverage,
+			stringsAsFactors=F);
+	}
+	
+	return(out);
+}
+
+test_gam = function(geneset,gpw,n_cores) { 
+  # Restrict our genes/weights/peaks to only those genes in the genesets.
+  # Here, geneset is not all combined, but GOBP, GOCC, etc. 
+  # i.e. A specific one.
+  gpw = subset(gpw,geneid %in% geneset@all.genes);
+
+  if (sum(gpw$peak) == 0) {
+    stop("Error: no peaks in your data!");
+  }
+
+  # Construct model formula.
+  model = "peak ~ goterm + s(log10_length,bs='cr')";
+  
+  # Run tests on genesets and beware of Windows!
+  if(os != 'Windows' && n_cores > 1) {
+	  results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'chipenrich', model)
+	  }, mc.cores = n_cores)
+  } else {
+  	  results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'chipenrich', model)
+	  })  
+  }
+  
+  # Collapse results into one table
+  results = Reduce(rbind,results_list)
+  
+  # Correct for multiple testing
+  results$FDR = p.adjust(results$P.value, method="BH");
+  
+  # Create enriched/depleted status column
+  results$Status = ifelse(results$Effect > 0, 'enriched', 'depleted')
+  
+  results = results[order(results$P.value),];
+  
+  return(results);
+}
+
+test_gam_ratio = function(geneset,gpw,n_cores) {
+  
   # Restrict our genes/weights/peaks to only those genes in the genesets. 
   gpw = subset(gpw,geneid %in% geneset@all.genes);
 
@@ -536,91 +971,198 @@ test_gam = function(geneset,gpw) {
   }
 
   # Construct model formula. 
-  model = "peak ~ goterm + s(log10_length,bs='cr')";
-  final_model = as.formula(model);
-    
-  r_pvals = c();
-  r_go_ids = c();
-  r_go_genes = c();
-  r_go_genes_num = c();
-  r_go_genes_peak = c();
-  r_go_genes_peak_num = c();
-  r_effects = c();
-  for (i in 1:length(geneset@set.gene)) {
-    go_id = ls(geneset@set.gene)[i];
-    go_genes = geneset@set.gene[[go_id]];
-		
-		# Eliminate GO genes that aren't in the ppg. 
-		#go_genes = Filter(function(x) x %in% gpw$geneid,go_genes);
-    go_genes = go_genes[go_genes %in% gpw$geneid];
-    
-    b_genes = gpw$geneid %in% go_genes;
-    sg_go = gpw$peak[b_genes];
-
-    if ((sum(b_genes) == 0) || (sum(!b_genes) == 0)) {
-      next;
-    }   
- 
-    r_go_genes[i] = paste(go_genes,collapse=";");
-    r_go_genes_num[i] = length(go_genes);
-    
-    go_genes_peak = gpw$geneid[b_genes][sg_go==1];
-    r_go_genes_peak[i] = paste(go_genes_peak,collapse=", ");
-    r_go_genes_peak_num[i] = length(go_genes_peak);
-    
-    if (all(as.logical(sg_go))) {
-      # Small correction for case where every gene in this geneset has a peak. 
-      cont_length = quantile(gpw$length,0.0025);
-      cont_gene = data.frame(
-        geneid = "continuity_correction",
-        length = cont_length,
-        log10_length = log10(cont_length),
-        num_peaks = 0,
-        peak = 0,
-        stringsAsFactors = F
-      );
-      if ("mappa" %in% names(gpw)) {
-        cont_gene$mappa = 1;
-      }
-      gpw = rbind(gpw,cont_gene);
-      b_genes = c(b_genes,1);
-
-      message(sprintf("Applying correction for geneset %s with %i genes...",go_id,length(go_genes)));
-    }
-    
-    fit = gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="binomial");
-    effect = coef(fit)[2];
-    bicep = summary(fit)$p.table[2,4];
-
-    r_effects[i] = effect;
-    r_pvals[i] = bicep;
-    r_go_ids[i] = go_id;
+  model = "goterm ~ ratio + s(log10_length,bs='cr')";
+  
+  # Run multicore tests on genesets and beware of Windows!
+  if(os != 'Windows' && n_cores > 1) {
+	  results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'broadenrich', model)
+	  }, mc.cores = n_cores)
+  } else {
+  	  results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'broadenrich', model)
+	  })  
   }
   
-  fdr = p.adjust(r_pvals,method="BH");
+  # Collapse results into one table
+  results = Reduce(rbind,results_list)
   
-  is_depleted = r_effects < 0;
-  is_enriched = r_effects > 0;
+  # Correct for multiple testing
+  results$FDR = p.adjust(results$P.value, method="BH");
   
-  enr = rep(NA,length(r_go_ids));
-  enr[is_depleted] = "depleted";
-  enr[is_enriched] = "enriched";
-  
-  results = data.frame(
-    "Geneset ID"=r_go_ids,
-    "N Geneset Genes"=r_go_genes_num,
-    "N Geneset Peak Genes"=r_go_genes_peak_num,
-    "Effect"=r_effects,
-    "Odds.Ratio"=exp(r_effects),
-    "Status"=enr,
-    "P-value"=r_pvals,
-    "FDR"=fdr,
-		"Geneset Peak Genes"=r_go_genes_peak,
-    stringsAsFactors=F
-  );
+  # Create enriched/depleted status column
+  results$Status = ifelse(results$Effect > 0, 'enriched', 'depleted')
   
   results = results[order(results$P.value),];
+  
   return(results);
+}
+
+test_gam_ratio_splineless = function(geneset,gpw,n_cores) {
+  message('Using test_gam_ratio_splineless..')
+  
+  # Restrict our genes/weights/peaks to only those genes in the genesets. 
+  gpw = subset(gpw,geneid %in% geneset@all.genes);
+
+  if (sum(gpw$peak) == 0) {
+    stop("Error: no peaks in your data!");
+  }
+
+  # Construct model formula. 
+  model = "goterm ~ ratio";
+  
+  # Run multicore tests on genesets and beware of Windows!
+  if(os != 'Windows' && n_cores > 1) {
+	  results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'broadenrich_splineless', model)
+	  }, mc.cores = n_cores)
+  } else {
+  	  results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'broadenrich_splineless', model)
+	  })  
+  }
+  
+  # Collapse results into one table
+  results = Reduce(rbind,results_list)
+  
+  # Correct for multiple testing
+  results$FDR = p.adjust(results$P.value, method="BH");
+  
+  # Create enriched/depleted status column
+  results$Status = ifelse(results$Effect > 0, 'enriched', 'depleted')
+  
+  results = results[order(results$P.value),];
+  
+  return(results);
+}
+
+single_approx = function(go_id, geneset, gpw) {
+	
+	lrm.fast = function(x,y) {
+		fit = lrm.fit(x,y);
+		vv = diag(fit$var);
+		cof = fit$coef;
+		z = cof/sqrt(vv);
+		pval = pchisq(z^2,1,lower.tail=F);
+		c(cof[2],pval[2]);
+	}
+	
+	# Genes in the geneset  
+	go_genes = geneset@set.gene[[go_id]];
+	
+	# Filter genes in the geneset to only those in the gpw table.
+	# The gpw table will be truncated depending on which geneset type we're in.
+	go_genes = go_genes[go_genes %in% gpw$geneid];
+	
+	# Background genes, the background presence of a peak, and the background
+	# weight of peaks
+	b_genes = gpw$geneid %in% go_genes;
+	sg_go = gpw$peak[b_genes];
+	wg_go = gpw$weight[b_genes];
+ 	
+ 	# Information about the geneset
+	r_go_id = go_id;
+	r_go_genes_num = length(go_genes);
+	r_go_genes_avg_length = mean(gpw$length[b_genes]);
+	
+    # Information about peak genes
+	go_genes_peak = gpw$geneid[b_genes][sg_go==1];
+	r_go_genes_peak = paste(go_genes_peak,collapse=", ");
+	r_go_genes_peak_num = length(go_genes_peak);
+	
+	# Small correction for case where every gene in this geneset has a peak. 
+	if (all(as.logical(sg_go))) {
+		cont_length = quantile(gpw$length,0.0025);
+		cont_gene = data.frame(
+			geneid = "continuity_correction",
+			length = cont_length,
+			log10_length = log10(cont_length),
+			num_peaks = 0,
+			peak = 0,
+			weight = quantile(gpw$weight,0.0025),
+			prob_peak = quantile(gpw$prob_peak,0.0025),
+			resid.dev = quantile(gpw$resid.dev,0.0025),
+			stringsAsFactors = F
+		);
+		if ("mappa" %in% names(gpw)) {
+			cont_gene$mappa = 1;
+		}
+		gpw = rbind(gpw,cont_gene);
+		b_genes = c(b_genes,1);
+		
+		message(sprintf("Applying correction for geneset %s with %i genes...",go_id,length(go_genes)));
+	}
+	
+	# The model is still essentially peak ~ goterm + s(log10_length,bs='cr')
+	# except we're using the weights that are calculated once...
+	# Also, y must be binary, so as.numeric(b_genes) (goterm) must be 
+	# predicted against the weights...
+	testm = cbind(y=as.numeric(b_genes), x=gpw$weight*gpw$peak);
+	ep = lrm.fast(testm[,"x"], testm[,"y"]);
+	
+	# Results from quick regression
+	r_effect = ep[1];
+	r_pval = ep[2];
+	
+	out = data.frame(
+		"P.value"=r_pval, 
+		"Geneset ID"=r_go_id, 
+		"N Geneset Genes"=r_go_genes_num, 
+		"Geneset Peak Genes"=r_go_genes_peak, 
+		"N Geneset Peak Genes"=r_go_genes_peak_num, 
+		"Effect"=r_effect, 
+		"Odds.Ratio"=exp(r_effect),
+		"Geneset Avg Gene Length"=r_go_genes_avg_length,
+		stringsAsFactors=F);
+	
+	return(out)
+}
+
+test_approx = function(geneset,gpw,nwp=F,n_cores) {
+	
+	if (!"weight" %in% names(gpw)) {
+    	stop("Error: you must fit weights first using one of the calc_weights* functions.");
+	}
+	
+	if (sum(gpw$peak) == 0) {
+		stop("Error: no peaks in your data!");
+	}
+	
+	# Restrict our genes/weights/peaks to only those genes in the genesets. 
+	gpw = subset(gpw,geneid %in% geneset@all.genes);
+	
+	# Re-normalize weights.
+	# Not sure what nwp means, nor if we want to modify gpw like this. 
+	if (!nwp) {
+		gpw$weight = gpw$weight / mean(gpw$weight);
+	} else { 
+		b_haspeak = gpw$peak == 1;
+		gpw$weight[b_haspeak] = gpw$weight[b_haspeak] / mean(gpw$weight[b_haspeak]);
+	}
+	
+	# Run multicore tests on genesets and beware of Windows!
+	if(os != 'Windows' && n_cores > 1) {
+		results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+			single_approx(go_id, geneset, gpw)
+		}, mc.cores = n_cores)
+	} else {
+		results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
+			single_approx(go_id, geneset, gpw)
+		})  
+	}
+	
+	# Collapse results into one table
+	results = Reduce(rbind,results_list)
+  
+	# Correct for multiple testing
+	results$FDR = p.adjust(results$P.value, method="BH");
+  
+	# Create enriched/depleted status column
+	results$Status = ifelse(results$Effect > 0, 'enriched', 'depleted')
+  
+	results = results[order(results$P.value),];
+  
+	return(results);
 }
 
 # Quick function to change column names of data frame 
@@ -744,28 +1286,6 @@ get_ext = function(file) {
     ));
   }
   
-  # Plot. 
-  # p = xyplot(
-    # num_peaks + exp_peaks + qpois_05 + qpois_95 + qpois_bonf_05 + qpois_bonf_95 ~ length,
-    # ppg,
-    # par.settings = simpleTheme(pch=20),
-    # auto.key = list(
-      # cex = 1.3,
-      # text = c(
-        # 'Count of Peaks',
-        # 'Expected Peaks',
-        # '5th Percentile',
-        # '95th Percentile',
-        # '5th Percentile (Bonferroni)',
-        # '95th Percentile (Bonferroni)'
-      # ),
-      # columns = 2
-    # ),
-    # scales = list(cex=1.4),
-    # xlab = list(label="Gene Length",cex=1.4),
-    # ylab = list(label="Count of Peaks",cex=1.4)
-  # );
-  
   return(p);
 }
 
@@ -844,6 +1364,7 @@ plot_expected_peaks = function(peaks,locusdef="nearest_tss",genome="hg19",use_ma
   return(p);
 }
 
+# Do the below, but from "scratch"
 plot_spline_length = function(peaks,locusdef="nearest_tss",genome='hg19',use_mappability=F,read_length=36,legend=T,xlim=NULL) {
 	# Check genome. 
   if (!genome %in% supported_genomes()) {
@@ -906,7 +1427,7 @@ plot_spline_length = function(peaks,locusdef="nearest_tss",genome='hg19',use_map
 	return(plotobj);
 }
 
-# Create diagnostic plot of P(peak) from your data against log locus length (of genes)
+# Create diagnostic plot of Proportion of Peaks from your data against log locus length (of genes)
 # along with the spline fit.  
 ..plot_spline_length = function(locusdef,peak_genes,num_peaks,mappa=NULL,legend=T,xlim=NULL) {  
   # Calculate smoothing spline fit.
@@ -982,7 +1503,7 @@ plot_spline_length = function(peaks,locusdef="nearest_tss",genome='hg19',use_map
     false_prob + prob_peak ~ log10_length,
     gpw,
     xlab=list(label=xlab,cex=1.4),
-    ylab=list(label="P(peak)",cex=1.4),
+    ylab=list(label="Proportion of Peaks",cex=1.4),
     ylim=c(-0.05,1.05),
 		xlim=c(xmin_nopad - 0.5,xmax_nopad + 0.5),
     panel=panel_func,
@@ -1040,7 +1561,7 @@ plot_spline_mappa = function(locusdef,peak_genes,mappa) {
     prob_peak ~ mappa,
     gpw,
     xlab=list(label="Mappability",cex=1.25),
-    ylab=list(label="P(peak)",cex=1.25),
+    ylab=list(label="Proportion of Peaks",cex=1.25),
     ylim=c(-0.05,1.05),
     panel=panel_func,
     type="l",
@@ -1055,6 +1576,99 @@ plot_spline_mappa = function(locusdef,peak_genes,mappa) {
   trellis.unfocus();
 
    return(plotobj);
+}
+
+plot_gene_coverage = function(peaks,locusdef="nearest_tss",genome='hg19',use_mappability=F,read_length=36,legend=T,xlim=NULL) {
+	# Check genome. 
+  if (!genome %in% supported_genomes()) {
+    stop("genome not supported: ",genome);
+  }
+  
+  # Check locus definition. Should only be 1. 
+  if (!locusdef %in% supported_locusdefs()) {
+    stop("bad locus definition requested: ",locusdef);
+  }
+  
+  # Check read length. 
+  if (use_mappability) {
+    if (!as.numeric(read_length) %in% supported_read_lengths()) {
+      stop("bad read length requested: ",read_length);
+    }
+  }
+	
+	if (class(peaks) == "data.frame") {
+		peakobj = load_peaks(peaks);
+	} else if (class(peaks) == "character") {
+    if (str_sub(peaks,-7,-1) == ".bed.gz") {
+      message("Reading BED file: ",peaks);
+      peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-4,-1) == ".bed") {
+      message("Reading BED file: ",peaks);
+      peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-10,-1) == '.broadPeak') {
+      message("Reading broadPeak file: ",peaks);
+      peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-11,-1) == '.narrowPeak') {
+      message("Reading narrowPeak file: ",peaks);
+      peakobj = read_bed(peaks);
+    } else {
+      message("Reading peaks file: ",peaks);
+      peakobj = read_peaks(peaks);
+    }
+	}
+  
+  peakobj = reduce_peaks(peakobj)
+  
+	# Number of peaks in data. 
+  num_peaks = sum(sapply(peakobj,function(x) length(x)))
+  
+  # Load locus definitions. 
+  ldef_code = sprintf("locusdef.%s.%s",genome,locusdef);
+  data(list=ldef_code,package = "chipenrich.data");
+  ldef = get(ldef_code);
+  
+	# # Load TSS site info. 
+  # tss_code = sprintf("tss.%s",genome);
+  # data(list=tss_code,package = "chipenrich.data");
+  # tss = get(tss_code);
+  
+  # Load mappability if requested. 
+  if (use_mappability) {
+    mappa_code = sprintf("mappa.%s.%s.%imer",genome,locusdef,read_length);
+    data(list=mappa_code,package = "chipenrich.data");
+    mappa = get(mappa_code);
+  } else {
+    mappa = NULL;
+  }
+	
+  # Assign peaks to genes. 
+  assigned_peaks = assign_peak_segments(peakobj,ldef);
+  peak_genes = unique(assigned_peaks$geneid);
+  
+  ppg = num_peaks_per_gene(assigned_peaks,ldef,mappa=NULL)
+  
+  ppg = calc_peak_gene_overlap(assigned_peaks,ppg)
+  
+	# Make plot. 
+	plotobj = ..plot_gene_coverage(ppg);
+	return(plotobj);
+}
+
+..plot_gene_coverage = function(ppg) {
+	
+	avg_bins = avg_binned_coverage(ppg, bin_size=25)
+	
+	plotobj = xyplot(
+		ratio ~ log_avg_length,
+		avg_bins,
+		main='Binned Locus Length versus Peak Coverage',
+		xlab='log10(locus length)',
+		ylab='Proportion of locus covered by peak',
+		pch=20,
+		col='black'
+	);
+	
+	return(plotobj);
 }
 
 # For each peak, find the nearest TSS, and distance to it. 
@@ -1100,7 +1714,7 @@ peak_nearest_tss = function(peaks,tss,midpoint=T) {
     results[[chrom]] = d;
   }
   
-  return(merge_all(results));
+  return(Reduce(rbind,results));
 }
 
 plot_dist_to_tss = function(peaks,genome='hg19') {
@@ -1152,7 +1766,7 @@ plot_dist_to_tss = function(peaks,genome='hg19') {
     scales=list(rot=45,cex=1.6),
     col="gray",
     ylim=c(0,1),
-    ylab=list(label="% of Peaks",cex=1.65),
+    ylab=list(label="Proportion of Peaks",cex=1.65),
     xlab=list(label="Distance to TSS (kb)",cex=1.65),
     main=list(label="Distribution of Distance from Peaks to Nearest TSS",cex=1.45)
   );
@@ -1168,6 +1782,8 @@ genome_to_organism = function(genome) {
     org = 'hsa';
   } else if (code == 'rn') {
     org = 'rno';
+  } else if (code == 'dm') {
+  	org = 'dme';
   }
   else {
     org = NULL;
@@ -1208,7 +1824,7 @@ supported_genomes = function() {
   piqr = data(package = "chipenrich.data");
   data_files = piqr$results[,3];
 
-  na.omit(unique(str_match(data_files,"(locusdef|mappa)\\.(\\w+)\\.")[,3]));
+  as.character(na.omit(unique(str_match(data_files,"(locusdef|mappa)\\.(\\w+)\\.")[,3])));
 }
 
 supported_methods = function() {
@@ -1333,6 +1949,7 @@ setup_ldef = function(filepath) {
   );
   
   # Check to make sure locus definitions are disjoint - that is, they do not overlap each other. 
+  # SLATED FOR DELETION PENDING CONSEQUENCES
   if(!isDisjoint(object@granges)) {
     stop("Error: user-provided locus definitions overlap - there should be disjoint ranges for all genes.");
   }
@@ -1377,9 +1994,28 @@ chipenrich = function(
   read_length = 36,
   qc_plots = T,
   max_geneset_size = 2000,
-  num_peak_threshold = 1
+  num_peak_threshold = 1,
+  n_cores = 1
 ) {
-
+  
+  if(os == 'Windows') {
+  	message('Warning! Multicore enrichment is not supported on Windows.')
+  }
+  
+  # Randomizations are accessed by appending _rndall or _rndlength to
+  # the geneset names. Parsing is done here.
+  rndall = all(grepl('rndall',genesets))
+  rndlength = all(grepl('rndlength',genesets))
+  rndloc = all(grepl('rndloc',genesets))
+  
+  if(rndall) {
+  	genesets = gsub('_rndall','',genesets)
+  } else if (rndlength) {
+  	genesets = gsub('_rndlength','',genesets)
+  } else if (rndloc) {
+  	genesets = gsub('_rndloc','',genesets)
+  }
+  
   l = unlist(as.list(environment()));
   opts = data.frame(
     args = names(l),
@@ -1417,6 +2053,11 @@ chipenrich = function(
     ldef_code = sprintf("locusdef.%s.%s",genome,locusdef);
     data(list=ldef_code,package = "chipenrich.data");
     ldef = get(ldef_code);
+    
+	# Randomize locus definition if rndloc == T
+	if(rndloc) {
+		ldef = randomize_locusdef(ldef, 50)
+	}
   }
   
   # If the user specified their own mappability, we can't use the built in mappability - they must provide their own. 
@@ -1493,11 +2134,22 @@ chipenrich = function(
     } else if (str_sub(peaks,-4,-1) == ".bed") {
       message("Reading BED file: ",peaks);
       peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-10,-1) == '.broadPeak') {
+      message("Reading broadPeak file: ",peaks);
+      peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-11,-1) == '.narrowPeak') {
+      message("Reading narrowPeak file: ",peaks);
+      peakobj = read_bed(peaks);
     } else {
       message("Reading peaks file: ",peaks);
       peakobj = read_peaks(peaks);
     }
 	}
+  
+  # Combine overlapping peaks if method = 'broadenrich'
+  if(method == 'broadenrich' || method == 'broadenrich_splineless') {
+		peakobj = reduce_peaks(peakobj)
+  }
   
   # Warn user if they are trying to use FET with a 
   # locus definition that might lead to biased results. 
@@ -1532,45 +2184,93 @@ chipenrich = function(
   for (gs in genesets) {
     geneset_code = sprintf("geneset.%s.%s",gs,organism);
     data(list=geneset_code,package = "chipenrich.data");
-    
+
     geneset_list[[geneset_code]] = filter_genesets(get(geneset_code),max_geneset_size);
   }
-  
+
   # Load TSS site info. 
   tss_code = sprintf("tss.%s",genome);
   data(list=tss_code,package = "chipenrich.data");
   tss = get(tss_code);
   
-  # Assign peaks to genes. 
-  message("Assigning peaks to genes..");
-  assigned_peaks = assign_peaks(peakobj,ldef,tss,midpoint=T);
+  # Assign peaks to genes. NOTE: Depending on method,
+  # peaks are assigned using assign_peaks(...) or
+  # assign_peak_segments(...).
+  if(!(method == 'broadenrich' || method == 'broadenrich_splineless')) {
+	message("Assigning peaks to genes with assign_peaks(...) ..");
+	assigned_peaks = assign_peaks(peakobj,ldef,tss,midpoint=T);
+	message("Successfully assigned peaks..")
+  } else {
+  	message("Assigning peaks to genes with assigned_peak_segments(...) ..");
+  	assigned_peaks = assign_peak_segments(peakobj,ldef)
+  	message("Successfully assigned peaks..")
+  }
+
   peak_genes = unique(assigned_peaks$geneid);
-  	
+
 	# Add gene symbols to peak genes. 
 	genes_code = sprintf("genes.%s",organism);
 	data(list=genes_code,package = "chipenrich.data");
 	gene2symbol = get(genes_code);
 	gene2symbol = change_names(gene2symbol,list(GENEID="geneid",SYMBOL="gene_symbol"));
 	assigned_peaks = merge(assigned_peaks,gene2symbol,by="geneid",all.x=T);
-  #  geneid chrom peak_start  peak_end peak_midpoint gene_locus_start gene_locus_end nearest_tss nearest_tss_gene dist_to_tss nearest_tss_gene_strand gene_symbol
+
+  if(!(method == 'broadenrich' || method == 'broadenrich_splineless')) {
+
 	column_order = c(
+		"peak_id",
 		"chrom",
 		"peak_start",
 		"peak_end",
 		"peak_midpoint",
 		"geneid",
 		"gene_symbol",
-    "gene_locus_start",
-    "gene_locus_end",
-    "nearest_tss",
-    "dist_to_tss",
-    "nearest_tss_gene",
-    "nearest_tss_gene_strand"
+    	"gene_locus_start",
+    	"gene_locus_end",
+    	"nearest_tss",
+    	"dist_to_tss",
+    	"nearest_tss_gene",
+    	"nearest_tss_gene_strand"
 	);
-	assigned_peaks = assigned_peaks[,column_order];
+  } else {
+  	column_order = c(
+  		"peak_id",
+  		"chrom",
+		"peak_start",
+		"peak_end",
+		"geneid",
+		"gene_symbol",
+    	"gene_locus_start",
+    	"gene_locus_end",
+    	"overlap_start",
+    	"overlap_end",
+    	"peak_overlap"
+  	);
+  }
+  assigned_peaks = assigned_peaks[,column_order];
   
   ppg = num_peaks_per_gene(assigned_peaks,ldef,mappa);
+  # This seems redundant given num_peaks_per_gene(...)
   ppg$peak = recode_peaks(ppg$num_peaks,num_peak_threshold);
+  
+  # Add relevant columns to ppg depending on the method
+  if(method == 'broadenrich' || method == 'broadenrich_splineless') {
+	message("Calculating peak overlaps with gene loci..")
+	ppg = calc_peak_gene_overlap(assigned_peaks,ppg);
+  }
+  if(method == 'chipapprox') {
+  	message("Calculating weights for approximate method..")
+  	ppg = calc_approx_weights(ppg,mappa);
+  }
+  
+  # Catch randomizations if present
+  if(rndall) {
+  	message('Randomizing across all genes.')
+  	ppg = randomize_ppg_all(ppg)
+  } else if (rndlength) {
+  	message('Randomizing within length bins.')
+  	ppg = randomize_ppg_length(ppg)
+  }
   	  
   # Run chipenrich method on each geneset. 
   results = list();
@@ -1579,7 +2279,7 @@ chipenrich = function(
 		message(sprintf("Genesets: %s",gobj@type));
 		message("Running tests..");
     if (testf == "test_gam") {
-      rtemp = test_func(gobj,ppg);
+      rtemp = test_func(gobj,ppg,n_cores);
     }
     if (testf == "test_fisher_exact") {
       rtemp = test_func(gobj,ppg,alternative=fisher_alt);
@@ -1587,41 +2287,52 @@ chipenrich = function(
     if (testf == "test_binomial") {
       rtemp = test_func(gobj,ppg);
     }
+    if (testf == "test_gam_ratio") {
+      rtemp = test_func(gobj,ppg,n_cores);
+    }
+    if (testf == "test_approx") {
+      rtemp = test_func(gobj,ppg,nwp=F,n_cores);
+    }
+    if (testf == "test_gam_ratio_splineless") {
+      rtemp = test_func(gobj,ppg,n_cores);
+    }
     
     # Annotate with geneset descriptions. 
     rtemp$"Description" = as.character(mget(rtemp$Geneset.ID,gobj@set.name,ifnotfound=NA));
     rtemp$"Geneset.Type" = gobj@type;
-    
+
     results[[gobj@type]] = rtemp;
   }
-  enrich = merge_all(results);
-  
+  enrich = Reduce(rbind,results);
+
   # Re-order the columns to something sensible. 
-	column_order = c(
-    "Geneset.Type",
+  column_order = c(
+   	"Geneset.Type",
     "Geneset.ID",
     "Description",
     "P.value",
     "FDR",
     "Effect",
-		"Odds.Ratio",
-		"P.Success",
+	"Odds.Ratio",
+	"P.Success",
     "Status",
     "N.Geneset.Genes",
     "N.Geneset.Peak.Genes",
-		"Geneset.Peak.Genes"
+    "Geneset.Avg.Gene.Length",
+    "Geneset.Avg.Gene.Coverage",
+	"Geneset.Peak.Genes"
   );
-	column_order = intersect(column_order,names(enrich));
+  column_order = intersect(column_order,names(enrich));
   enrich = enrich[,column_order];
-  
+
   # Order results by p-value. 
   enrich = enrich[order(enrich$P.value),];
-  
+
   # If there is a status column, re-sort so enriched terms are on top. 
   if ("Status" %in% names(enrich)) {
     enrich = enrich[order(enrich$Status,decreasing=T),];
   }
-  
+
   # Pull out tests that failed. 
   bad_enrich = subset(enrich,is.na(P.value));
   enrich = subset(enrich,!is.na(P.value));
@@ -1652,9 +2363,13 @@ chipenrich = function(
     if (qc_plots) {
       filename_qcplots = file.path(out_path,sprintf("%s_qcplots.pdf",out_name));
       pdf(filename_qcplots);
-      print(..plot_spline_length(ldef,peak_genes,num_peaks,mappa=mappa));
-      print(..plot_dist_to_tss(peakobj,tss));
-#      print(..plot_expected_peaks(ppg));
+			if (!(method=='broadenrich' || method=='broadenrich_splineless')) {
+				print(..plot_spline_length(ldef,peak_genes,num_peaks,mappa=mappa));
+				print(..plot_dist_to_tss(peakobj,tss));
+			} else {
+				print(..plot_gene_coverage(ppg));
+			}
+#     print(..plot_expected_peaks(ppg));
       dev.off();
       
       message("Wrote QC plots to: ",filename_qcplots);

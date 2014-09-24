@@ -23,7 +23,7 @@ plot_expected_peaks(peaks,
 
 \arguments{
   \item{peaks}{
-    Either a data frame, or file containing peaks, or a BED file. The data frame should have 3 columns: chrom, start, and end. Chrom should follow UCSC convention, e.g. "chrX". The file should be tab-delimited and contain a header with at least the columns chrom, start, and end. 
+    Either a data frame, a BED file, a .broadPeak file, or a .narrowPeak file. The data frame should have at least 3 columns: chrom, start, and end. Chrom should follow UCSC convention, e.g. "chrX". The file should be tab-delimited.
   }
 
   \item{locusdef}{

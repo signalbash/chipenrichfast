@@ -5,20 +5,20 @@ Run ChIP-Enrich on a dataset of ChIP-seq peaks
 }
 
 \description{
-Run gene set enrichment testing (ChIP-Enrich) on a ChIP-seq peak dataset or other type of dataset consisting of regions across the genome. The user can call \code{chipenrich} to run the method on their data. A number of arguments can be provided to change the type of test, the genome build, which sets of genes to test, how peaks are assigned to genes, and other minor options. 
+Run gene set enrichment testing (ChIP-Enrich or Broad-Enrich) on a ChIP-seq peak dataset or other type of dataset consisting of regions across the genome. The user can call \code{chipenrich} to run the method on their data. A number of arguments can be provided to change the type of test, the genome build, which sets of genes to test, how peaks are assigned to genes, and other minor options. 
 }
 
 \usage{
 chipenrich(peaks, out_name = "chipenrich", out_path = getwd(), genome = "hg19",
 genesets = c("GOBP","GOCC","GOMF"), 
-locusdef = "nearest_tss", method = "chipenrich", fisher_alt = "two.sided", 
-use_mappability = F, mappa_file = NULL, read_length = 36, 
-qc_plots = T, max_geneset_size = 2000, num_peak_threshold = 1)
+locusdef = "nearest_tss", method = "chipenrich", 
+fisher_alt = "two.sided", use_mappability = F, mappa_file = NULL, read_length = 36, 
+qc_plots = T, max_geneset_size = 2000, num_peak_threshold = 1, n_cores=1)
 }
 
 \arguments{
   \item{peaks}{
-Either a data frame, or file containing peaks, or a BED file. The data frame should have 3 columns: chrom, start, and end. Chrom should follow UCSC convention, e.g. "chrX". The file should be tab-delimited and contain a header with at least the columns chrom, start, and end. 
+Either a data frame, a BED file, a .broadPeak file, or a .narrowPeak file. The data frame should have at least 3 columns: chrom, start, and end. Chrom should follow UCSC convention, e.g. "chrX". The file should be tab-delimited.
 }
   \item{out_name}{
 Prefix string to use for naming output files. This should not contain any characters that would be illegal for the system being used (Unix, Windows, etc.) The default value is "chipenrich", and a file "chipenrich_results.tab" is produced. If \code{qc_plots} is set, then a file "chipenrich_qcplots.pdf" is produced containing a number of quality control plots. If \code{out_name} is set to NULL, no files are written, and results then must be retrieved from the list returned by \code{chipenrich}.  
@@ -36,7 +36,7 @@ A character vector of geneset databases to be tested for enrichment. A list of s
 A string denoting the gene locus definition to be used, or the full path to a user-defined locus definition file. A gene locus definition controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}} for a list of supported definitions built-in. If using a user-specified file, the file must have 4 columns: geneid, chrom, start, end and be tab-delimited. 
 }
   \item{method}{
-A string denoting the gene set enrichment test to be performed (ChIP-Enrich ('chipenrich'), or Fisher's exact test ('fet').) For a list of supported methods, use \code{\link{supported_methods}}. 
+A character string specifying the method to use for enrichment testing. Must be one of ChIP-Enrich ('chipenrich') (default), Broad-Enrich ('broadenrich'), or Fisher's exact test ('fet'). For a list of supported methods, use \code{\link{supported_methods}}. 
 }
   \item{fisher_alt}{
 If method is 'fet', this option indicates the alternative for Fisher's exact test, and must be one of 'two-sided' (default), 'greater', or 'less'. 
@@ -59,12 +59,17 @@ Sets the threshold for how many peaks a gene must have to be considered as havin
   \item{max_geneset_size}{
 Sets the maximum number of genes a gene set may have to be considered for enrichment testing. 
 }
+  \item{n_cores}{
+The number of cores to use for enrichment testing. We recommend using only up to the maximum number of \emph{physical} cores present, as virtual cores do not significantly decrease runtime. Default number of cores is set to 1. NOTE: Windows does not support multicore enrichment.
+}
 }
 
 \details{
 	The \code{\link{chipenrich}} function is used to run gene set enrichment tests on a file or data frame contaning peaks called from a ChIP-seq experiment. It can currently run the following tests: 
 	\itemize{
 	\item ChIP-Enrich (\code{method='chipenrich'}) is the main method, which is similar to Fisher's exact test in that it is a test of association between genes having a peak, and genes belonging to a predefined gene set, but that also adjusts for gene locus length and sequence mappability (optional). The method uses binomial smoothing splines in a generalized additive model framework, see (Wood, 2010) or the \code{\link[mgcv]{gam}} function for more details.
+	
+	\item Broad-Enrich (\code{method='broadenrich'}) is designed for use with broad peaked datasets such as histone modifications. Given a locus definition, genes are scored according to the proportion of the gene locus which is covered by a peak (or peaks). As in \code{method='chipenrich'}, Broad-Enrich uses binomial smoothing splines to adjust for gene locus length.
 	
 	\item Fisher's exact test (\code{method='fet'}) is the naive approach, where peaks are assigned to a gene using the locus definitions set using the \code{locusdef} option, and then each set of genes is tested using a 2x2 table tabulating whether genes have a peak, and whether they belong to the set of genes being tested. Note that this method does not adjust for gene locus length. 
   
@@ -75,6 +80,7 @@ Sets the maximum number of genes a gene set may have to be considered for enrich
   \item A data frame with 3 columns named: chrom, start, and end; denoting the chromosome, starting position, and ending position of the peak. Chromosome should be in UCSC format, e.g. chrX, chrY, chr22, etc. 
   \item Character vector representing the path to a file containing the data frame outlined above. The file must be tab-delimited and the header must exist. Additional columns can exist, so long as they do not contain tab characters.
   \item A BED file, following UCSC's formatting. The file must have a .bed extension to be read as a BED file.
+  \item A .broadPeak or .narrowPeak file, as may be downloaded from the ENCODE Consortium. These are BED 6+3 and BED 6+4 formatted files, but only the chrom, chromStart, and chromEnd columns (first three) are used.
   }
 
 	The \code{locusdef} option controls how peaks are assigned to genes. A number of options are available and can be listed using \code{\link{supported_locusdefs}}. We currently support: 
@@ -96,6 +102,7 @@ Sets the maximum number of genes a gene set may have to be considered for enrich
 	\itemize{
 		\item A spline fit plot showing the relationship between the locus length of a gene and the likelihood of that gene having a peak given the data. See \code{\link{plot_spline_length}} to generate the plot separately, and for a description of the plot features. 
 		\item A histogram of the distance from each peak to the nearest transcription start site (TSS) of any gene. See \code{\link{plot_dist_to_tss}} to generate the plot separately, and for a description of the plot features.  
+		\item A plot showing the relationship between the locus length of a gene and its coverage by a peak. See \code{\link{plot_gene_coverage}} to generate the plot separately, and for a description of the plot features. This plot is only automatically generated for \code{method='broadenrich'}.
     % \item A plot of the expected number of peaks per gene given locus length. See \code{\link{plot_expected_peaks}}. 
 	}
 }
@@ -108,17 +115,21 @@ A data frame containing peak assignments to genes. Peaks which do not overlap a 
 The columns are: 
 
 \describe{
+  \item{peak_id}{ is an ID given to unique combinations of chromosome, peak start, and peak end. }
   \item{chrom}{ is the chromosome the peak originated from. }
-  \item{peak_start}{ is starting position of the peak. }
+  \item{peak_start}{ is start position of the peak. }
   \item{peak_end}{ is end position of the peak. }
   \item{peak_midpoint}{ is the midpoint of the peak. }
   \item{geneid}{ is the Entrez ID of the gene to which the peak was assigned. }
   \item{gene_symbol}{ is the official gene symbol for the geneid (above). }
-  \item{gene_locus_start}{ is the starting position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+  \item{gene_locus_start}{ is the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
   \item{gene_locus_end}{ is the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-  \item{nearest_tss}{ is the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
-  \item{nearest_tss_gene}{ is the gene having the closest TSS to the peak (should be the same as geneid when using the nearest TSS locus definition.) }
-  \item{nearest_tss_gene_strand}{ is the strand of the gene with the closest TSS. }
+  \item{nearest_tss}{ (\code{method='chipenrich'} and \code{method='fet'}) is the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
+  \item{nearest_tss_gene}{ (\code{method='chipenrich'} and \code{method='fet'}) is the gene having the closest TSS to the peak (should be the same as geneid when using the nearest TSS locus definition.) }
+  \item{nearest_tss_gene_strand}{ (\code{method='chipenrich'} and \code{method='fet'}) is the strand of the gene with the closest TSS. }
+  \item{overlap_start}{ (\code{method='broadenrich'} only) the start position of the peak overlap with the gene locus.}
+  \item{overlap_end}{ (\code{method='broadenrich'} only) the end position of the peak overlap with the gene locus.}
+  \item{peak_overlap}{ (\code{method='broadenrich'} only) the base pair overlap of the peak with the gene locus.}
 }}
 
 \item{results }{
@@ -133,7 +144,10 @@ A data frame of the results from performing the gene set enrichment test on each
   \item{Odds.Ratio}{ is the estimated odds that peaks are associated with a given gene set compared to the odds that peaks are associated with other gene sets, after controlling for locus length and/or mappability.  An odds ratio greater than 1 indicates enrichment, and less than 1 indicates depletion.}
   \item{N.Geneset.Genes}{ is the number of genes in the gene set.}
   \item{N.Geneset.Peak.Genes}{ is the number of genes in the genes set that were assigned at least one peak.}
+  \item{Geneset.Avg.Gene.Length}{ is the average length of the genes in the gene set.}
+  \item{Geneset.Avg.Gene.Coverage}{ (\code{method='broadenrich'} only) is the mean proportion of the gene loci in the gene set covered by a peak.}
   \item{Geneset.Peak.Genes}{ is the list of genes from the gene set that had at least one peak assigned.}
+  
 }}
 
 \item{opts }{A data frame containing the arguments/values passed to \code{chipenrich}.}
@@ -147,18 +161,24 @@ A data frame of the count of peaks per gene. The columns are:
   \item{log10_length}{ is the log10(locus length) for the gene.}
   \item{num_peaks}{ is the number of peaks that were assigned to the gene, given the current locus definition. }
   \item{peak}{ is whether or not the gene is considered to have a peak, as defined by \code{num_peak_threshold}. }
+  \item{peak_overlap}{ (\code{method='broadenrich'} only) is the number of base pairs of the gene covered by a peak.}
+  \item{ratio}{ (\code{method='broadenrich'} only) is the proportion of the gene covered by a peak.}
 }}
 
 }
 
 \references{
-	Welch RP*, Lee C*, Smith RA, Imbriano P, Scott LJ, Sartor MA. ChIP-Enrich: Gene set enrichment testing for ChIP-Seq data (in preparation.)
-
+	R.P. Welch*, C. Lee*, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor.  "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. doi:10.1093/nar/gku463
+	
+	R.G. Cavalcante, C. Lee, R.P. Welch, S. Patil, T. Weymouth, L.J. Scott, and M.A. Sartor. "Broad-Enrich: functional interpretation of large sets of broad genomic regions." Bioinformatics (2014) 30(17):i393-i400 doi:10.1093/bioinformatics/btu444
+	
 	Wood, S. mgcv: GAMs with GCV/AIC/REML smoothness estimation and GAMMs by PQL. R package version, 1.6-2 (2010).
 }
 
 \author{
 Ryan Welch \email{welchr@umich.edu}
+
+Raymond Cavalcante \email{rcavalca@umich.edu}
 }
 
 \seealso{
@@ -174,6 +194,7 @@ Ryan Welch \email{welchr@umich.edu}
 	\itemize{
 	\item \code{\link{plot_spline_length}}
 	\item \code{\link{plot_dist_to_tss}}
+	\item \code{\link{plot_gene_coverage}}
   % \item \code{\link{plot_expected_peaks}}
 	}
 }
