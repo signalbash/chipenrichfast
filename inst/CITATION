@@ -4,17 +4,18 @@ citEntry(
   entry  = "article",
   title  = "ChIP-Enrich: Gene set enrichment testing for ChIP-Seq data",
   author = personList(
-    as.person("Ryan Welch"),
+    as.person("Ryan P Welch"),
     as.person("Chee Lee"),
+    as.person("Raymond G Cavalcante"),
     as.person("Richard Alex Smith"),
     as.person("Paul Imbriano"),
     as.person("Laura J Scott"),
     as.person("Maureen A Sartor")
   ),
-  year = 2012,
-	journal = "In Preparation",
+  year = 2014,
+  journal = "Nucleic Acids Research",
   note = paste("R package version",meta$Version),
-  textVersion = "Welch RP, Lee C, Smith RA, Imbriano P, Scott LJ, Sartor MA. 2012. ChIP-Enrich: Gene set enrichment testing for ChIP-Seq data (in preparation.)"
+  textVersion = "Welch RP, Lee C, Smith RA, Imbriano P, Scott LJ, Sartor MA. "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. doi:10.1093/nar/gku463"
 )
 
 citFooter("This free open-source software implements academic research by the authors and co-workers. If you use it, please support the project by citing the appropriate journal articles.")
