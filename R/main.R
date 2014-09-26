@@ -68,6 +68,46 @@ read_bed = function(file_path) {
   return(chroms);
 }
 
+read_bedgff = function(file_path) {
+  if (!file.exists(file_path)) {
+    stop("Can't find BED file: ",file_path);
+  }
+  
+  chunk_size = 500;
+  chunk = scan(file_path,what="character",nmax=chunk_size,strip.white=T,sep="\n",quiet=T);
+  skip_n = suppressWarnings(min(grep("^chr(\\d+|\\w+)\\s+\\d+",chunk)) - 1);
+  
+  skip_n = suppressWarnings(min(grep("^\\d(L|R)",chunk)) - 1);
+  
+  if (is.infinite(skip_n)) {
+    stop("Error: no valid chromosomes detected within first 500 lines of BED file.");
+  }
+  
+  message(sprintf("Skipping %i lines of BED header..",skip_n));
+  
+  peaks = read.table(file_path,header=F,skip=skip_n);
+  peaks = peaks[,c(1,4,5)];
+  names(peaks) = c("chrom","start","end");
+
+  sub_check = peaks[1:min(nrow(peaks),100),];
+  if (!all(grepl("chr",sub_check$chrom))) {
+    peaks$chrom = paste('chr',peaks$chrom,sep='')
+    message("Adding 'chr' to chromosome column for compatibility with locus definitions.");
+  }
+  
+  if (any(sub_check$start < 0) | any(sub_check$end < 0)) {
+    stop("Start/end positions of peaks should be >= 0.");
+  }
+  
+  chroms = list();
+  for (chr in unique(peaks$chrom)) {
+    peaks_chrom = subset(peaks,chrom == chr);
+    chroms[[chr]] = IRanges(start=peaks_chrom$start,end=peaks_chrom$end);
+  }
+  
+  return(chroms);
+}
+
 read_peaks = function(file_path) { 
   d = read.table(file_path,sep="\t",header=T);
   
@@ -2140,6 +2180,9 @@ chipenrich = function(
     } else if (str_sub(peaks,-11,-1) == '.narrowPeak') {
       message("Reading narrowPeak file: ",peaks);
       peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-8,-1) == ".bed.gff" || str_sub(peaks,-9,-1) == '.bed.gff3') {
+      message("Reading .bed.gff or .bed.gff3 file: ",peaks);
+      peakobj = read_bedgff(peaks);
     } else {
       message("Reading peaks file: ",peaks);
       peakobj = read_peaks(peaks);
