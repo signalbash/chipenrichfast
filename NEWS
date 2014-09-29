@@ -1,4 +1,4 @@
-CHANGES IN VERSION 1.4.0
+CHANGES IN VERSION 1.3.4
 ------------------------
 
 PKG FEATURES
@@ -13,6 +13,16 @@ PKG FEATURES
 
   o Peaks downloaded from the ENCODE Consortium as .broadPeak or .narrowPeak files
     are supported directly.
+  
+  o Peaks downloaded from the modENCODE Consortium as .bed.gff or .bed.gff3 files are 
+    also supported directly.
+
+  o Support for D. melanogaster (dm3) genome and enrichment testing for GO terms
+    from all three branches (GOBP, GOCC, and GOMF).
+
+  o New gene sets from Reactome (http://www.reactome.org) for human, mouse, and rat.
+
+  o New example histone data set, peaks_H3K4me3_GM12878, based on hg19.
 
 
 CHANGES IN VERSION 1.0
