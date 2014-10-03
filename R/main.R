@@ -1730,7 +1730,10 @@ peak_nearest_tss = function(peaks,tss,midpoint=T) {
     
     nearest_tss = tss_ranges[nearest(peak_ranges,tss_ranges)];
     
-    dist_to_tss = distance(peak_ranges,nearest_tss);
+    suppressWarnings({
+      # Hide the Bioconductor 2.12 warning about distance functionality changing
+      dist_to_tss = distance(peak_ranges,nearest_tss);
+    })
     
 		if (midpoint) {
 			d = data.frame(
@@ -1990,9 +1993,9 @@ setup_ldef = function(filepath) {
   
   # Check to make sure locus definitions are disjoint - that is, they do not overlap each other. 
   # SLATED FOR DELETION PENDING CONSEQUENCES
-  if(!isDisjoint(object@granges)) {
-    stop("Error: user-provided locus definitions overlap - there should be disjoint ranges for all genes.");
-  }
+#  if(!isDisjoint(object@granges)) {
+#    stop("Error: user-provided locus definitions overlap - there should be disjoint ranges for all genes.");
+#  }
 
   object;
 }
