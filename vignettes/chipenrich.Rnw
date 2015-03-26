@@ -38,9 +38,9 @@ library(chipenrich.data)
 This will load chipenrich, the chipenrich.data package, as well as all other dependency packages.  The main function for conducting all gene set enrichment testing is \verb@chipenrich()@.
 \\* \linebreak The defaults for the \verb@chipenrich()@ function are
 \begin{verbatim}
-chipenrich(peaks, out_name = "chipenrich", out_path = getwd(), genome = "hg19", 
-	genesets =  c('GOBP', 'GOCC', 'GOMF'), locusdef = "nearest_tss ", 
-	method = "chipenrich", fisher_alt = "two.sided", use_mappability = F, 
+chipenrich(peaks, out_name = "chipenrich", out_path = getwd(), genome = "hg19",
+	genesets =  c('GOBP', 'GOCC', 'GOMF'), locusdef = "nearest_tss ",
+	method = "chipenrich", fisher_alt = "two.sided", use_mappability = F,
 	read_length = 24, genome_length = NULL, qc_plots = T,n_cores=1)
 \end{verbatim}
 
@@ -65,13 +65,13 @@ Peaks are assigned to genes according to a pre-defined locus definition, i.e. th
 supported_locusdefs()
 @
 
-Using the options ``1kb'' or ``5kb'' will only assign peaks to genes if the peaks are within 1 kilobases (kb) or 5kb of a gene's transcription start site (TSS) respectively.  The option ``exon'' will assign peaks to genes if the peaks occur within a gene's exons.  Using ``nearest\_gene'' or ``nearest\_tss'' will assign peaks to genes according to the nearest gene or the nearest TSS.  Only the ``nearest\_gene'' and ``nearest\_tss'' locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region.  All gene loci are non-overlapping. The command ``\verb@help(chipenrich.data)@'' may also provide more information on the locus definitions. Users may also create their own custom locus definitions.
+Using the options ``1kb'', ``5kb'', or ``10kb'' will only assign peaks to genes if the peaks are within 1 kilobases (kb),  5kb, or 10kb of a gene's transcription start site (TSS), respectively.  The option ``exon'' or ``intron'' will assign peaks to genes if the peaks occur within a gene's exons or introns, respectively. The option ``10kb_and_more_upstream'' will assign peaks to genes if the peaks occur in a region >10kb upstream from a TSS to the midpoint between the adjacent TSS. Using ``nearest\_gene'' or ``nearest\_tss'' will assign peaks to genes according to the nearest gene or the nearest TSS.  Only the ``nearest\_gene'' and ``nearest\_tss'' locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region.  All gene loci are non-overlapping. The command ``\verb@help(chipenrich.data)@'' may also provide more information on the locus definitions. Users may also create their own custom locus definitions.
 \\* \linebreak Many gene set annotation databases are supported by \verb@chipenrich@:
 <<list_genesets>>=
 supported_genesets()
 @
 
-Three methods for gene set enrichment testing are provided:  the main ChIP-Enrich method (``chipenrich''), the Broad-Enrich method (``broadenrich''), and Fisher's exact test (``fet'').  The ``chipenrich'' method designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The ``broadenrich'' method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks. Finally, the ``fet'' method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples). 
+Three methods for gene set enrichment testing are provided:  the main ChIP-Enrich method (``chipenrich''), the Broad-Enrich method (``broadenrich''), and Fisher's exact test (``fet'').  The ``chipenrich'' method designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The ``broadenrich'' method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks. Finally, the ``fet'' method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).
 <<list_methods>>=
 supported_methods()
 @
@@ -82,25 +82,31 @@ The default gene set database is Gene Ontology (GO) terms, comprising of all thr
 supported_read_lengths()
 @
 
-Read lengths of 24mer are only available for the hg19 genome.  
-\\* \linebreak See the section on mappability for more information on how it is calculated. 
+Read lengths of 24mer are only available for the hg19 genome.
+\\* \linebreak See the section on mappability for more information on how it is calculated.
 
 \section{Locus definitions}
 
 We define a gene \textit{locus} as the region from which we predict a gene could be regulated. ChIP-seq peaks, or other types of genomic regions, falling within a locus for a gene are assigned to that gene. \\
 
-We provide a number of different definitions of a gene locus: 
+We provide a number of different definitions of a gene locus:
 
 \begin{description}
-\item[nearest\_tss] The locus is the region spanning the midpoints between the TSSs of adjacent genes. 
- 
-\item[nearest\_gene] The locus is the region spanning the midpoints between the boundaries of each gene, where a gene is defined as the region between the furthest upstream TSS and furthest downstream TES for that gene. If two gene loci overlap each other, we take the midpoint of the overlap as the boundary between the two loci. When a gene locus is completely nested within another, we create a disjoint set of 3 intervals, where the outermost gene is separated into 2 intervals broken apart at the endpoints of the nested gene. 
+\item[nearest\_tss] The locus is the region spanning the midpoints between the TSSs of adjacent genes.
 
-\item[1kb] The locus is the region within 1 kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 2 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene. 
+\item[nearest\_gene] The locus is the region spanning the midpoints between the boundaries of each gene, where a gene is defined as the region between the furthest upstream TSS and furthest downstream TES for that gene. If two gene loci overlap each other, we take the midpoint of the overlap as the boundary between the two loci. When a gene locus is completely nested within another, we create a disjoint set of 3 intervals, where the outermost gene is separated into 2 intervals broken apart at the endpoints of the nested gene.
 
-\item[5kb] The locus is the region within 5 kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 10 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene. 
+\item[1kb] The locus is the region within 1 kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 2 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
 
-\item[exons] Each gene has multiple loci corresponding to its exons. 
+\item[5kb] The locus is the region within 5 kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 10 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
+
+\item[10kb] The locus is the region within 10 kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 20 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
+
+\item[10kb_and_more_upstream] The locus is the region >10kb upstream from a TSS to the midpoint between the adjacent TSS.
+
+\item[exon] Each gene has multiple loci corresponding to its exons.
+
+\item[intron] Each gene has multiple loci corresponding to its introns.
 \end{description}
 
 \section{Mappability}
@@ -111,16 +117,16 @@ We define base pair mappability as the average read mappability of all possible 
 M_{i} = (\frac{1}{2K-1}) \sum_{j=i-K+1}^{i+(K-1)} M_{j}
 \end{equation}
 
-where $M_{i}$ is the mappability of base pair $i$, and $M_{j}$ is mappability (from UCSC's mappability track) of read $j$ where j is the start position of the K length read.  We calculated base pair mappability for reads of lengths 24, 36, 40, 50, 75, and 100 base pairs for \textit{Homo sapiens} (build hg19) and for reads of lengths 36, 40, 50, 75, and 100 base pairs for \textit{Mus musculus} (build mm9). Mappability is unavailable for \textit{Rattus norvegicus} (build rn4) and \textit({Mus musculus} (build mm10). 
+where $M_{i}$ is the mappability of base pair $i$, and $M_{j}$ is mappability (from UCSC's mappability track) of read $j$ where j is the start position of the K length read.  We calculated base pair mappability for reads of lengths 24, 36, 40, 50, 75, and 100 base pairs for \textit{Homo sapiens} (build hg19) and for reads of lengths 36, 40, 50, 75, and 100 base pairs for \textit{Mus musculus} (build mm9). Mappability is unavailable for \textit{Rattus norvegicus} (build rn4) and \textit({Mus musculus} (build mm10).
 
 \subsection{Locus mappability}
 
-We define locus mappability as the average of all base pair mappability values for a gene's locus. Locus mappability is calculated for each available locus definition. 
+We define locus mappability as the average of all base pair mappability values for a gene's locus. Locus mappability is calculated for each available locus definition.
 
 \section{Examples}
 \subsection{Diagnostic plots}
 
-If ``method = chipenrich'' and ``qc\_plots = T'' then two pdf files will be output: One with a binomial smoothing spline fitted to the probability of a peak given gene length and one showing the distribution of the distance of peaks to the nearest TSS of a gene.  These plots may also be generated using separate functions as illustrated below.  Figure 1 shows the distribution of peaks to the nearest TSS.  In figure 2, a spline is fitted to the data given gene locus length. The same is shown in figure 3 but here we account for the mappable locus length ($mappability \times locus length$). 
+If ``method = chipenrich'' and ``qc\_plots = T'' then two pdf files will be output: One with a binomial smoothing spline fitted to the probability of a peak given gene length and one showing the distribution of the distance of peaks to the nearest TSS of a gene.  These plots may also be generated using separate functions as illustrated below.  Figure 1 shows the distribution of peaks to the nearest TSS.  In figure 2, a spline is fitted to the data given gene locus length. The same is shown in figure 3 but here we account for the mappable locus length ($mappability \times locus length$).
 
 If ``method = broadenrich'' and ``qc\_plots = T'' then one pdf file is output: A plot showing the relationship between the gene locus length and the proportion of the locus covered by a peak. Figure 4 shows this relationship.\\
 
@@ -156,7 +162,7 @@ plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19'
 \begin{figure}
 \begin{center}
 \begin{verbatim}
-> plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19', 
+> plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19',
 use_mappability = T, read_length = 24)
 \end{verbatim}
 
@@ -189,8 +195,8 @@ There are many combinations of methods, genesets, and mappabiity settings that m
 \subsection{ChIP-Enrich}
 Gene set enrichment of Biocarta pathways using ChIP-Enrich:
 <<chipenrich,echo=TRUE>>=
-results = chipenrich(peaks = peaks_E2F4, genesets = "biocarta_pathway", 
-	locusdef = "nearest_tss", max_geneset_size = 100, qc_plots = F, 
+results = chipenrich(peaks = peaks_E2F4, genesets = "biocarta_pathway",
+	locusdef = "nearest_tss", max_geneset_size = 100, qc_plots = F,
 	out_name = NULL,n_cores=2)
 results.ce = results$results[order(results$results$P.value),]
 results.ce[1:5,1:5]
@@ -200,7 +206,7 @@ results.ce[1:5,1:5]
 Gene set enrichment of Biocarta pathways using ChIP-Enrich, accounting for mappability:
 <<chipenrich_with_mappa,echo=TRUE>>=
 results = chipenrich(peaks = peaks_E2F4,genesets = "biocarta_pathway",
-	locusdef = "nearest_tss", max_geneset_size = 100, use_mappability=T, 
+	locusdef = "nearest_tss", max_geneset_size = 100, use_mappability=T,
 	read_length=24, qc_plots = F, out_name = NULL,n_cores=2)
 results.cem = results$results[order(results$results$P.value),]
 results.cem[1:5,1:5]
@@ -209,8 +215,8 @@ results.cem[1:5,1:5]
 \subsection{Broad-Enrich}
 Gene set enrichment of Biocarta pathways using Broad-Enrich:
 <<chipenrich,echo=TRUE>>=
-results = chipenrich(peaks = peaks_H3K4me3_GM12878, genesets = "biocarta_pathway", 
-	method='broadenrich', locusdef = "nearest_tss", max_geneset_size = 100, 
+results = chipenrich(peaks = peaks_H3K4me3_GM12878, genesets = "biocarta_pathway",
+	method='broadenrich', locusdef = "nearest_tss", max_geneset_size = 100,
 	qc_plots = F, out_name = NULL,n_cores=2)
 results.be = results$results[order(results$results$P.value),]
 results.be[1:5,1:5]
@@ -221,15 +227,15 @@ Fisher's Exact test assumes that each gene is equally likely to have a peak.  We
 
 Gene set enrichment of KEGG pathways using Fisher's exact test:
 <<chipenrich_fisher,echo=TRUE>>=
-results = chipenrich(peaks = peaks_E2F4, genesets = c("kegg_pathway"), 
-	locusdef = "5kb", method = "fet", fisher_alt = "two.sided", 
+results = chipenrich(peaks = peaks_E2F4, genesets = c("kegg_pathway"),
+	locusdef = "5kb", method = "fet", fisher_alt = "two.sided",
 	max_geneset_size = 100, qc_plots = F, out_name = NULL)
 results.fet = results$results[order(results$results$P.value),]
 results.fet[1:5,1:5]
 @
 
 \section {Output}
-The output of \verb@chipenrich()@ is an R object containing the results of the test and the peak to gene assignments.  Both of these are also written to text files in the working directory  (unless specified otherwised) after the test is completed. 
+The output of \verb@chipenrich()@ is an R object containing the results of the test and the peak to gene assignments.  Both of these are also written to text files in the working directory  (unless specified otherwised) after the test is completed.
 
 \subsection{Peak-to-gene assignments}
  Peak assignments are stored in \verb@$peaks@.  The following is an example of how to access the peak to gene assignments in R after a gene set enrichment test has already been performed:
@@ -251,7 +257,7 @@ colnames(results$results)
 \item[P.Value] is the probability of observing the degree of enrichment (see``\verb@Odds.Ratio@") of the gene set given the null hypothesis that peaks are not associated with any gene sets.
 \item[FDR] is the false discovery rate proposed by Bejamini \& Hochberg for adjusting the p-value to control for family-wise error rate.
 \item[Odds.Ratio] is the estimated odds that peaks are associated with a given gene set compared to the odds that peaks are associated with other gene sets, after controlling for locus length and/or mappability.  An odds ratio greater than 1 indicates enrichment, and less than 1 indicates depletion.
-\item[Status] denotes whether the gene set was enriched or depleted. 
+\item[Status] denotes whether the gene set was enriched or depleted.
 \item[N.Geneset.Genes] is the number of genes in the gene set.
 \item[N.Geneset.Peak.Genes] is the number of genes in the genes set that were assigned at least one peak.
 \item[Geneset.Avg.Gene.Coverage] (broadenrich only) is the mean proportion of the gene loci in the gene set covered by a peak.
@@ -260,7 +266,7 @@ colnames(results$results)
 
 \section {References}
 R.P. Welch*, C. Lee*, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor.  "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. doi:10.1093/nar/gku463
-	
+
 R.G. Cavalcante, C. Lee, R.P. Welch, S. Patil, T. Weymouth, L.J. Scott, and M.A. Sartor. "Broad-Enrich: functional interpretation of large sets of broad genomic regions." Bioinformatics (2014) 30(17):i393-i400 doi:10.1093/bioinformatics/btu444
 
 \end{document}
