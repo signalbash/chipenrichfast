@@ -65,7 +65,7 @@ Peaks are assigned to genes according to a pre-defined locus definition, i.e. th
 supported_locusdefs()
 @
 
-Using the options ``1kb'', ``5kb'', or ``10kb'' will only assign peaks to genes if the peaks are within 1 kilobases (kb),  5kb, or 10kb of a gene's transcription start site (TSS), respectively.  The option ``exon'' or ``intron'' will assign peaks to genes if the peaks occur within a gene's exons or introns, respectively. The option ``10kb_and_more_upstream'' will assign peaks to genes if the peaks occur in a region >10kb upstream from a TSS to the midpoint between the adjacent TSS. Using ``nearest\_gene'' or ``nearest\_tss'' will assign peaks to genes according to the nearest gene or the nearest TSS.  Only the ``nearest\_gene'' and ``nearest\_tss'' locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region.  All gene loci are non-overlapping. The command ``\verb@help(chipenrich.data)@'' may also provide more information on the locus definitions. Users may also create their own custom locus definitions.
+Using the options ``1kb'', ``5kb'', or ``10kb'' will only assign peaks to genes if the peaks are within 1 kilobases (kb),  5kb, or 10kb of a gene's transcription start site (TSS), respectively.  The option ``exon'' or ``intron'' will assign peaks to genes if the peaks occur within a gene's exons or introns, respectively. The option ``10kb\_and\_more\_upstream'' will assign peaks to genes if the peaks occur in a region more than 10kb upstream from a TSS to the midpoint between the adjacent TSS. Using ``nearest\_gene'' or ``nearest\_tss'' will assign peaks to genes according to the nearest gene or the nearest TSS.  Only the ``nearest\_gene'' and ``nearest\_tss'' locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region.  All gene loci are non-overlapping. The command ``\verb@help(chipenrich.data)@'' may also provide more information on the locus definitions. Users may also create their own custom locus definitions.
 \\* \linebreak Many gene set annotation databases are supported by \verb@chipenrich@:
 <<list_genesets>>=
 supported_genesets()
@@ -102,7 +102,7 @@ We provide a number of different definitions of a gene locus:
 
 \item[10kb] The locus is the region within 10 kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 20 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
 
-\item[10kb_and_more_upstream] The locus is the region >10kb upstream from a TSS to the midpoint between the adjacent TSS.
+\item[10kb\_and\_more\_upstream] The locus is the region more than 10kb upstream from a TSS to the midpoint between the adjacent TSS.
 
 \item[exon] Each gene has multiple loci corresponding to its exons.
 
