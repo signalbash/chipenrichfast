@@ -2262,6 +2262,9 @@ chipenrich = function(
     } else if (str_sub(peaks,-11,-1) == '.narrowPeak') {
       message("Reading narrowPeak file: ",peaks);
       peakobj = read_bed(peaks);
+    } else if (str_sub(peaks,-14,-1) == '.narrowPeak.gz') {
+      message("Reading narrowPeak file: ",peaks);
+      peakobj = read_bed(peaks);
     } else if (str_sub(peaks,-8,-1) == ".bed.gff" || str_sub(peaks,-9,-1) == '.bed.gff3') {
       message("Reading .bed.gff or .bed.gff3 file: ",peaks);
       peakobj = read_bedgff(peaks);
