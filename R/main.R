@@ -31,6 +31,7 @@ METHOD_NAMES = list(
 	'broadenrich_splineless' = "Broad-Enrich Splineless"
 );
 
+# This is the main function to read files
 read_bed = function(file_path) {
   if (!file.exists(file_path)) {
     stop("Can't find BED file: ",file_path);
@@ -68,6 +69,7 @@ read_bed = function(file_path) {
   return(chroms);
 }
 
+# This file type is for D. melanogaster files from modENCODE
 read_bedgff = function(file_path) {
   if (!file.exists(file_path)) {
     stop("Can't find BED file: ",file_path);
@@ -75,7 +77,6 @@ read_bedgff = function(file_path) {
 
   chunk_size = 500;
   chunk = scan(file_path,what="character",nmax=chunk_size,strip.white=T,sep="\n",quiet=T);
-  skip_n = suppressWarnings(min(grep("^chr(\\d+|\\w+)\\s+\\d+",chunk)) - 1);
 
   skip_n = suppressWarnings(min(grep("^\\d(L|R)",chunk)) - 1);
 
@@ -108,6 +109,7 @@ read_bedgff = function(file_path) {
   return(chroms);
 }
 
+# This should be deprecated because read_bed does it better
 read_peaks = function(file_path) {
   d = read.table(file_path,sep="\t",header=T);
 
@@ -127,6 +129,7 @@ read_peaks = function(file_path) {
   return(chroms);
 }
 
+# Read peaks from a dataframe having a particular structure
 load_peaks = function(dframe) {
   # Check columns.
   for (col in c("chrom","start","end")) {
@@ -1636,24 +1639,16 @@ plot_gene_coverage = function(peaks,locusdef="nearest_tss",genome='hg19',use_map
     }
   }
 
+  # Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
 		peakobj = load_peaks(peaks);
 	} else if (class(peaks) == "character") {
-    if (str_sub(peaks,-7,-1) == ".bed.gz") {
-      message("Reading BED file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-4,-1) == ".bed") {
-      message("Reading BED file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-10,-1) == '.broadPeak') {
-      message("Reading broadPeak file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-11,-1) == '.narrowPeak') {
-      message("Reading narrowPeak file: ",peaks);
-      peakobj = read_bed(peaks);
+    if (str_sub(peaks,-4,-1) == ".gff" || str_sub(peaks,-5,-1) == '.gff3' || str_sub(peaks,-7,-1) == ".gff.gz" || str_sub(peaks,-8,-1) == '.gff3.gz') {
+      message("Reading peaks file: ",peaks);
+      peakobj = read_bedgff(peaks);
     } else {
       message("Reading peaks file: ",peaks);
-      peakobj = read_peaks(peaks);
+      peakobj = read_bed(peaks);
     }
 	}
 
@@ -1762,15 +1757,16 @@ peak_nearest_tss = function(peaks,tss,midpoint=T) {
 
 plot_dist_to_tss = function(peaks,genome='hg19') {
 	# Get peaks from user's file.
+  # Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
 		peakobj = load_peaks(peaks);
 	} else if (class(peaks) == "character") {
-    if (get_ext(peaks) == "bed") {
-      message("Reading BED file: ",peaks);
-      peakobj = read_bed(peaks);
+    if (str_sub(peaks,-4,-1) == ".gff" || str_sub(peaks,-5,-1) == '.gff3' || str_sub(peaks,-7,-1) == ".gff.gz" || str_sub(peaks,-8,-1) == '.gff3.gz') {
+      message("Reading peaks file: ",peaks);
+      peakobj = read_bedgff(peaks);
     } else {
       message("Reading peaks file: ",peaks);
-      peakobj = read_peaks(peaks);
+      peakobj = read_bed(peaks);
     }
 	}
 
@@ -2250,27 +2246,12 @@ chipenrich = function(
 	if (class(peaks) == "data.frame") {
 		peakobj = load_peaks(peaks);
 	} else if (class(peaks) == "character") {
-    if (str_sub(peaks,-7,-1) == ".bed.gz") {
-      message("Reading BED file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-4,-1) == ".bed") {
-      message("Reading BED file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-10,-1) == '.broadPeak') {
-      message("Reading broadPeak file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-11,-1) == '.narrowPeak') {
-      message("Reading narrowPeak file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-14,-1) == '.narrowPeak.gz') {
-      message("Reading narrowPeak file: ",peaks);
-      peakobj = read_bed(peaks);
-    } else if (str_sub(peaks,-8,-1) == ".bed.gff" || str_sub(peaks,-9,-1) == '.bed.gff3') {
-      message("Reading .bed.gff or .bed.gff3 file: ",peaks);
+    if (str_sub(peaks,-4,-1) == ".gff" || str_sub(peaks,-5,-1) == '.gff3' || str_sub(peaks,-7,-1) == ".gff.gz" || str_sub(peaks,-8,-1) == '.gff3.gz') {
+      message("Reading peaks file: ",peaks);
       peakobj = read_bedgff(peaks);
     } else {
       message("Reading peaks file: ",peaks);
-      peakobj = read_peaks(peaks);
+      peakobj = read_bed(peaks);
     }
 	}
 
