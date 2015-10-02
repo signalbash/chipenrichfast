@@ -2264,11 +2264,6 @@ chipenrich = function(
     }
 	}
 
-  # Combine overlapping peaks if method = 'broadenrich'
-  if(method == 'broadenrich' || method == 'broadenrich_splineless') {
-		peakobj = reduce_peaks(peakobj)
-  }
-
   # Warn user if they are trying to use FET with a
   # locus definition that might lead to biased results.
   #if ((method == "fet") & (!locusdef %in% c("1kb","5kb"))) {
