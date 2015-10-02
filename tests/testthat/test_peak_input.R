@@ -18,42 +18,42 @@ reading_logic = function(peaks) {
 
 peak_path = system.file('extdata', 'test.gff3', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.gff3 gives correct number of records',{
+test_that('.gff3 gives correct number of records after reduce peaks',{
     expect_equal(sum(sapply(peaks,length)), 19)
 })
 
 peak_path = system.file('extdata', 'test.gff3.gz', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.gff3.gz gives correct number of records',{
+test_that('.gff3.gz gives correct number of records after reduce peaks',{
     expect_equal(sum(sapply(peaks,length)), 19)
 })
 
 peak_path = system.file('extdata', 'test_header.bed', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.bed with header gives correct number of records',{
-    expect_equal(sum(sapply(peaks,length)), 10)
+test_that('.bed with (2 overlapping peaks) header gives correct number of records after reduce peaks',{
+    expect_equal(sum(sapply(peaks,length)), 9)
 })
 
 peak_path = system.file('extdata', 'test.broadPeak', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.broadPeak gives correct number of records',{
-    expect_equal(sum(sapply(peaks,length)), 26)
+test_that('.broadPeak (1 duplicate line and 2 overlapping peaks) gives correct number of records after reduce peaks',{
+    expect_equal(sum(sapply(peaks,length)), 25)
 })
 
 peak_path = system.file('extdata', 'test.narrowPeak', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.narrowPeak gives correct number of records',{
+test_that('.narrowPeak gives correct number of records after reduce peaks',{
     expect_equal(sum(sapply(peaks,length)), 14)
 })
 
 peak_path = system.file('extdata', 'test.broadPeak.gz', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.broadPeak.gz gives correct number of records',{
+test_that('.broadPeak.gz gives correct number of records after reduce peaks',{
     expect_equal(sum(sapply(peaks,length)), 17)
 })
 
 peak_path = system.file('extdata', 'test.narrowPeak.gz', package='chipenrich')
 peaks = reading_logic(peak_path)
-test_that('.narrowPeak.gz gives correct number of records',{
+test_that('.narrowPeak.gz gives correct number of records after reduce peaks',{
     expect_equal(sum(sapply(peaks,length)), 11)
 })
