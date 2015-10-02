@@ -66,6 +66,8 @@ read_bed = function(file_path) {
     chroms[[chr]] = IRanges(start=peaks_chrom$start,end=peaks_chrom$end);
   }
 
+  chroms = reduce_peaks(chroms)
+
   return(chroms);
 }
 
@@ -106,6 +108,8 @@ read_bedgff = function(file_path) {
     chroms[[chr]] = IRanges(start=peaks_chrom$start,end=peaks_chrom$end);
   }
 
+  chroms = reduce_peaks(chroms)
+
   return(chroms);
 }
 
@@ -126,6 +130,8 @@ read_peaks = function(file_path) {
     chroms[[chr]] = IRanges(start=peaks_chrom$start,end=peaks_chrom$end);
   }
 
+  chroms = reduce_peaks(chroms)
+
   return(chroms);
 }
 
@@ -144,11 +150,14 @@ load_peaks = function(dframe) {
     chroms[[chr]] = IRanges(start=peaks_chrom$start,end=peaks_chrom$end);
   }
 
+  chroms = reduce_peaks(chroms)
+
   return(chroms);
 }
 
 reduce_peaks = function(peaks) {
 	peaks = lapply(peaks, IRanges::reduce)
+  peaks = lapply(peaks, unique)
 	return(peaks)
 }
 
@@ -314,9 +323,9 @@ assign_peak_segments = function(peaks,locusdef) {
       'gene_locus_start'=gene_start,
       'gene_locus_end'=gene_end,
       'geneid'=names(matched_genes),
-	  'overlap_start'=overlap_start,
-	  'overlap_end'=overlap_end,
-	  'peak_overlap'=peak_overlap
+      'overlap_start'=overlap_start,
+      'overlap_end'=overlap_end,
+      'peak_overlap'=peak_overlap
     );
 
     # A hash on chrom, peak_start, peak_end to assign unique peak_id
@@ -2345,21 +2354,21 @@ chipenrich = function(
 		"peak_midpoint",
 		"geneid",
 		"gene_symbol",
-    	"gene_locus_start",
-    	"gene_locus_end",
-    	"nearest_tss",
-    	"dist_to_tss",
-    	"nearest_tss_gene",
-    	"nearest_tss_gene_strand"
+    "gene_locus_start",
+    "gene_locus_end",
+    "nearest_tss",
+    "dist_to_tss",
+    "nearest_tss_gene",
+    "nearest_tss_gene_strand"
 	);
   } else {
   	column_order = c(
   		"peak_id",
   		"chrom",
-		"peak_start",
-		"peak_end",
-		"geneid",
-		"gene_symbol",
+      "peak_start",
+      "peak_end",
+      "geneid",
+      "gene_symbol",
     	"gene_locus_start",
     	"gene_locus_end",
     	"overlap_start",
@@ -2433,14 +2442,14 @@ chipenrich = function(
     "P.value",
     "FDR",
     "Effect",
-	"Odds.Ratio",
-	"P.Success",
+    "Odds.Ratio",
+    "P.Success",
     "Status",
     "N.Geneset.Genes",
     "N.Geneset.Peak.Genes",
     "Geneset.Avg.Gene.Length",
     "Geneset.Avg.Gene.Coverage",
-	"Geneset.Peak.Genes"
+    "Geneset.Peak.Genes"
   );
   column_order = intersect(column_order,names(enrich));
   enrich = enrich[,column_order];
