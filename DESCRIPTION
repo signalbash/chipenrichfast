@@ -1,7 +1,7 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 1.7.5
+Version: 1.8.0
 Date: 2015-10-01
 Authors@R: c(
   person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
