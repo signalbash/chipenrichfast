@@ -207,16 +207,9 @@ assign_peaks = function(peaks,locusdef,tss,midpoint=T) {
     neg2 = start(matched_peak_grange) > start(tss_hits) & (strand(tss_hits) == "-");
     neg_dist = as.logical(neg1 | neg2);
 
-    suppressWarnings({
-      # Hide the Bioconductor 2.12 warning about distance functionality changing
-      dist_obj = distanceToNearest(matched_peak_grange,tss$granges);
-    });
+	dist_obj = distanceToNearest(matched_peak_grange,tss$granges);
 
-    if (class(dist_obj) == "Hits") {
-      dist_to_tss = dist_obj@elementMetadata$distance;
-    } else {
-      dist_to_tss = dist_obj$distance;
-    }
+	dist_to_tss = dist_obj@elementMetadata$distance;
 
     dist_to_tss[neg_dist] = dist_to_tss[neg_dist] * -1;
 
