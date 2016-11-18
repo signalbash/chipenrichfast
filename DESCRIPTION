@@ -46,6 +46,9 @@ VignetteBuilder: knitr
 Collate:
     'assign_peaks.R'
     'test_gam.R'
+		'test_gam_fast.R'
+		'test_nb.R'
+		'test_nb_fast.R'
     'test_fisher.R'
     'test_binomial.R'
     'test_approx.R'
