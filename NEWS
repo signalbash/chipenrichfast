@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.13.2
+-------------------------
+
+  o Fixed bug in randomization with length bins where artifactually, randomizations
+    would sort genes on Entrez ID introducing problems in Type I error rate.
+
 CHANGES IN VERSION 1.11.4
 -------------------------
 
