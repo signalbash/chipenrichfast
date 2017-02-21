@@ -16,6 +16,7 @@ notifications:
   email:
     on_success: change
     on_failure: change
+  slack: sartorlab:C04eRjCj1hqMOhkcy4p2bFuG
 
 after_success:
   - Rscript -e 'covr::coveralls()'
