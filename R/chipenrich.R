@@ -572,6 +572,7 @@ chipenrich = function(
 	# Pull out tests that failed.
 	bad_enrich = subset(enrich, is.na(enrich$P.value))
 	enrich = subset(enrich, !is.na(enrich$P.value))
+	rownames(enrich) = c(1:nrow(enrich))
 
 	######################################################
 	# Write result objects to files
