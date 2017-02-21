@@ -44,9 +44,10 @@ for a list of supported definitions built-in. If using a user-specified file,
 the file must have 4 columns: geneid, chrom, start, end and be tab-delimited.}
 
 \item{method}{A character string specifying the method to use for enrichment
-testing. Must be one of ChIP-Enrich ('chipenrich') (default), Broad-Enrich
-('broadenrich'), or Fisher's exact test ('fet'). For a list of supported
-methods, use \code{\link{supported_methods}}.}
+testing. Must be one of ChIP-Enrich ('chipenrich') (default), ChIP-Enrich fast
+('chipenrich_fast'), Broad-Enrich ('broadenrich'), Count-Enrich ('countenrich'),
+Count-Enrich fast ('countenrich_fast'), or Fisher's exact test ('fet').
+For a list of supported methods, use \code{\link{supported_methods}}.}
 
 \item{fisher_alt}{If method is 'fet', this option indicates the alternative
 for Fisher's exact test, and must be one of 'two-sided' (default), 'greater',
@@ -149,7 +150,7 @@ A data frame of the count of peaks per gene. The columns are:
 \description{
 Run gene set enrichment testing (ChIP-Enrich or Broad-Enrich) on a ChIP-seq
 peak dataset or other type of dataset consisting of regions across the genome.
-The user can call \code{chipenrich} to run the method on their data. A number
+The user can call \code{chipenrich()} to run the method on their data. A number
 of arguments can be provided to change the type of test, the genome build,
 which sets of genes to test, how peaks are assigned to genes, and other minor options.
 

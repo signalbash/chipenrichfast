@@ -1,12 +1,15 @@
 SUPPORTED_METHODS = list(
   'chipenrich' = "test_gam",
+  'chipenrich_fast' = "test_gam_fast",
   'fet' = "test_fisher_exact",
-  'broadenrich' = "test_gam_ratio"
+  'broadenrich' = "test_gam_ratio",
+  'countenrich' = "test_gam_nb",
+  'countenrich_fast' = "test_gam_nb_fast",
+  'chipapprox' = 'test_approx'
 )
 
 HIDDEN_METHODS = list(
   'binomial' = "test_binomial",
-  'chipapprox' = 'test_approx',
   'broadenrich_splineless' = "test_gam_ratio_splineless"
 )
 
@@ -15,5 +18,7 @@ METHOD_NAMES = list(
 	'chipenrich' = "ChIP-Enrich",
 	'broadenrich' = "Broad-Enrich",
 	'chipapprox' = "ChIP-Enrich Approximate",
-	'broadenrich_splineless' = "Broad-Enrich Splineless"
+	'broadenrich_splineless' = "Broad-Enrich Splineless",
+	'countenrich' = "Count-Enrich",
+	'chipenrich_fast' = "ChIP-Enrich Fast"
 )
