@@ -1,6 +1,6 @@
 ---
 title: "`chipenrich`: Gene Set Enrichment For ChIP-seq Peak Data"
-author: "Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Laura J. Scott, Maureen A. Sartor"
+author: "Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document
@@ -12,7 +12,7 @@ vignette: >
 
 # Introduction
 
-This document describes how to use `chipenrich` to analyze results from ChIP-Seq experiments and other DNA sequencing experiments that result in a set of genomic regions. `chipenrich` includes two methods that adjust for potential confounders of gene set enrichment testing (locus length and mappability of the sequence reads). The first method `chipenrich` is designed for use with transcription-factor based ChIP-seq experiments and other DNA sequencing experiments with narrow genomic regions. The second method `broadenrich` is designed for use with histone modification based ChIP-seq experiments and other DNA sequencing experiments with broad genomic regions.
+This document describes how to use `chipenrich` to analyze results from ChIP-Seq experiments and other DNA sequencing experiments that result in a set of genomic regions. The `chipenrich` package includes three classes of methods that adjust for potential confounders of gene set enrichment testing (locus length and mappability of the sequence reads). The first, `chipenrich`, is designed for use with transcription-factor (TF) based ChIP-seq experiments and other DNA sequencing experiments with narrow genomic regions. The second, `countenrich`, is similarly designed for TF based ChIP-seq, but where the number of peaks present in gene loci may be important. The third, `broadenrich`, is designed for use with histone modification based ChIP-seq experiments and other DNA sequencing experiments with broad genomic regions.
 
 # Synopsis
 
@@ -35,7 +35,7 @@ chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
 
 The `peaks` option should be either a data frame or character vector representing the path to a file containing the peaks. The file (or data frame) should have at least 3 columns: `chrom`, `start` and `end`, denoting the chromosome, start position, and end position of the peaks. Chromosome should be in UCSC format, e.g. chrX, chrY, chr22, etc. If a file, it must be tab-delimited, and the header must exist. The input file may also be a .bed, .broadPeak, or .narrowPeak file. Additional columns can exist, so long as they do not contain tab characters. Two example datasets, `peaks_E2F4` and `peaks_H3K4me3_GM12878`, are included in the package.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 data(peaks_E2F4, package = 'chipenrich.data')
 data(peaks_H3K4me3_GM12878, package = 'chipenrich.data')
 
@@ -66,7 +66,7 @@ The default gene set database is Gene Ontology (GO) terms, comprising of all thr
 supported_genesets()
 ```
 
-Three methods for gene set enrichment testing are provided:  the main ChIP-Enrich method (`chipenrich`), the Broad-Enrich method (`broadenrich`), and Fisher's exact test (`fet`). The `chipenrich` method designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The `broadenrich` method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks. Finally, the `fet` method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).
+Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (`chipenrich`); a faster version of the ChIP-Enrich method (`chipenrich_fast`); the Broad-Enrich method (`broadenrich`); Count-Enrich (`countenrich`), a negative-binomial based method; a faster version of Count-Enrich (`countenrich_fast`); and Fisher's exact test (`fet`). The `chipenrich` methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The `countenrich` methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The `broadenrich` method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks.  Finally, the `fet` method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).
 
 ```{r}
 supported_methods()
@@ -113,21 +113,21 @@ We define locus mappability as the average of all base pair mappability values f
 
 If `method = chipenrich` and `qc_plots = T` then two pdf files will be output: One with a binomial smoothing spline fitted to the probability of a peak given gene length and one showing the distribution of the distance of peaks to the nearest TSS of a gene. These plots may also be generated using separate functions as illustrated below. The first figure below shows the distribution of peaks to the nearest TSS. In the second figure below, spline is fitted to the data given gene locus length. In the third figure below, we do the same but here we account for the mappable locus length ($mappability \times locuslength$).
 
-```{r, fig.align='center', fig.cap='E2F4 peak distances to TSS', fig.height=6, fig.width=6, fig.show='hold'}
+```{r, fig.align='center', fig.cap='E2F4 peak distances to TSS', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')
 ```
 
-```{r, fig.align='center', fig.cap='E2F4 spline without mappability', fig.height=6, fig.width=6, fig.show='hold'}
+```{r, fig.align='center', fig.cap='E2F4 spline without mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19')
 ```
 
-```{r, fig.align='center', fig.cap='E2F4 spline with mappability', fig.height=6, fig.width=6, fig.show='hold'}
+```{r, fig.align='center', fig.cap='E2F4 spline with mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19', use_mappability = T, read_length = 24)
 ```
 
 If `method = broadenrich` and `qc_plots = T` then one pdf file is output: A plot showing the relationship between the gene locus length and the proportion of the locus covered by a peak. Figure 4 shows this relationship.
 
-```{r, fig.align='center', fig.cap='H3K4me3 gene coverage', fig.height=6, fig.width=6, fig.show='hold'}
+```{r, fig.align='center', fig.cap='H3K4me3 gene coverage', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 plot_gene_coverage(peaks = peaks_H3K4me3_GM12878, locusdef = 'nearest_tss',  genome = 'hg19')
 ```
 
@@ -135,7 +135,7 @@ plot_gene_coverage(peaks = peaks_H3K4me3_GM12878, locusdef = 'nearest_tss',  gen
 
 There are many combinations of methods, genesets, and mappabiity settings that may be used to do gene set enrichment testing using `chipenrich`. In the following, we include some examples of gene set enrichment testing using the `peaks_E2F4` and `peaks_H3K4me3_GM12878` example datasets. **Note:** Analysis using multiple cores (`n_cores`) is not available on Windows.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path,
@@ -144,7 +144,7 @@ results.ce = results$results
 print(results.ce[1:5,1:5])
 ```
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 # With mappability
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path,
 	locusdef = "nearest_tss", use_mappability=T, read_length=24, qc_plots = F,
@@ -153,9 +153,42 @@ results.cem = results$results
 print(results.cem[1:5,1:5])
 ```
 
+## ChIP-Enrich Fast
+
+```{r, warning = FALSE, message = FALSE}
+# Without mappability
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'chipenrich_fast',
+	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+results.ce = results$results
+print(results.ce[1:5,1:5])
+```
+
+## Count-Enrich
+
+```{r, warning = FALSE, message = FALSE}
+# Without mappability
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'countenrich',
+	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+results.ce = results$results
+print(results.ce[1:5,1:5])
+```
+
+## Count-Enrich Fast
+
+```{r, warning = FALSE, message = FALSE}
+# Without mappability
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'countenrich_fast',
+	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+results.ce = results$results
+print(results.ce[1:5,1:5])
+```
+
 ## Broad-Enrich
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 results = chipenrich(peaks = peaks_H3K4me3_GM12878, genesets = gs_path,
 	method='broadenrich', locusdef = "nearest_tss", qc_plots = F,
 	out_name = NULL, n_cores=1)
@@ -167,7 +200,7 @@ print(results.be[1:5,1:5])
 
 Fisher's Exact test assumes that each gene is equally likely to have a peak. We recommend using Fisher's exact test with the `1kb` or `5kb` locus definitions only. This will force all genes to have approximately the same locus length and avoid returning bias results.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, locusdef = "5kb",
 	method = "fet", fisher_alt = "two.sided", qc_plots = F, out_name = NULL)
 results.fet = results$results
