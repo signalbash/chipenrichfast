@@ -16,7 +16,7 @@ postprocess_peak_grs = function(gr) {
 	gr = GenomicRanges::sort(gr)
 
 	# Create name column, or replace what's there
-	mcols(gr)$name = paste0('peak:', seq_along(gr))
+	GenomicRanges::mcols(gr)$name = paste0('peak:', seq_along(gr))
 
 	return(gr)
 }
