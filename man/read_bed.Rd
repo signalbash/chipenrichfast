@@ -2,36 +2,56 @@
 % Please edit documentation in R/read.R
 \name{read_bed}
 \alias{read_bed}
-\title{Read BEDX+Y files and convert into GRanges}
+\title{Read BEDX+Y files}
 \usage{
-read_bed(file_path)
+read_bed(file_path, genome = NA)
 }
 \arguments{
-\item{file_path}{A path to a valid BEDX+Y file.}
+\item{file_path}{A path to a file having the extensions: .bed, .broadPeak,
+.narrowPeak, .gff3, .gff2, .gff, .wig, or .bedGraph or .bdg. Files may be
+compressed with gzip, and so might end in .narrowPeak.gz.}
+
+\item{genome}{The genome build used to get input regions. Usually inferred from
+\code{chipenrich()}. Default is NA, in which case no genome is assigned to the
+\code{GRanges} and the peaks cannot be sorted.}
 }
 \value{
-A \code{GRanges} that is unstranded, and contains only chrom, start, and end.
+A \code{GRanges} with \code{mcols} matching extra columns as needed.
 }
 \description{
-Given a \code{file_path}, read in a delimited file, assuming it is BEDX+Y,
-keep only the first three columns: chrom, start, end, and output \code{GRanges}.
+Given a \code{file_path}, read in BEDX+Y files. It is expected that files have
+extensions that can reliably be parsed so that the correct variant of
+\code{rtracklayer::import()} can be called. See \code{file_path} below.
 }
 \details{
+A warning is given if input regions are overlapping. In the case of enrichment
+testing with \code{method = 'broadenrich'}, regions should be disjoint.
+
+Header rows must be commented with \code{#} to be ignored. Otherwise, and error
+may result.
+
 Typically, this function will not be used alone, but inside \code{chipenrich()}.
 }
 \examples{
 
-# Example of BED3 with no header
+# Example of BED3
+file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
+peaks = read_bed(file, genome = 'hg19')
+
+# Example of BED3 without genome
 file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
 peaks = read_bed(file)
 
-# Example of BED3 with header
-file = system.file('extdata', 'test_header.bed', package = 'chipenrich')
-peaks = read_bed(file)
-
-# Example of narrowPeak with header
+# Example of narrowPeak without genome
 file = system.file('extdata', 'test.narrowPeak', package = 'chipenrich')
 peaks = read_bed(file)
 
-}
+# Example of gzipped broadPeak without genome
+file = system.file('extdata', 'test.broadPeak.gz', package = 'chipenrich')
+peaks = read_bed(file)
 
+# Example of gzipped gff3 Fly peaks
+file = system.file('extdata', 'test.gff3.gz', package = 'chipenrich')
+peaks = read_bed(file, genome = 'dm3')
+
+}

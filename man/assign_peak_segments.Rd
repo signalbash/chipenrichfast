@@ -33,4 +33,3 @@ assigned_peaks = assign_peak_segments(
 	locusdef = locusdef.hg19.nearest_tss)
 
 }
-

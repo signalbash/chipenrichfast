@@ -146,7 +146,7 @@ assign_peak_segments = function(peaks, locusdef) {
 	# which are also the starts and ends of the overlaps
 	overlap_start = pmax(peak_start, gene_start)
 	overlap_end = pmin(peak_end, gene_end)
-	overlap_length = overlap_end - overlap_start
+	overlap_length = overlap_end - overlap_start + 1
 
 	d = data.frame(
 		peak_id = GenomicRanges::mcols(peaks)$name[peak_indices],

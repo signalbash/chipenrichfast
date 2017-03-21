@@ -17,4 +17,3 @@ Display supported genomes.
 supported_genomes()
 
 }
-

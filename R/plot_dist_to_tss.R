@@ -60,15 +60,9 @@ peak_nearest_tss = function(peaks, tss, midpoint=T) {
 plot_dist_to_tss = function(peaks, genome='hg19') {
 	# Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
-		peakobj = load_peaks(peaks)
+		peakobj = load_peaks(peaks, genome = genome)
 	} else if (class(peaks) == "character") {
-		if (stringr::str_sub(peaks,-4,-1) == ".gff" || stringr::str_sub(peaks,-5,-1) == '.gff3' || stringr::str_sub(peaks,-7,-1) == ".gff.gz" || stringr::str_sub(peaks,-8,-1) == '.gff3.gz') {
-			message("Reading peaks file: ", peaks)
-			peakobj = read_bedgff(peaks)
-		} else {
-			message("Reading peaks file: ", peaks)
-			peakobj = read_bed(peaks)
-		}
+		peakobj = read_bed(peaks, genome = genome)
 	}
 
 	# Load TSS site info.
