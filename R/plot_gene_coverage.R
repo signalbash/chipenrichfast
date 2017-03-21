@@ -23,7 +23,7 @@ avg_binned_coverage = function(gpw, bin_size = 25) {
 #' the full path to a user-defined locus definition file. A gene locus definition
 #' controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}}
 #' for a list of supported definitions built-in. If using a user-specified file,
-#' the file must have 4 columns: geneid, chrom, start, end and be tab-delimited.
+#' the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.
 #' @param genome A string indicating the genome upon which the peaks file is
 #' based. Supported genomes are listed by the \code{\link{supported_genomes}} function.
 #' @param use_mappability A logical variable indicating whether to adjust for
@@ -94,13 +94,14 @@ plot_gene_coverage = function(peaks, locusdef = "nearest_tss", genome = 'hg19', 
 		mappa_code = sprintf("mappa.%s.%s.%imer", genome, locusdef, read_length)
 		data(list = mappa_code, package = "chipenrich.data", envir = environment())
 		mappa = get(mappa_code)
+		colnames(mappa) = c('gene_id', 'mappa')
 	} else {
 		mappa = NULL
 	}
 
 	# Assign peaks to genes.
 	assigned_peaks = assign_peak_segments(peakobj, ldef)
-	peak_genes = unique(assigned_peaks$geneid)
+	peak_genes = unique(assigned_peaks$gene_id)
 
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa=NULL)
 	ppg = calc_peak_gene_overlap(assigned_peaks, ppg)

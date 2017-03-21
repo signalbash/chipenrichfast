@@ -26,13 +26,13 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 	d = locusdef@dframe
 
 	# Indicator vector for which genes have peaks.
-	d$peak = as.numeric(d$geneid %in% peak_genes)
+	d$peak = as.numeric(d$gene_id %in% peak_genes)
 
 	# Compute length and log10 length for each gene.
 	d$length = d$end - d$start
 
 	# For genes that exist across multiple rows, sum their lengths.
-	d = stats::aggregate(cbind(peak,length) ~ geneid,d,sum)
+	d = stats::aggregate(cbind(peak,length) ~ gene_id,d,sum)
 	d$log10_length = log10(d$length)
 
 	# A gene could now have > 1 peak due to aggregating (above), reset it to be
@@ -44,7 +44,7 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 
 	# If mappability was requested, add that in.
 	if (!is.null(mappa)) {
-		d = merge(d, mappa, by = "geneid", sort = F)
+		d = merge(d, mappa, by = "gene_id", sort = F)
 		d$orig_length = d$length
 		d$length = as.numeric((d$mappa * d$length) + 1)
 		d$log10_length = log10(d$length)
@@ -66,7 +66,7 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 	d$prob_peak = ppeak
 	d$resid.dev = resid(fit,type="deviance")
 
-	cols = c("geneid", "length", "log10_length", "mappa", "orig_length", "peak", "weight", "prob_peak", "resid.dev")
+	cols = c("gene_id", "length", "log10_length", "mappa", "orig_length", "peak", "weight", "prob_peak", "resid.dev")
 	if (is.null(mappa)) {
 		cols = setdiff(cols, c("mappa", "orig_length"))
 	}
@@ -89,7 +89,7 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 #' the full path to a user-defined locus definition file. A gene locus definition
 #' controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}}
 #' for a list of supported definitions built-in. If using a user-specified file,
-#' the file must have 4 columns: geneid, chrom, start, end and be tab-delimited.
+#' the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.
 #' @param genome A string indicating the genome upon which the peaks file is
 #' based. Supported genomes are listed by the \code{\link{supported_genomes}} function.
 #' @param use_mappability A logical variable indicating whether to adjust for
@@ -170,13 +170,14 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = 'hg19', 
 		mappa_code = sprintf("mappa.%s.%s.%imer", genome, locusdef, read_length)
 		data(list = mappa_code, package = "chipenrich.data", envir = environment())
 		mappa = get(mappa_code)
+		colnames(mappa) = c('gene_id', 'mappa')
 	} else {
 		mappa = NULL
 	}
 
 	# Assign peaks to genes.
 	assigned_peaks = assign_peaks(peakobj, ldef, tss)
-	peak_genes = unique(assigned_peaks$geneid)
+	peak_genes = unique(assigned_peaks$gene_id)
 
 	# Make plot.
 	plotobj = ..plot_spline_length(ldef, peak_genes, num_peaks, mappa, legend=legend, xlim=xlim)

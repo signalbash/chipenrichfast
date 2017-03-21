@@ -1,7 +1,7 @@
 # Used in plot_expected_peaks(...) and chipenrich(...)
-#' Aggregate peak assignments over the \code{geneid} column
+#' Aggregate peak assignments over the \code{gene_id} column
 #'
-#' For each \code{geneid}, determine the locus length and the number of peaks.
+#' For each \code{gene_id}, determine the locus length and the number of peaks.
 #'
 #' Typically, this function will not be used alone, but inside \code{chipenrich()}.
 #'
@@ -9,7 +9,7 @@
 #' @param locusdef A locus definition object from \code{chipenrich.data}.
 #' @param mappa A mappability object from \code{chipenrich.data}.
 #'
-#' @return A \code{data.frame} with columns \code{geneid, length, log10_length, num_peaks, peak}. The result is used directly in the gene set enrichment tests in \code{chipenrich()}.
+#' @return A \code{data.frame} with columns \code{gene_id, length, log10_length, num_peaks, peak}. The result is used directly in the gene set enrichment tests in \code{chipenrich()}.
 #'
 #' @examples
 #'
@@ -40,19 +40,19 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 	d$length = d$end - d$start
 
 	# Sum up lengths for each gene.
-	d = stats::aggregate(length ~ geneid,d,sum)
+	d = stats::aggregate(length ~ gene_id, d, sum)
 	d$log10_length = log10(d$length)
 
 	# Compute the total number of peaks assigned to each gene.
-	ppg = table(assigned_peaks$geneid)
+	ppg = table(assigned_peaks$gene_id)
 	d_ppg = data.frame(
-		geneid = names(ppg),
+		gene_id = names(ppg),
 		num_peaks = as.numeric(ppg),
 		stringsAsFactors = FALSE)
 	result = merge(
 		x = d,
 		y = d_ppg,
-		by = 'geneid',
+		by = 'gene_id',
 		all.x=T)
 	result[is.na(result$num_peaks), ]$num_peaks = 0
 
@@ -62,7 +62,7 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 		result = merge(
 			x = result,
 			y = mappa,
-			by = 'geneid',
+			by = 'gene_id',
 			sort=F)
 		result$length = as.numeric((result$mappa * result$length) + 1)
 		result$log10_length = log10(result$length)
@@ -85,9 +85,9 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 #' Typically, this function will not be used alone, but inside \code{chipenrich()} with \code{method = 'broadenrich'}.
 #'
 #' @param assigned_peaks A \code{data.frame} resulting from \code{assign_peak_segments()}.
-#' @param ppg The aggregated peak assignments over \code{geneid} from \code{num_peaks_per_gene()}.
+#' @param ppg The aggregated peak assignments over \code{gene_id} from \code{num_peaks_per_gene()}.
 #'
-#' @return A \code{data.frame} with columns \code{geneid, length, log10_length, num_peaks, peak, peak_overlap, ratio}. The result is used directly in the gene set enrichment tests in \code{chipenrich()} when \code{method = 'broadenrich'}.
+#' @return A \code{data.frame} with columns \code{gene_id, length, log10_length, num_peaks, peak, peak_overlap, ratio}. The result is used directly in the gene set enrichment tests in \code{chipenrich()} when \code{method = 'broadenrich'}.
 #'
 #' @examples
 #'
@@ -113,16 +113,16 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 #' @export
 calc_peak_gene_overlap = function(assigned_peaks, ppg) {
 	# Sum up the lengths for each peak in a gene
-	rpg = stats::aggregate(peak_overlap ~ geneid, assigned_peaks, sum)
+	rpg = stats::aggregate(peak_overlap ~ gene_id, assigned_peaks, sum)
 
 	d_rpg = data.frame(
-		geneid = rpg$geneid,
+		gene_id = rpg$gene_id,
 		peak_overlap = rpg$peak_overlap,
 		stringsAsFactors = FALSE)
 	result = merge(
 		x = ppg,
 		y = d_rpg,
-		by = 'geneid',
+		by = 'gene_id',
 		all.x=T)
 	result$peak_overlap[is.na(result$peak_overlap)] = 0
 
@@ -157,7 +157,7 @@ calc_approx_weights = function(ppg, mappa) {
 	d$prob_peak = ppeak
 	d$resid.dev = resid(fit,type="deviance")
 
-	cols = c("geneid","length","log10_length","mappa","num_peaks","peak","weight","prob_peak","resid.dev")
+	cols = c("gene_id","length","log10_length","mappa","num_peaks","peak","weight","prob_peak","resid.dev")
 	if (is.null(mappa)) {
 		cols = setdiff(cols,c("mappa"))
 	}

@@ -1,6 +1,6 @@
 test_binomial = function(geneset, ppg) {
 	# Restrict to genes only within the genesets.
-	ppg = subset(ppg, ppg$geneid %in% geneset@all.genes)
+	ppg = subset(ppg, ppg$gene_id %in% geneset@all.genes)
 
 	# Total # of peaks.
 	total_peaks = sum(ppg$num_peaks)
@@ -12,15 +12,15 @@ test_binomial = function(geneset, ppg) {
 	}
 
 	# Gene IDs must be character to be stored into an environment as names.
-	ppg$geneid = as.character(ppg$geneid)
+	ppg$gene_id = as.character(ppg$gene_id)
 
 	# Index gene --> peak count.
 	gene2peakc = new.env(parent = emptyenv())
-	apply(ppg, 1, function(x) assign(x["geneid"], x["num_peaks"], envir = gene2peakc))
+	apply(ppg, 1, function(x) assign(x["gene_id"], x["num_peaks"], envir = gene2peakc))
 
 	# Index gene --> log10 length.
 	gene2length = new.env(parent = emptyenv())
-	apply(ppg, 1, function(x) assign(x["geneid"], x["length"], envir = gene2length))
+	apply(ppg, 1, function(x) assign(x["gene_id"], x["length"], envir = gene2length))
 
 	# Length of the genome.
 	genome_length = sum(as.numeric(ppg$length))
@@ -36,8 +36,8 @@ test_binomial = function(geneset, ppg) {
 		go_genes = as.character(geneset@set.gene[[go_term]])
 
 		# Eliminate GO genes that aren't in the ppg.
-		#go_genes = Filter(function(x) x %in% ppg$geneid,go_genes)
-		go_genes = go_genes[go_genes %in% ppg$geneid]
+		#go_genes = Filter(function(x) x %in% ppg$gene_id,go_genes)
+		go_genes = go_genes[go_genes %in% ppg$gene_id]
 
 		go_gene_lengths = as.numeric(sapply(go_genes,function(x) get(x, gene2length)))
 		go_term_length = sum(go_gene_lengths)
@@ -53,7 +53,7 @@ test_binomial = function(geneset, ppg) {
 		estimates[i] = btest$estimate
 		gonums[i] = length(go_genes)
 
-		go_peak_genes = ppg[(ppg$geneid %in% go_genes) & (ppg$num_peaks > 0),]$geneid
+		go_peak_genes = ppg[(ppg$gene_id %in% go_genes) & (ppg$num_peaks > 0),]$gene_id
 		r_go_peak_genes[i] = paste(go_peak_genes, collapse = ", ")
 		n_go_peak_genes[i] = length(go_peak_genes)
 	}

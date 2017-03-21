@@ -2,7 +2,7 @@ test_gam_nb = function(geneset,gpw,n_cores) {
   # Restrict our genes/weights/peaks to only those genes in the genesets.
   # Here, geneset is not all combined, but GOBP, GOCC, etc.
   # i.e. A specific one.
-  gpw = subset(gpw,geneid %in% geneset@all.genes);
+  gpw = subset(gpw,gene_id %in% geneset@all.genes);
   
   if (sum(gpw$peak) == 0) {
     stop("Error: no peaks in your data!");
@@ -45,10 +45,10 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
   
   # Filter genes in the geneset to only those in the gpw table.
   # The gpw table will be truncated depending on which geneset type we're in.
-  go_genes = go_genes[go_genes %in% gpw$geneid];
+  go_genes = go_genes[go_genes %in% gpw$gene_id];
   
   # Background genes and the background presence of a peak
-  b_genes = gpw$geneid %in% go_genes;
+  b_genes = gpw$gene_id %in% go_genes;
   sg_go = gpw$peak[b_genes];
   
   # Information about the geneset
@@ -57,7 +57,7 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
   r_go_genes_avg_length = mean(gpw$length[b_genes]);
   
   # Information about peak genes
-  go_genes_peak = gpw$geneid[b_genes][sg_go==1];
+  go_genes_peak = gpw$gene_id[b_genes][sg_go==1];
   r_go_genes_peak = paste(go_genes_peak,collapse=", ");
   r_go_genes_peak_num = length(go_genes_peak);
   

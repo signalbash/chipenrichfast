@@ -11,10 +11,10 @@ assign_peaks(peaks, locusdef, tss)
 
 \item{locusdef}{A locus definition object from \code{chipenrich.data}.}
 
-\item{tss}{A tss object from \code{chipenrich.data}}
+\item{tss}{A \code{GRanges} object representing the TSSs for the genome build. Includes \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}.}
 }
 \value{
-A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, geneid, nearest_tss, nearest_tss_gene, dist_to_tss, nearest_tss_gene_strand}. The result is used in \code{num_peaks_per_gene()}.
+A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, gene_id, nearest_tss, nearest_tss_gene, dist_to_tss, nearest_tss_gene_strand}. The result is used in \code{num_peaks_per_gene()}.
 }
 \description{
 Determine the midpoints of a set of input regions \code{peaks} and the overlap of the midpoints with a given locus definition \code{locusdef}. Also report the TSS that is nearest each region (peak) overlapping a defined locus and its distance.

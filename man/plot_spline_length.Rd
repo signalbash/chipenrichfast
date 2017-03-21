@@ -17,7 +17,7 @@ should follow UCSC convention, e.g. "chrX".}
 the full path to a user-defined locus definition file. A gene locus definition
 controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}}
 for a list of supported definitions built-in. If using a user-specified file,
-the file must have 4 columns: geneid, chrom, start, end and be tab-delimited.}
+the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.}
 
 \item{genome}{A string indicating the genome upon which the peaks file is
 based. Supported genomes are listed by the \code{\link{supported_genomes}} function.}

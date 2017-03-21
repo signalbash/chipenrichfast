@@ -2,7 +2,7 @@
 % Please edit documentation in R/peaks_per_gene.R
 \name{num_peaks_per_gene}
 \alias{num_peaks_per_gene}
-\title{Aggregate peak assignments over the \code{geneid} column}
+\title{Aggregate peak assignments over the \code{gene_id} column}
 \usage{
 num_peaks_per_gene(assigned_peaks, locusdef, mappa = NULL)
 }
@@ -14,10 +14,10 @@ num_peaks_per_gene(assigned_peaks, locusdef, mappa = NULL)
 \item{mappa}{A mappability object from \code{chipenrich.data}.}
 }
 \value{
-A \code{data.frame} with columns \code{geneid, length, log10_length, num_peaks, peak}. The result is used directly in the gene set enrichment tests in \code{chipenrich()}.
+A \code{data.frame} with columns \code{gene_id, length, log10_length, num_peaks, peak}. The result is used directly in the gene set enrichment tests in \code{chipenrich()}.
 }
 \description{
-For each \code{geneid}, determine the locus length and the number of peaks.
+For each \code{gene_id}, determine the locus length and the number of peaks.
 }
 \details{
 Typically, this function will not be used alone, but inside \code{chipenrich()}.
