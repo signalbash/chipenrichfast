@@ -7,7 +7,8 @@
 load_peaks(dframe, genome = NA, keep.extra.columns = TRUE)
 }
 \arguments{
-\item{dframe}{A BEDX+Y style \code{data.frame}.}
+\item{dframe}{A BEDX+Y style \code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame}
+for acceptable column names for appropriate conversion to \code{GRanges}.}
 
 \item{genome}{The genome build used to get input regions. Usually inferred from
 \code{chipenrich()}. Default is NA, in which case no genome is assigned to the
