@@ -1,0 +1,4 @@
+chr	start	end	gene_id	symbol
+chr1	600	800	1	HI
+chr1	900	1000	10	BYE
+chr2	500	600	1000	SURE

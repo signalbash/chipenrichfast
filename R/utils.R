@@ -64,3 +64,44 @@ genome_to_organism = function(genome) {
 
   org;
 }
+
+# Used to get eg2symbol mappings for custom locus definitions
+genome_to_orgdb = function(genome = supported_genomes()) {
+    genome = match.arg(genome)
+
+    if(genome == 'hg19') {
+        # Gives Entrez IDs
+        egSYMBOL = org.Hs.eg.db::org.Hs.egSYMBOL
+    } else if (genome == 'hg38') {
+        # Gives Entrez IDs
+        egSYMBOL = org.Hs.eg.db::org.Hs.egSYMBOL
+    } else if (genome == 'mm9') {
+        # Gives Entrez IDs
+        egSYMBOL = org.Mm.eg.db::org.Mm.egSYMBOL
+    } else if (genome == 'mm10') {
+        # Gives Entrez IDs
+        egSYMBOL = org.Mm.eg.db::org.Mm.egSYMBOL
+    } else if (genome == 'rn4') {
+        # Gives ENSEMBL IDs
+        egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
+    } else if (genome == 'rn5') {
+        # Gives Entrez IDs
+        egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
+    } else if (genome == 'rn6') {
+        # Gives Entrez IDs
+        egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
+    } else if (genome == 'dm3') {
+        # Gives ENSEMBL IDs
+        egSYMBOL = org.Dm.eg.db::org.Dm.egSYMBOL
+    } else if (genome == 'dm6') {
+        # Gives ENSEMBL IDs
+        egSYMBOL = org.Dm.eg.db::org.Dm.egSYMBOL
+    }
+
+    ### Build Entrez ID to gene symbol mapping
+        mapped_genes = AnnotationDbi::mappedkeys(egSYMBOL)
+        eg2symbol = as.data.frame(egSYMBOL[mapped_genes])
+        eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
+
+    return(eg2symbol)
+}
