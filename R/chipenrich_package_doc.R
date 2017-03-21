@@ -8,9 +8,7 @@
 #' @name chipenrich
 #'
 #' @import chipenrich.data
-#' @importClassesFrom GenomicRanges GRanges
-#' @importMethodsFrom GenomicRanges findOverlaps
-#' @importClassesFrom GenomeInfoDb Seqinfo
+#' @import GenomicRanges
 #' @importFrom GenomeInfoDb seqinfo
 #' @importFrom grDevices dev.off pdf
 #' @import grid
@@ -22,8 +20,9 @@
 #' @import parallel
 #' @importFrom plyr rbind.fill
 #' @import rms
+#' @import rtracklayer
 #' @importFrom S4Vectors queryHits subjectHits
-#' @importFrom stats as.formula binom.test coef complete.cases fisher.test fitted na.omit p.adjust pchisq qpois quantile resid
+#' @importFrom stats as.formula binom.test coef complete.cases fisher.test fitted na.omit p.adjust pchisq predict qpois quantile resid
 #' @importFrom stringr str_match str_sub
 #' @importFrom utils data read.table tail write.table
 NULL

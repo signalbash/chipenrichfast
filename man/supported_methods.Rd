@@ -17,4 +17,3 @@ Display supported gene set enrichment methods.
 supported_methods()
 
 }
-

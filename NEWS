@@ -1,3 +1,27 @@
+CHANGES IN VERSION 1.13.5
+-------------------------
+
+  o Refactor read_bed().
+
+    o Now a wrapper for rtracklayer::import().
+
+    o Handles the following formats (compressed or not): BED3 - BED6, broadPeak,
+      narrowPeak, gff3, gff2, gff, gtf, wig, or bedGraph.
+
+    o Consequently, starts are +1.
+
+    o Enables use of other columns (e.g. signalValue), which we will explore in
+      future models.
+
+    o This function will likely be renamed in the future to reflect new generality.
+
+  o Refactor load_peaks().
+
+    o Use GenomicRanges::makeGRangesFromDataFrame() instead of custom implementation.
+
+  o Aside from requiring files to have recognizable extensions (see above), these
+    changes are backwards compatible.
+
 CHANGES IN VERSION 1.13.4
 -------------------------
 

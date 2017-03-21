@@ -2,29 +2,49 @@
 % Please edit documentation in R/read.R
 \name{load_peaks}
 \alias{load_peaks}
-\title{Convert BEDX+Y data.frames and into GRanges}
+\title{Convert a BEDX+Y data.frame and into GRanges}
 \usage{
-load_peaks(dframe)
+load_peaks(dframe, genome = NA, keep.extra.columns = TRUE)
 }
 \arguments{
 \item{dframe}{A BEDX+Y style \code{data.frame}.}
+
+\item{genome}{The genome build used to get input regions. Usually inferred from
+\code{chipenrich()}. Default is NA, in which case no genome is assigned to the
+\code{GRanges} and the peaks cannot be sorted.}
+
+\item{keep.extra.columns}{Keep extra columns parameter from \code{GenomicRanges::makeGRangesFromDataFrame()}.}
 }
 \value{
-A \code{GRanges} that is unstranded, and contains only chrom, start, and end.
+A \code{GRanges} that may or may not \code{keep.extra.columns}, and
+that may or may not be stranded, depending on whether there is strand column
+in the \code{dframe}.
 }
 \description{
-Given a \code{data.frame} in BEDX+Y format, keep only the first three
-columns: chrom, start, end, and output \code{GRanges}.
+Given a \code{data.frame} in BEDX+Y format, use the built-in function
+\code{GenomicRanges::makeGRangesFromDataFrame()} to convert to \code{GRanges}.
 }
 \details{
 Typically, this function will not be used alone, but inside \code{chipenrich()}.
 }
 \examples{
 
-# Example of BED3 with no header
-data(peaks_H3K4me3_GM12878, package='chipenrich.data')
-peaks_H3K4me3_GM12878 = subset(peaks_H3K4me3_GM12878, peaks_H3K4me3_GM12878$chrom == 'chr1')
-peaks = load_peaks(peaks_H3K4me3_GM12878)
+# Example with just chr, start, end
+peaks_df = data.frame(
+chr = c('chr1','chr2','chr3'),
+start = c(35,74,235),
+end = c(46,83,421),
+stringsAsFactors = FALSE)
+peaks = load_peaks(peaks_df, genome = 'hg19')
+
+# Example with extra columns
+peaks_df = data.frame(
+chr = c('chr1','chr2','chr3'),
+start = c(35,74,235),
+end = c(46,83,421),
+strand = c('+','-','+'),
+score = c(36, 747, 13),
+stringsAsFactors = FALSE)
+peaks = load_peaks(peaks_df, genome = 'hg19', keep.extra.columns = TRUE)
 
 }
-

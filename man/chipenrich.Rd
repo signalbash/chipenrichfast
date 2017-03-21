@@ -3,6 +3,7 @@
 \docType{package}
 \name{chipenrich}
 \alias{chipenrich}
+\alias{chipenrich}
 \alias{chipenrich-package}
 \title{Run ChIP-Enrich on a dataset of ChIP-seq peaks}
 \usage{
@@ -175,4 +176,3 @@ assigned_peaks = results$peaks
 enrich = results$results
 
 }
-

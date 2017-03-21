@@ -33,7 +33,9 @@ chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
   num_peak_threshold = 1, n_cores = 1)
 ```
 
-The `peaks` option should be either a data frame or character vector representing the path to a file containing the peaks. The file (or data frame) should have at least 3 columns: `chrom`, `start` and `end`, denoting the chromosome, start position, and end position of the peaks. Chromosome should be in UCSC format, e.g. chrX, chrY, chr22, etc. If a file, it must be tab-delimited, and the header must exist. The input file may also be a .bed, .broadPeak, or .narrowPeak file. Additional columns can exist, so long as they do not contain tab characters. Two example datasets, `peaks_E2F4` and `peaks_H3K4me3_GM12878`, are included in the package.
+The `peaks` parameter should be a `data.frame` or a path to a file. If `peaks` is a path, the file must have one of the following extensions: `.bed`, `.broadPeak`, `.narrowPeak`, `.gff3`, `.gff2`, `.gff`, `.wig`, or `.bedGraph` or `.bdg`. Files may be compressed with `gzip`, and so might end in `.narrowPeak.gz`, for example. The `rtracklayer::import()` function is used to read peaks, so adherence to the mentioned file formats is necessary. Header rows must be commented out with `#`.
+
+If a `peaks` is a `data.frame`, the `GenomicRanges::makeGRangesFromDataFrame()` is used to convert to `GRanges`, and so must have appropriately labeled columns. See `?GenomicRanges::makeGRangesFromDataFrame` for details.
 
 ```{r, warning = FALSE, message = FALSE}
 data(peaks_E2F4, package = 'chipenrich.data')

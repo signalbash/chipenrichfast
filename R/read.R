@@ -1,175 +1,161 @@
-#' Read BEDX+Y files and convert into GRanges
+#' Read BEDX+Y files
 #'
-#' Given a \code{file_path}, read in a delimited file, assuming it is BEDX+Y,
-#' keep only the first three columns: chrom, start, end, and output \code{GRanges}.
+#' Given a \code{file_path}, read in BEDX+Y files. It is expected that files have
+#' extensions that can reliably be parsed so that the correct variant of
+#' \code{rtracklayer::import()} can be called. See \code{file_path} below.
+#'
+#' A warning is given if input regions are overlapping. In the case of enrichment
+#' testing with \code{method = 'broadenrich'}, regions should be disjoint.
+#'
+#' Header rows must be commented with \code{#} to be ignored. Otherwise, and error
+#' may result.
 #'
 #' Typically, this function will not be used alone, but inside \code{chipenrich()}.
 #'
-#' @param file_path A path to a valid BEDX+Y file.
+#' @param file_path A path to a file having the extensions: .bed, .broadPeak,
+#' .narrowPeak, .gff3, .gff2, .gff, .wig, or .bedGraph or .bdg. Files may be
+#' compressed with gzip, and so might end in .narrowPeak.gz.
+#' @param genome The genome build used to get input regions. Usually inferred from
+#' \code{chipenrich()}. Default is NA, in which case no genome is assigned to the
+#' \code{GRanges} and the peaks cannot be sorted.
 #'
-#' @return A \code{GRanges} that is unstranded, and contains only chrom, start, and end.
+#' @return A \code{GRanges} with \code{mcols} matching extra columns as needed.
 #'
 #' @examples
 #'
-#' # Example of BED3 with no header
+#' # Example of BED3
+#' file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
+#' peaks = read_bed(file, genome = 'hg19')
+#'
+#' # Example of BED3 without genome
 #' file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
 #' peaks = read_bed(file)
 #'
-#' # Example of BED3 with header
-#' file = system.file('extdata', 'test_header.bed', package = 'chipenrich')
-#' peaks = read_bed(file)
-#'
-#' # Example of narrowPeak with header
+#' # Example of narrowPeak without genome
 #' file = system.file('extdata', 'test.narrowPeak', package = 'chipenrich')
 #' peaks = read_bed(file)
 #'
-#' @export
-read_bed = function(file_path) {
-	if (!file.exists(file_path)) {
-		stop("Can't find BED file: ",file_path)
-	}
-
-	# Determine how many lines to skip
-	chunk_size = 500;
-	chunk = scan(file_path,what="character",nmax=chunk_size,strip.white=T,sep="\n",quiet=T)
-	skip_n = suppressWarnings(min(grep("^chr(\\d+|\\w+)\\s+\\d+",chunk)) - 1)
-
-	if (is.infinite(skip_n)) {
-		stop("Error: no valid chromosomes detected within first 500 lines of BED file.")
-	}
-
-	message(sprintf("Skipping %i lines of BED header..",skip_n))
-
-	# Read the file, subset to first 3 columns, and rename columns
-	peaks = read.table(file_path,header=F,skip=skip_n)
-	peaks = peaks[,1:3]
-	names(peaks) = c("chrom","start","end")
-
-	sub_check = peaks[1:min(nrow(peaks),100),]
-	if (!all(grepl("chr",sub_check$chrom))) {
-		stop("First column of BED file should have chr* entries.")
-	}
-
-	if (any(sub_check$start < 0) | any(sub_check$end < 0)) {
-		stop("Start/end positions of peaks should be >= 0.")
-	}
-
-	# Convert to list of GenomicRanges
-	gr = GenomicRanges::GRanges(
-		seqnames = peaks$chrom,
-		ranges = IRanges::IRanges(start = peaks$start, end = peaks$end))
-
-	# Reduce peaks
-	gr = GenomicRanges::reduce(gr)
-	gr$name = paste('peak:', 1:length(gr), sep='')
-
-	return(gr)
-}
-
-#' Read BEDGFF files and convert into GRanges
+#' # Example of gzipped broadPeak without genome
+#' file = system.file('extdata', 'test.broadPeak.gz', package = 'chipenrich')
+#' peaks = read_bed(file)
 #'
-#' Given a \code{file_path}, read in a delimited file, assuming it is BEDGFF (as
-#' is output by modENCODE for D. Melanogaster TF ChIP-seq experiments), keep
-#' only chrom, start, and end columns, and output \code{GRanges}.
-#'
-#' Typically, this function will not be used alone, but inside \code{chipenrich()}.
-#'
-#' @param file_path A path to a valid BEDGFF file (as from modENCODE).
-#'
-#' @return A \code{GRanges} that is unstranded, and contains only chrom, start, and end.
-#'
-#' @examples
-#'
-#' # Example of GFF3
-#' file = system.file('extdata', 'test.gff3', package = 'chipenrich')
-#' peaks = read_bedgff(file)
-#'
-#' # Example of gzipped GFF3
+#' # Example of gzipped gff3 Fly peaks
 #' file = system.file('extdata', 'test.gff3.gz', package = 'chipenrich')
-#' peaks = read_bedgff(file)
+#' peaks = read_bed(file, genome = 'dm3')
 #'
 #' @export
-read_bedgff = function(file_path) {
-	if (!file.exists(file_path)) {
-		stop("Can't find BED file: ",file_path)
+read_bed = function(file_path, genome = NA) {
+	# Establish extra columns and format as needed
+	if(grepl('.narrowPeak', file_path)) {
+		extraCols = c('signalValue' = 'numeric', 'pValue' = 'numeric', 'qValue' = 'numeric', 'peak' = 'integer')
+		format = 'bed'
+	} else if (grepl('.broadPeak', file_path)) {
+		extraCols = c('signalValue' = 'numeric', 'pValue' = 'numeric', 'qValue' = 'numeric')
+		format = 'bed'
+	} else if (grepl('.gff3', file_path)) {
+		extraCols = character()
+		format = 'gff3'
+	} else if (grepl('.gff2', file_path)) {
+		extraCols = character()
+		format = 'gff2'
+	} else if (grepl('.gff', file_path)) {
+		extraCols = character()
+		format = 'gff'
+	} else if (grepl('.wig', file_path)) {
+		extraCols = character()
+		format = 'wig'
+	} else if (grepl('.bedGraph', file_path) || grepl('.bdg', file_path)) {
+		extraCols = character()
+		format = 'bedGraph'
+	} else {
+		extraCols = character()
+		format = 'bed'
 	}
 
-	chunk_size = 500;
-	chunk = scan(file_path,what="character",nmax=chunk_size,strip.white=T,sep="\n",quiet=T)
-
-	skip_n = suppressWarnings(min(grep("^\\d(L|R)",chunk)) - 1)
-
-	if (is.infinite(skip_n)) {
-		stop("Error: no valid chromosomes detected within first 500 lines of BED file.")
+	if(grepl('gff', format)) {
+		# format = 'gff' doesn't use the extraCols parameter
+		gr = rtracklayer::import(con = file_path, format = format, genome = genome)
+	} else {
+		gr = rtracklayer::import(con = file_path, format = format, genome = genome, extraCols = extraCols)
 	}
 
-	message(sprintf("Skipping %i lines of BED header..",skip_n))
-
-	peaks = read.table(file_path,header=F,skip=skip_n)
-	peaks = peaks[,c(1,4,5)]
-	names(peaks) = c("chrom","start","end")
-
-	sub_check = peaks[1:min(nrow(peaks),100),]
-	if (!all(grepl("chr",sub_check$chrom))) {
-		peaks$chrom = paste('chr',peaks$chrom,sep='')
-		message("Adding 'chr' to chromosome column for compatibility with locus definitions.")
+	# Check for overlapping peaks
+	reduced_gr = GenomicRanges::reduce(gr)
+	if(length(gr) != length(reduced_gr)) {
+		warning('Some input regions overlap. It is recommended that input regions be disjoint.')
 	}
 
-	if (any(sub_check$start < 0) | any(sub_check$end < 0)) {
-		stop("Start/end positions of peaks should be >= 0.")
-	}
+	# Sort
+	gr = GenomicRanges::sort(gr)
 
-	# Convert to list of GenomicRanges
-	gr = GenomicRanges::GRanges(
-		seqnames = peaks$chrom,
-		ranges = IRanges::IRanges(start = peaks$start, end = peaks$end))
-
-	# Reduce peaks
-	gr = GenomicRanges::reduce(gr)
-	gr$name = paste('peak:', 1:length(gr), sep='')
+	# Create name column, or replace what's there
+	mcols(gr)$name = paste0('peak:', seq_along(gr))
 
 	return(gr)
 }
 
-#' Convert BEDX+Y data.frames and into GRanges
+#' Convert a BEDX+Y data.frame and into GRanges
 #'
-#' Given a \code{data.frame} in BEDX+Y format, keep only the first three
-#' columns: chrom, start, end, and output \code{GRanges}.
+#' Given a \code{data.frame} in BEDX+Y format, use the built-in function
+#' \code{GenomicRanges::makeGRangesFromDataFrame()} to convert to \code{GRanges}.
 #'
 #' Typically, this function will not be used alone, but inside \code{chipenrich()}.
 #'
 #' @param dframe A BEDX+Y style \code{data.frame}.
+#' @param genome The genome build used to get input regions. Usually inferred from
+#' \code{chipenrich()}. Default is NA, in which case no genome is assigned to the
+#' \code{GRanges} and the peaks cannot be sorted.
+#' @param keep.extra.columns Keep extra columns parameter from \code{GenomicRanges::makeGRangesFromDataFrame()}.
 #'
-#' @return A \code{GRanges} that is unstranded, and contains only chrom, start, and end.
+#' @return A \code{GRanges} that may or may not \code{keep.extra.columns}, and
+#' that may or may not be stranded, depending on whether there is strand column
+#' in the \code{dframe}.
 #'
 #' @examples
 #'
-#' # Example of BED3 with no header
-#' data(peaks_H3K4me3_GM12878, package='chipenrich.data')
-#' peaks_H3K4me3_GM12878 = subset(peaks_H3K4me3_GM12878, peaks_H3K4me3_GM12878$chrom == 'chr1')
-#' peaks = load_peaks(peaks_H3K4me3_GM12878)
+#' # Example with just chr, start, end
+#' peaks_df = data.frame(
+#'	chr = c('chr1','chr2','chr3'),
+#'	start = c(35,74,235),
+#'	end = c(46,83,421),
+#'	stringsAsFactors = FALSE)
+#' peaks = load_peaks(peaks_df, genome = 'hg19')
+#'
+#' # Example with extra columns
+#' peaks_df = data.frame(
+#'	chr = c('chr1','chr2','chr3'),
+#'	start = c(35,74,235),
+#'	end = c(46,83,421),
+#'	strand = c('+','-','+'),
+#'	score = c(36, 747, 13),
+#'	stringsAsFactors = FALSE)
+#' peaks = load_peaks(peaks_df, genome = 'hg19', keep.extra.columns = TRUE)
 #'
 #' @export
-load_peaks = function(dframe) {
-	# Check columns.
-	for (col in c("chrom","start","end")) {
-		if (!col %in% names(dframe)) {
-			stop(sprintf("error in peaks data frame: no column named '%s'",col))
-		}
+load_peaks = function(dframe, genome = NA, keep.extra.columns = TRUE) {
+	# Use built-in function
+	if(is.na(genome)) {
+		gr = GenomicRanges::makeGRangesFromDataFrame(
+			df = dframe,
+			keep.extra.columns = keep.extra.columns)
+	} else {
+		gr = GenomicRanges::makeGRangesFromDataFrame(
+			df = dframe,
+			seqinfo = GenomeInfoDb::Seqinfo(genome = genome),
+			keep.extra.columns = keep.extra.columns)
 	}
 
-	# Convert to list of GenomicRanges
-	message('Constructing GRanges')
-	gr = GenomicRanges::GRanges(
-		seqnames = dframe$chrom,
-		ranges = IRanges::IRanges(start = dframe$start, end = dframe$end))
+	# Check for overlapping peaks
+	reduced_gr = GenomicRanges::reduce(gr)
+	if(length(gr) != length(reduced_gr)) {
+		warning('Some input regions overlap. It is recommended that input regions be disjoint.')
+	}
 
-	# Reduce peaks
-	message('Sorting GRanges')
+	# Sort
 	gr = GenomicRanges::sort(gr)
-	message('Reducing GRanges')
-	gr = GenomicRanges::reduce(gr)
-	gr$name = paste('peak:', 1:length(gr), sep='')
+
+	# Create name column, or replace what's there
+	mcols(gr)$name = paste0('peak:', seq_along(gr))
 
 	return(gr)
 }
