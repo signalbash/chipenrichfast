@@ -1,8 +1,8 @@
 test_fisher_exact = function(geneset,gpw,alternative="two.sided") {
 	# Restrict to only those genes in the genesets.
-	gpw = subset(gpw, gpw$geneid %in% geneset@all.genes)
+	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
-	genes = gpw$geneid
+	genes = gpw$gene_id
 	peaks = gpw$peak
 
 	results = lapply(ls(geneset@set.gene), function(go_term) {
@@ -21,7 +21,7 @@ test_fisher_exact = function(geneset,gpw,alternative="two.sided") {
 			odds_ratio = fet_result$estimate
 		}, silent = T)
 
-		go_peak_genes = gpw[(gpw$geneid %in% go_genes) & (gpw$peak == 1),]$geneid
+		go_peak_genes = gpw[(gpw$gene_id %in% go_genes) & (gpw$peak == 1),]$gene_id
 		go_peak_genes_str = paste(go_peak_genes, collapse = ", ")
 
 		enr = NA

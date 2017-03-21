@@ -1,5 +1,7 @@
 # Randomize the locus definition @dframe and rebuild the @granges and @chrom2iranges
 randomize_locusdef = function(ldef, resolution=50) {
+	### TODO: Remove the reducing code once we transition to new chipenrich.data
+
 	message('Extracting definition data frame..')
 	ldef_df = ldef@dframe
 
@@ -12,32 +14,32 @@ randomize_locusdef = function(ldef, resolution=50) {
 
 		message(paste('	On chrom', chrom))
 
-		# Collapse consecutive rows of the ldef when the geneid is the same
-			# Split by geneid
+		# Collapse consecutive rows of the ldef when the gene_id is the same
+			# Split by gene_id
 			message('		Splitting chrom on gene id..')
-			lc_geneid = split(lc, lc$geneid)
+			lc_gene_id = split(lc, lc$gene_id)
 
-			# For each geneid df, create an IRanges object to apply IRanges::reduce to
+			# For each gene_id df, create an IRanges object to apply IRanges::reduce to
 			message('		Applying IRanges::reduce to each gene id group..')
-			lc_geneid_ir = lapply(lc_geneid, function(lcg) {
-				geneid = unique(lcg$geneid)
+			lc_gene_id_ir = lapply(lc_gene_id, function(lcg) {
+				gene_id = unique(lcg$gene_id)
 
-				ir = IRanges::IRanges(start=lcg$start, end = lcg$end, names=lcg$geneid)
+				ir = IRanges::IRanges(start=lcg$start, end = lcg$end, names=lcg$gene_id)
 				ir = IRanges::reduce(ir)
-				names(ir) = rep.int(geneid, length(ir))
+				names(ir) = rep.int(gene_id, length(ir))
 
 				return(as.data.frame(ir, stringsAsFactors=F))
 			})
 
 		# Now put all the data.framed IRange objects back together
 		message('		Collapsing reduced definition..')
-		lc_collapsed = Reduce(rbind, lc_geneid_ir)
+		lc_collapsed = Reduce(rbind, lc_gene_id_ir)
 
 		# Add chromosome column back, rename names column, and sort columns
 		message('		Formatting reduced definition..')
 		lc_collapsed$chrom = chrom
-		colnames(lc_collapsed) = c('start','end','width','geneid','chrom')
-		lc_collapsed = lc_collapsed[,c('geneid','chrom','start','end')]
+		colnames(lc_collapsed) = c('start','end','width','gene_id','chrom')
+		lc_collapsed = lc_collapsed[,c('gene_id','chrom','start','end')]
 
 		# Sort lc_collapsed by the starting position and rename rownames
 		message('		Sorting reduced definition..')
@@ -54,8 +56,8 @@ randomize_locusdef = function(ldef, resolution=50) {
 		split_lc = lapply(split_lc, function(bin){
 			reordering = sample(1:nrow(bin), nrow(bin))
 
-			# Scramble geneids
-			data.frame('geneid' = bin$geneid[reordering], bin[,2:ncol(bin)], stringsAsFactors=F)
+			# Scramble gene_ids
+			data.frame('gene_id' = bin$gene_id[reordering], bin[,2:ncol(bin)], stringsAsFactors=F)
 		})
 		lc = Reduce(rbind, split_lc)
 
@@ -69,7 +71,7 @@ randomize_locusdef = function(ldef, resolution=50) {
 	ldef_gr = GenomicRanges::GRanges(
 		seqnames = ldef_df$chrom,
 		ranges = IRanges::IRanges(start=ldef_df$start, end=ldef_df$end),
-		names = ldef_df$geneid
+		names = ldef_df$gene_id
 	)
 
 	message('Creating new IRanges object..')
@@ -81,7 +83,7 @@ randomize_locusdef = function(ldef, resolution=50) {
 	ldef_ir = lapply(chr_list, function(chr) {
 		sub_ldef_df = subset(ldef_df, ldef_df$chrom==chr)
 
-		ir = IRanges::IRanges(start=sub_ldef_df$start, end=sub_ldef_df$end, names=sub_ldef_df$geneid)
+		ir = IRanges::IRanges(start=sub_ldef_df$start, end=sub_ldef_df$end, names=sub_ldef_df$gene_id)
 		return(ir)
 	})
 
@@ -98,7 +100,7 @@ randomize_ppg_all = function(ppg) {
 	rownames(ppg) = 1:nrow(ppg)
 
 	reordering = sample(1:nrow(ppg), nrow(ppg))
-	ppg = data.frame('geneid'=ppg$geneid, ppg[reordering,2:ncol(ppg)], stringsAsFactors=F)
+	ppg = data.frame('gene_id'=ppg$gene_id, ppg[reordering,2:ncol(ppg)], stringsAsFactors=F)
 
 	return(ppg)
 }
@@ -116,7 +118,7 @@ randomize_ppg_length = function(ppg) {
 	split_ppg = lapply(split_ppg, function(bin){
 		reordering = sample(1:nrow(bin), nrow(bin))
 
-		data.frame('geneid'=bin$geneid, bin[reordering,2:ncol(bin)], stringsAsFactors=F)
+		data.frame('gene_id'=bin$gene_id, bin[reordering,2:ncol(bin)], stringsAsFactors=F)
 	})
 	ppg = Reduce(rbind, split_ppg)
 

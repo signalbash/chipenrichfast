@@ -6,9 +6,9 @@
 #'
 #' @param peaks A \code{GRanges} object representing regions to be used for enrichment.
 #' @param locusdef A locus definition object from \code{chipenrich.data}.
-#' @param tss A tss object from \code{chipenrich.data}
+#' @param tss A \code{GRanges} object representing the TSSs for the genome build. Includes \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}.
 #'
-#' @return A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, geneid, nearest_tss, nearest_tss_gene, dist_to_tss, nearest_tss_gene_strand}. The result is used in \code{num_peaks_per_gene()}.
+#' @return A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, gene_id, nearest_tss, nearest_tss_gene, dist_to_tss, nearest_tss_gene_strand}. The result is used in \code{num_peaks_per_gene()}.
 #'
 #' @examples
 #'
@@ -29,10 +29,6 @@ assign_peaks = function(peaks, locusdef, tss) {
 	# NOTE: locusdef is an environment, so uses @
 	ldef_gr = locusdef@granges
 
-	# Extract GRanges of tss
-	# NOTE: tss is a list, so uses $
-	tss_gr = tss$granges
-
 	# Determine midpoints of peaks and construct a GRanges object
 	# on that basis. Include the peak name for later merging
 	peak_mids = IRanges::mid(GenomicRanges::ranges(peaks))
@@ -46,13 +42,13 @@ assign_peaks = function(peaks, locusdef, tss) {
 	mid_ldef_overlaps = GenomicRanges::findOverlaps(mids_gr, ldef_gr)
 
 	# Determine distance of peak midpoints to nearest TSSs
-	mid_dist_to_ntss = GenomicRanges::distanceToNearest(mids_gr, tss_gr)
+	mid_dist_to_ntss = GenomicRanges::distanceToNearest(mids_gr, tss)
 
 	# Sign the distances by up (-) or down (+) stream
 	mid_starts = GenomicRanges::start(mids_gr)[S4Vectors::queryHits(mid_dist_to_ntss)]
-	tss_starts = GenomicRanges::start(tss_gr)[S4Vectors::subjectHits(mid_dist_to_ntss)]
-	tss_pos_strand = GenomicRanges::strand(tss_gr)[S4Vectors::subjectHits(mid_dist_to_ntss)] == "+"
-	tss_neg_strand = GenomicRanges::strand(tss_gr)[S4Vectors::subjectHits(mid_dist_to_ntss)] == "-"
+	tss_starts = GenomicRanges::start(tss)[S4Vectors::subjectHits(mid_dist_to_ntss)]
+	tss_pos_strand = GenomicRanges::strand(tss)[S4Vectors::subjectHits(mid_dist_to_ntss)] == "+"
+	tss_neg_strand = GenomicRanges::strand(tss)[S4Vectors::subjectHits(mid_dist_to_ntss)] == "-"
 
 	neg1 = (mid_starts < tss_starts) & (tss_pos_strand)
 	neg2 = (mid_starts > tss_starts) & (tss_neg_strand)
@@ -73,7 +69,8 @@ assign_peaks = function(peaks, locusdef, tss) {
 		peak_end = GenomicRanges::end(peaks)[mid_indices],
 		gene_locus_start = GenomicRanges::start(ldef_gr)[ldef_indices],
 		gene_locus_end = GenomicRanges::end(ldef_gr)[ldef_indices],
-		geneid = GenomicRanges::mcols(ldef_gr)$names[ldef_indices],
+		gene_id = GenomicRanges::mcols(ldef_gr)$gene_id[ldef_indices],
+		gene_symbol = GenomicRanges::mcols(ldef_gr)$symbol[ldef_indices],
 		stringsAsFactors = FALSE
 	)
 
@@ -81,10 +78,11 @@ assign_peaks = function(peaks, locusdef, tss) {
 	tss_indices = S4Vectors::subjectHits(mid_dist_to_ntss)
 	mid_dist_df = data.frame(
 		peak_id = GenomicRanges::mcols(mids_gr)$name[mid_indices],
-		nearest_tss = GenomicRanges::start(tss_gr)[tss_indices],
-		nearest_tss_gene = GenomicRanges::mcols(tss_gr)$geneid[tss_indices],
+		nearest_tss = GenomicRanges::start(tss)[tss_indices],
+		nearest_tss_gene_id = GenomicRanges::mcols(tss)$gene_id[tss_indices],
+		nearest_tss_symbol = GenomicRanges::mcols(tss)$symbol[tss_indices],
 		dist_to_tss = GenomicRanges::mcols(mid_dist_to_ntss)$distance,
-		nearest_tss_gene_strand = GenomicRanges::strand(tss_gr)[tss_indices],
+		nearest_tss_gene_strand = GenomicRanges::strand(tss)[tss_indices],
 		stringsAsFactors = FALSE
 	)
 
@@ -98,6 +96,24 @@ assign_peaks = function(peaks, locusdef, tss) {
 		sort = FALSE
 	)
 
+	# Reorder the columns
+	column_order = c(
+		"peak_id",
+		"chr",
+		"peak_start",
+		"peak_end",
+		"gene_id",
+		"gene_symbol",
+		"gene_locus_start",
+		"gene_locus_end",
+		"nearest_tss",
+		"dist_to_tss",
+		"nearest_tss_gene_id",
+		"nearest_tss_symbol",
+		"nearest_tss_gene_strand"
+	)
+	d = d[, column_order]
+
 	return(d)
 }
 
@@ -110,7 +126,7 @@ assign_peaks = function(peaks, locusdef, tss) {
 #' @param peaks A \code{GRanges} object representing regions to be used for enrichment.
 #' @param locusdef A locus definition object from \code{chipenrich.data}.
 #'
-#' @return A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, geneid, overlap_start, overlap_end, peak_overlap}. The result is used in \code{num_peaks_per_gene()}.
+#' @return A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, gene_id, overlap_start, overlap_end, peak_overlap}. The result is used in \code{num_peaks_per_gene()}.
 #'
 #' @examples
 #'
@@ -155,7 +171,8 @@ assign_peak_segments = function(peaks, locusdef) {
 		peak_end = peak_end,
 		gene_locus_start = gene_start,
 		gene_locus_end = gene_end,
-		geneid = GenomicRanges::mcols(ldef_gr)$names[ldef_indices],
+		gene_id = GenomicRanges::mcols(ldef_gr)$gene_id[ldef_indices],
+		gene_symbol = GenomicRanges::mcols(ldef_gr)$symbol[ldef_indices],
 		overlap_start = overlap_start,
 		overlap_end = overlap_end,
 		peak_overlap = overlap_length,
