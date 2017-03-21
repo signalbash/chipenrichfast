@@ -281,12 +281,12 @@ chipenrich = function(
 
 	############################################################################
 	# CHECK locusdefs and load if okay
-	# The API for a user to use their own genesets will be to put a path in
-	# the genesets argument.
+	# The API for a user to use their own locusdef will be to put a path in
+	# the locusdef argument.
 	user_defined_ldef = file.exists(locusdef)
 	if (user_defined_ldef) {
 		# Load user-defined locus definition file.
-		ldef = setup_ldef(locusdef)
+		ldef = setup_ldef(locusdef, genome)
 	} else {
 		if (!any(supported_locusdefs()$genome == genome & locusdef == supported_locusdefs()$locusdef)) {
 			stop(

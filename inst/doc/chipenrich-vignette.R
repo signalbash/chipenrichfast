@@ -23,16 +23,16 @@ peaks_H3K4me3_GM12878 = subset(peaks_H3K4me3_GM12878, peaks_H3K4me3_GM12878$chro
 supported_genomes()
 
 ## ------------------------------------------------------------------------
-supported_locusdefs()
+head(supported_locusdefs())
 
 ## ------------------------------------------------------------------------
-supported_genesets()
+head(supported_genesets())
 
 ## ------------------------------------------------------------------------
 supported_methods()
 
 ## ------------------------------------------------------------------------
-supported_read_lengths()
+head(supported_read_lengths())
 
 ## ---- fig.align='center', fig.cap='E2F4 peak distances to TSS', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
 plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')

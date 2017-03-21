@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.13.11
+--------------------------
+
+  o Alter setup_ldef() function to add symbol column. If a valid genome is used
+    use orgDb to get eg2symbol mappings and fill in for the user. Users can give
+    their own symbol column which will override using orgDb. Finally, if neither
+    symbol column or valid genome is used, symbols are set to NA.
+
 CHANGES IN VERSION 1.13.10
 --------------------------
 

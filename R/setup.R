@@ -48,46 +48,78 @@ read_mappa = function(file_path) {
 	return(d)
 }
 
-# Creates a LocusDefinition object given a flat file of definitions.
-setup_ldef = function(filepath) {
-	# Check if file exists.
+#' Function to read custom locus definition from file
+#'
+#' This function reads a tab-delimited text (with a header) file that should have
+#' columns 'chr', 'start', 'end', and a column named 'gene_id' (or 'geneid') with the
+#' Entrez Gene ID. If a \code{supported_genomes()} is given, then a column
+#' of gene symbols named 'symbol', will be added. If an unsupported genome is
+#' used there are two options: 1) Have a column named 'symbols' with the gene
+#' symbols in the custom locus definition, and leave \code{genome = NA}, or 2)
+#' leave \code{genome = NA}, do not provide gene symbols, and NAs will be used.
+#'
+#' @param filepath A valid file path for the custom locus definition.
+#' @param genome A genome from \code{supported_genomes()}, default \code{NA}.
+#'
+#' @return A \code{LocusDefinition} class object with slots \code{dframe},
+#' \code{granges}, \code{genome.build}, and \code{organism}.
+setup_ldef = function(filepath, genome = NA) {
 	if (!file.exists(filepath)) {
 		stop("Error: unable to open file for reading: ", filepath)
 	}
 
-	# Read in flat file.
 	message("Reading user-specified gene locus definitions: ", filepath)
-	d = read.table(filepath, sep = "\t", header = T, stringsAsFactors = F)
+	df = read.table(filepath, sep = "\t", header = T, stringsAsFactors = F)
 
-	# Warn if missing entries, we'll ignore them though.
-	num_missing = sum(!complete.cases(d))
+	num_missing = sum(!complete.cases(df))
 	if (num_missing > 0) {
-		message(sprintf("Warning: %i rows of user-provided locus definition were missing values, skipping these rows..", num_missing))
+		message(sprintf("Warning: %i rows of user-provided locus definition were missing values, skipping these rows.", num_missing))
+	}
+	df = na.omit(df)
+	# Remove duplicated rows, not duplicated genes.
+	# Some genes will exist on multiple rows because they are split by
+	# other transcripts, or small nuclear RNAs, etc.
+	df = unique(df)
+
+	# Rename 'geneid' columns 'gene_id' for backwards compatibility
+	if('geneid' %in% colnames(df)) {
+		colnames(df)[which(colnames(df) == 'geneid')] = 'gene_id'
 	}
 
-	# Remove rows with missing data.
-	d = na.omit(d)
+	if(!('gene_id' %in% colnames(df))) {
+		stop("Error: Custom locus definition must have column named 'gene_id'.")
+	}
 
-	filename = strip_ext(filepath)
+	if('symbol' %in% colnames(df)) {
+		# Do nothing
+		message('Using given symbol column...')
+	} else if (genome %in% supported_genomes()) {
+		message('Using orgDb package to get gene symbols...')
+		eg2symbol = genome_to_orgdb(genome)
+		df$symbol = eg2symbol[match(df$gene_id, eg2symbol$gene_id), 'symbol']
+	} else {
+		message('Setting gene symbols to NA...')
+		df$symbol = NA
+	}
+
+	if(genome %in% supported_genomes()) {
+		gr = GenomicRanges::makeGRangesFromDataFrame(
+			df = df,
+			seqinfo = GenomeInfoDb::Seqinfo(genome = genome),
+			keep.extra.columns = TRUE)
+	} else {
+		gr = GenomicRanges::makeGRangesFromDataFrame(
+			df = df,
+			keep.extra.columns = TRUE)
+	}
 
 	# Create new locus definition object.
 	object = new("LocusDefinition")
 
-	# Remove duplicated rows, not duplicated genes.
-	# Some genes will exist on multiple rows because they are split by
-	# other transcripts, or small nuclear RNAs, etc.
-	d = unique(d)
+	object@dframe = df
+	object@granges = gr
 
-	object@dframe = d
-
-	### TODO: Use GenomicRanges::makeGRangesFromDataFrame() here instead
-	# Store as GRanges object as well, for convenience.
-	object@granges = GenomicRanges::GRanges(
-		seqnames = d$chrom,
-		ranges = IRanges::IRanges(start = d$start, end = d$end),
-		gene_id = d$gene_id)
-
-	object
+	return(object)
 }
 
 # Creates an object that mimics the GeneSet class

@@ -57,15 +57,17 @@ supported_genomes()
 Peaks are assigned to genes according to a pre-defined locus definition, i.e. the region where peaks have to occur in order to be assigned to a gene. The following locus definitions are supported in `chipenrich`:
 
 ```{r}
-supported_locusdefs()
+head(supported_locusdefs())
 ```
 
-Using the options `1kb`, `5kb`, or `10kb` will only assign peaks to genes if the peaks are within 1 kilobases (kb),  5kb, or 10kb of a gene's transcription start site (TSS), respectively. The option `exon` or `intron` will assign peaks to genes if the peaks occur within a gene's exons or introns, respectively. The option `*kb_outside_upstream` will assign peaks to genes if the peaks occur in a region more than \*kb upstream from a TSS to the midpoint between the adjacent TSS. The option `*kb_outside` will assign peaks to genes if the peaks occur in a region more than \*kb upstream or downstream from a TSS to the midpoint between the adjacent TSS. Using `nearest_gene` or `nearest_tss` will assign peaks to genes according to the nearest gene or the nearest TSS. Only the `nearest_gene` and `nearest_tss` locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region. All gene loci are non-overlapping. The command `help(chipenrich.data)` may also provide more information on the locus definitions. Users may also create their own custom locus definitions.
+Using the options `1kb`, `5kb`, or `10kb` will only assign peaks to genes if the peaks are within 1 kilobases (kb),  5kb, or 10kb of a gene's transcription start site (TSS), respectively. The option `exon` or `intron` will assign peaks to genes if the peaks occur within a gene's exons or introns, respectively. The option `*kb_outside_upstream` will assign peaks to genes if the peaks occur in a region more than \*kb upstream from a TSS to the midpoint between the adjacent TSS. The option `*kb_outside` will assign peaks to genes if the peaks occur in a region more than \*kb upstream or downstream from a TSS to the midpoint between the adjacent TSS. Using `nearest_gene` or `nearest_tss` will assign peaks to genes according to the nearest gene or the nearest TSS. Only the `nearest_gene` and `nearest_tss` locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region. All gene loci are non-overlapping. The command `help(chipenrich.data)` may also provide more information on the locus definitions.
+
+At present, users may provide custom locus definitions for `supported_genomes()` only. Custom locus definitions should be tab-delimited files with a header row and columns for `chr`, `start`, `end`, and `gene_id` or `geneid` (Entrez Gene ID). Optionally, users may provide a `symbol` column, but if the `genome` given in `chipenrich()` is one of the `supported_genomes()`, then the correct `orgDb` package will be loaded to obtain the Entrez gene to symbol mappings. User-supplied `symbol` columns will override `orgDb` mappings. In the absence of a `symbol` column or `supported_genomes()`, symbols will be `NA`.
 
 The default gene set database is Gene Ontology (GO) terms, comprising of all three GO branches (GOBP, GOCC, and GOMF). Though, many more genesets are supported by `chipenrich`:
 
 ```{r}
-supported_genesets()
+head(supported_genesets())
 ```
 
 Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (`chipenrich`); a faster version of the ChIP-Enrich method (`chipenrich_fast`); the Broad-Enrich method (`broadenrich`); Count-Enrich (`countenrich`), a negative-binomial based method; a faster version of Count-Enrich (`countenrich_fast`); and Fisher's exact test (`fet`). The `chipenrich` methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The `countenrich` methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The `broadenrich` method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks.  Finally, the `fet` method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).
@@ -77,7 +79,7 @@ supported_methods()
 Accounting for mappability of reads is optional and can only be accomplished using the ChIP-Enrich or Broad-Enrich method. See the section on mappability for more information on how it is calculated. Mappabilities for the following read lengths are available (24bp is only available for hg19):
 
 ```{r}
-supported_read_lengths()
+head(supported_read_lengths())
 ```
 
 # Locus Definitions

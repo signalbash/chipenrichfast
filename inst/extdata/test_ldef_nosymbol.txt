@@ -1,0 +1,4 @@
+chr	start	end	gene_id
+chr1	600	800	1
+chr1	900	1000	10
+chr2	500	600	1000
