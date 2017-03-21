@@ -17,6 +17,7 @@ Description: ChIP-Enrich performs gene set enrichment testing
 biocViews: Software, Bioinformatics, Enrichment, GeneSetEnrichment
 License: GPL-3
 Imports:
+	BiocGenerics,
     chipenrich.data,
     GenomeInfoDb,
     GenomicRanges,

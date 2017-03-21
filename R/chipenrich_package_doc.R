@@ -7,6 +7,7 @@
 #' @docType package
 #' @name chipenrich
 #'
+#' @import BiocGenerics
 #' @import chipenrich.data
 #' @import GenomicRanges
 #' @importFrom GenomeInfoDb seqinfo
