@@ -420,7 +420,7 @@ chipenrich = function(
 	}
 
 	# Number of peaks in data.
-	num_peaks = sum(sapply(peakobj, function(x) length(x)))
+	num_peaks = length(peakobj)
 
 	######################################################
 	# Assign peaks to genes. NOTE: If method = 'broadenrich' use
