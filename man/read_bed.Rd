@@ -2,37 +2,46 @@
 % Please edit documentation in R/read.R
 \name{read_bed}
 \alias{read_bed}
-\title{Read BEDX+Y files}
+\title{Read files containing peaks or genomic regions}
 \usage{
 read_bed(file_path, genome = NA)
 }
 \arguments{
-\item{file_path}{A path to a file having the extensions: .bed, .broadPeak,
-.narrowPeak, .gff3, .gff2, .gff, .wig, or .bedGraph or .bdg. Files may be
-compressed with gzip, and so might end in .narrowPeak.gz.}
+\item{file_path}{A path to a file with input peaks/regions. See extended
+description above for details about file support.}
 
-\item{genome}{The genome build used to get input regions. Usually inferred from
-\code{chipenrich()}. Default is NA, in which case no genome is assigned to the
-\code{GRanges} and the peaks cannot be sorted.}
+\item{genome}{The genome build the input regions are with respect to.
+Usually inferred from \code{chipenrich()}. Default is NA, in which case no
+genome is assigned to the \code{GRanges} and the peaks cannot be sorted.}
 }
 \value{
-A \code{GRanges} with \code{mcols} matching extra columns as needed.
+A \code{GRanges} with \code{mcols} matching any extra columns.
 }
 \description{
-Given a \code{file_path}, read in BEDX+Y files. It is expected that files have
-extensions that can reliably be parsed so that the correct variant of
-\code{rtracklayer::import()} can be called. See \code{file_path} below.
+The following formats are fully supported via their file extensions: .bed,
+.broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph or .bdg. BED3 through
+BED6 files are supported under the .bed extension. Files without these extensions
+are supported under the conditions that the first 3 columns correspond to
+chr, start, and end and that there is either no header column, or it is
+commented out. Files may be compressed with gzip, and so might end in .narrowPeak.gz,
+for example. Forfiles with extension support, the \code{rtracklayer::import()}
+function is used to read peaks, so adherence to the mentioned file formats is
+necessary.
 }
 \details{
-A warning is given if input regions are overlapping. In the case of enrichment
-testing with \code{method = 'broadenrich'}, regions should be disjoint.
+NOTE: Header rows must be commented with \code{#} to be ignored. Otherwise,
+an error may result.
 
-Header rows must be commented with \code{#} to be ignored. Otherwise, and error
-may result.
+NOTE: A warning is given if any input regions overlap. In the case of enrichment
+testing with \code{method = 'broadenrich'}, regions should be disjoint.
 
 Typically, this function will not be used alone, but inside \code{chipenrich()}.
 }
 \examples{
+
+# Example of generic .txt file with peaks
+file = system.file('extdata', 'test_header.txt', package = 'chipenrich')
+peaks = read_bed(file)
 
 # Example of BED3
 file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')

@@ -33,7 +33,7 @@ chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
   num_peak_threshold = 1, n_cores = 1)
 ```
 
-The `peaks` parameter should be a `data.frame` or a path to a file. If `peaks` is a path, the file must have one of the following extensions: `.bed`, `.broadPeak`, `.narrowPeak`, `.gff3`, `.gff2`, `.gff`, `.wig`, or `.bedGraph` or `.bdg`. Files may be compressed with `gzip`, and so might end in `.narrowPeak.gz`, for example. The `rtracklayer::import()` function is used to read peaks, so adherence to the mentioned file formats is necessary. Header rows must be commented out with `#`.
+The `peaks` parameter should be a `data.frame` or a path to a file. If `peaks` is a path, the following formats are fully supported via their file extensions: `.bed`, `.broadPeak`, `.narrowPeak`, `.gff3`, `.gff2`, `.gff`, and `.bedGraph` or `.bdg`. BED3 through BED6 files are supported under the `.bed` extension. Files without these extensions are supported under the conditions that the first 3 columns correspond to `chr`, `start`, and `end` and that there is either no header column, or it is commented out with a `#`. Files may be compressed with `gzip`, and so might end in `.narrowPeak.gz`, for example. For files with extension support, the `rtracklayer::import()` function is used to read peaks, so adherence to the mentioned file formats is necessary.
 
 If a `peaks` is a `data.frame`, the `GenomicRanges::makeGRangesFromDataFrame()` is used to convert to `GRanges`, and so must have appropriately labeled columns. See `?GenomicRanges::makeGRangesFromDataFrame` for details.
 

@@ -68,6 +68,22 @@ test_that('Compressed narrowPeak', {
 	expect_equal(length(peaks), 11)
 })
 
+test_that('Text input header', {
+	peak_path = system.file('extdata', 'test_header.txt', package='chipenrich')
+	peaks = suppressWarnings(read_bed(peak_path))
+
+	expect_equal(length(peaks), 10)
+	expect_warning(read_bed(peak_path), 'input regions overlap')
+})
+
+test_that('Text input no header', {
+	peak_path = system.file('extdata', 'test_noheader.txt', package='chipenrich')
+	peaks = suppressWarnings(read_bed(peak_path))
+
+	expect_equal(length(peaks), 10)
+	expect_warning(read_bed(peak_path), 'input regions overlap')
+})
+
 test_that('load_peaks() with and without genome', {
 	peaks_df = data.frame(
 		chr = c('chr1','chr2','chr3'),
