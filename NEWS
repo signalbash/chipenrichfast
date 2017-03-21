@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.13.9
+-------------------------
+
+  o Refactor randomize_locusdef() function to be much much faster. Phew!
+
 CHANGES IN VERSION 1.13.8
 -------------------------
 
