@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.13.6
+-------------------------
+
+  o Add back arbitrary extension support to read_bed(), so long as first three
+    columns are chr, start, end, and there is no header. Users should comment
+    out the header row if there is one.
+
 CHANGES IN VERSION 1.13.5
 -------------------------
 

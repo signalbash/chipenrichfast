@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
-<meta name="date" content="2017-03-07" />
+<meta name="date" content="2017-03-08" />
 
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><code>chipenrich</code>: Gene Set Enrichment For ChIP-seq Peak Data</h1>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
-<h4 class="date"><em>2017-03-07</em></h4>
+<h4 class="date"><em>2017-03-08</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function() {
   fisher_alt = &quot;two.sided&quot;, use_mappability = F, mappa_file = NULL,
   read_length = 36, qc_plots = T, max_geneset_size = 2000,
   num_peak_threshold = 1, n_cores = 1)</code></pre>
-<p>The <code>peaks</code> parameter should be a <code>data.frame</code> or a path to a file. If <code>peaks</code> is a path, the file must have one of the following extensions: <code>.bed</code>, <code>.broadPeak</code>, <code>.narrowPeak</code>, <code>.gff3</code>, <code>.gff2</code>, <code>.gff</code>, <code>.wig</code>, or <code>.bedGraph</code> or <code>.bdg</code>. Files may be compressed with <code>gzip</code>, and so might end in <code>.narrowPeak.gz</code>, for example. The <code>rtracklayer::import()</code> function is used to read peaks, so adherence to the mentioned file formats is necessary. Header rows must be commented out with <code>#</code>.</p>
+<p>The <code>peaks</code> parameter should be a <code>data.frame</code> or a path to a file. If <code>peaks</code> is a path, the following formats are fully supported via their file extensions: <code>.bed</code>, <code>.broadPeak</code>, <code>.narrowPeak</code>, <code>.gff3</code>, <code>.gff2</code>, <code>.gff</code>, and <code>.bedGraph</code> or <code>.bdg</code>. BED3 through BED6 files are supported under the <code>.bed</code> extension. Files without these extensions are supported under the conditions that the first 3 columns correspond to <code>chr</code>, <code>start</code>, and <code>end</code> and that there is either no header column, or it is commented out with a <code>#</code>. Files may be compressed with <code>gzip</code>, and so might end in <code>.narrowPeak.gz</code>, for example. For files with extension support, the <code>rtracklayer::import()</code> function is used to read peaks, so adherence to the mentioned file formats is necessary.</p>
 <p>If a <code>peaks</code> is a <code>data.frame</code>, the <code>GenomicRanges::makeGRangesFromDataFrame()</code> is used to convert to <code>GRanges</code>, and so must have appropriately labeled columns. See <code>?GenomicRanges::makeGRangesFromDataFrame</code> for details.</p>
 <pre class="r"><code>data(peaks_E2F4, package = 'chipenrich.data')
 data(peaks_H3K4me3_GM12878, package = 'chipenrich.data')
