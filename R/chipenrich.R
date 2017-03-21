@@ -181,13 +181,15 @@ chipenrich = function(
 
 	############################################################################
 	# Collect options for opts output
-	l = unlist(as.list(environment()))
+	opts_list = as.list(sys.call())
+	opts_list = opts_list[2:length(opts_list)]
+
 	opts = data.frame(
-		args = names(l),
-		values = sapply(unlist(l),paste,collapse=","),
-		stringsAsFactors = F
+		parameters = names(opts_list),
+		values = as.character(opts_list),
+		stringsAsFactors = FALSE
 	)
-	rownames(opts) = 1:length(l)
+
 
 	############################################################################
 	# Deal with randomizations if present

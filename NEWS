@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.13.10
+--------------------------
+
+  o Use sys.call() to report options used in chipenrich() in opts.tab output. We
+    previously used as.list(environment()) which would also output entire
+    data.frames if peaks were loaded in as a data.frame.
+
 CHANGES IN VERSION 1.13.9
 -------------------------
 
