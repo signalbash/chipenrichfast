@@ -30,4 +30,3 @@ peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
 plot_dist_to_tss(peaks_E2F4)
 
 }
-

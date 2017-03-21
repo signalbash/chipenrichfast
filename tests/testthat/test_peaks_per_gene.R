@@ -35,8 +35,8 @@ for(ldef in hg19_ldefs) {
 
 expected_overlaps = list(
 	'locusdef.hg19.10kb' = c(700,81),
-	'locusdef.hg19.10kb_and_more_upstream' = c(918),
-	'locusdef.hg19.1kb' = c(327),
+	'locusdef.hg19.10kb_and_more_upstream' = c(919),
+	'locusdef.hg19.1kb' = c(328),
 	'locusdef.hg19.5kb' = c(700),
 	'locusdef.hg19.exon' = c(100,100),
 	'locusdef.hg19.intron' = c(100,100),

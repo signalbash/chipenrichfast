@@ -52,4 +52,3 @@ peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
 plot_gene_coverage(peaks_E2F4)
 
 }
-

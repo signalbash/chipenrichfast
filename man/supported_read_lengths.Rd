@@ -17,4 +17,3 @@ Display supported read lengths for mappability
 supported_read_lengths()
 
 }
-

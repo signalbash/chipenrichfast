@@ -57,4 +57,3 @@ plot_spline_length(peaks_E2F4,genome='hg19')
 plot_spline_length(peaks_E2F4, locusdef = 'nearest_gene', genome = 'hg19')
 
 }
-

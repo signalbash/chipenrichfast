@@ -41,4 +41,3 @@ ppg = num_peaks_per_gene(
 	mappa = NULL)
 
 }
-
