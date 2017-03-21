@@ -4,10 +4,6 @@ peak_nearest_tss = function(peaks, tss, midpoint=T) {
 	# NOTE: THIS CODE IS RECYCLED FROM assign_peaks() with slight mods to
 	# mid_dist_df to match previous output.
 
-	# Extract GRanges of tss
-	# NOTE: tss is a list, so uses $
-	tss_gr = tss$granges
-
 	# Determine midpoints of peaks and construct a GRanges object
 	# on that basis. Include the peak name for later merging
 	peak_mids = IRanges::mid(GenomicRanges::ranges(peaks))
@@ -17,14 +13,14 @@ peak_nearest_tss = function(peaks, tss, midpoint=T) {
 		name = GenomicRanges::mcols(peaks)$name
 	)
 
-	mid_dist_to_ntss = GenomicRanges::distanceToNearest(mids_gr, tss_gr)
+	mid_dist_to_ntss = GenomicRanges::distanceToNearest(mids_gr, tss)
 
 	mid_indices = S4Vectors::queryHits(mid_dist_to_ntss)
 	tss_indices = S4Vectors::subjectHits(mid_dist_to_ntss)
 	mid_dist_df = data.frame(
 		chr = GenomeInfoDb::seqnames(mids_gr)[mid_indices],
 		peak_midpoint = GenomicRanges::start(mids_gr)[mid_indices],
-		nearest_tss = GenomicRanges::start(tss_gr)[tss_indices],
+		nearest_tss = GenomicRanges::start(tss)[tss_indices],
 		dist_to_tss = GenomicRanges::mcols(mid_dist_to_ntss)$distance,
 		stringsAsFactors = FALSE
 	)

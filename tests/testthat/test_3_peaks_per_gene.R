@@ -14,13 +14,18 @@ peaks = read_bed(file)
 # Expected values for peak assignments
 expected_numpeaks = list(
 	'locusdef.hg19.10kb' = c(3),
-	'locusdef.hg19.10kb_and_more_upstream' = c(1),
+	'locusdef.hg19.10kb_outside' = c(1),
+	'locusdef.hg19.10kb_outside_upstream' = c(1),
 	'locusdef.hg19.1kb' = c(2),
+	'locusdef.hg19.1kb_outside' = c(1,1),
+	'locusdef.hg19.1kb_outside_upstream' = c(1,1),
 	'locusdef.hg19.5kb' = c(3),
-	'locusdef.hg19.exon' = c(1,1),
-	'locusdef.hg19.intron' = c(1,1),
-	'locusdef.hg19.nearest_gene' = c(3,1),
-	'locusdef.hg19.nearest_tss' = c(3,1)
+	'locusdef.hg19.5kb_outside' = c(1),
+	'locusdef.hg19.5kb_outside_upstream' = c(1),
+	'locusdef.hg19.exon' = c(1),
+	'locusdef.hg19.intron' = c(1),
+	'locusdef.hg19.nearest_gene' = c(3, 1),
+	'locusdef.hg19.nearest_tss' = c(3, 1)
 )
 
 # Do the tests in a loop for each locus definition of hg19
@@ -34,12 +39,17 @@ for(ldef in hg19_ldefs) {
 }
 
 expected_overlaps = list(
-	'locusdef.hg19.10kb' = c(700,81),
-	'locusdef.hg19.10kb_and_more_upstream' = c(919),
-	'locusdef.hg19.1kb' = c(328),
+	'locusdef.hg19.10kb' = c(700,80),
+	'locusdef.hg19.10kb_outside' = c(921),
+	'locusdef.hg19.10kb_outside_upstream' = c(921),
+	'locusdef.hg19.1kb' = c(327),
+	'locusdef.hg19.1kb_outside' = c(1000,374),
+	'locusdef.hg19.1kb_outside_upstream' = c(1000,374),
 	'locusdef.hg19.5kb' = c(700),
-	'locusdef.hg19.exon' = c(100,100),
-	'locusdef.hg19.intron' = c(100,100),
+	'locusdef.hg19.5kb_outside' = c(1000),
+	'locusdef.hg19.5kb_outside_upstream' = c(1000),
+	'locusdef.hg19.exon' = c(100),
+	'locusdef.hg19.intron' = c(100),
 	'locusdef.hg19.nearest_gene' = c(700,1000),
 	'locusdef.hg19.nearest_tss' = c(700,1000)
 )

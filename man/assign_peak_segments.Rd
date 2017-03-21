@@ -12,7 +12,7 @@ assign_peak_segments(peaks, locusdef)
 \item{locusdef}{A locus definition object from \code{chipenrich.data}.}
 }
 \value{
-A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, geneid, overlap_start, overlap_end, peak_overlap}. The result is used in \code{num_peaks_per_gene()}.
+A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, gene_id, overlap_start, overlap_end, peak_overlap}. The result is used in \code{num_peaks_per_gene()}.
 }
 \description{
 Determine all overlaps between the set of input regions \code{peaks} and the given locus definition \code{locusdef}. In addition, report where each overlap begins and ends, as well as the length of the overlap.

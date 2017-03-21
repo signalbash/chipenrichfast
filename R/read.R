@@ -124,8 +124,6 @@ read_bed = function(file_path, genome = NA) {
 		gr = load_peaks(dframe = df, genome = genome, keep.extra.columns = FALSE)
 	}
 
-
-
 	return(gr)
 }
 

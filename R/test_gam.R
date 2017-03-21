@@ -10,10 +10,10 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 
 	# Filter genes in the geneset to only those in the gpw table.
 	# The gpw table will be truncated depending on which geneset type we're in.
-	go_genes = go_genes[go_genes %in% gpw$geneid]
+	go_genes = go_genes[go_genes %in% gpw$gene_id]
 
 	# Background genes and the background presence of a peak
-	b_genes = gpw$geneid %in% go_genes
+	b_genes = gpw$gene_id %in% go_genes
 	sg_go = gpw$peak[b_genes]
 
  	# Information about the geneset
@@ -22,7 +22,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 	r_go_genes_avg_length = mean(gpw$length[b_genes])
 
     # Information about peak genes
-	go_genes_peak = gpw$geneid[b_genes][sg_go == 1]
+	go_genes_peak = gpw$gene_id[b_genes][sg_go == 1]
 	r_go_genes_peak = paste(go_genes_peak, collapse = ", ")
 	r_go_genes_peak_num = length(go_genes_peak)
 
@@ -37,7 +37,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 			cont_length = quantile(gpw$length, 0.0025)
 
 			cont_gene = data.frame(
-				geneid = "continuity_correction",
+				gene_id = "continuity_correction",
 				length = cont_length,
 				log10_length = log10(cont_length),
 				num_peaks = 0,
@@ -96,7 +96,7 @@ test_gam = function(geneset,gpw,n_cores) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	# Here, geneset is not all combined, but GOBP, GOCC, etc.
 	# i.e. A specific one.
-	gpw = subset(gpw, gpw$geneid %in% geneset@all.genes)
+	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
 	if (sum(gpw$peak) == 0) {
 		stop("Error: no peaks in your data!")
@@ -132,7 +132,7 @@ test_gam = function(geneset,gpw,n_cores) {
 
 test_gam_ratio = function(geneset,gpw,n_cores) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
-	gpw = subset(gpw, gpw$geneid %in% geneset@all.genes)
+	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
 	if (sum(gpw$peak) == 0) {
 		stop("Error: no peaks in your data!")
@@ -170,7 +170,7 @@ test_gam_ratio_splineless = function(geneset,gpw,n_cores) {
 	message('Using test_gam_ratio_splineless..')
 
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
-	gpw = subset(gpw, gpw$geneid %in% geneset@all.genes)
+	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
 	if (sum(gpw$peak) == 0) {
 		stop("Error: no peaks in your data!")

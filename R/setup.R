@@ -25,15 +25,15 @@ read_mappa = function(file_path) {
 	d = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
 
 	# Check columns.
-	for (col in c("geneid", "mappa")) {
+	for (col in c("gene_id", "mappa")) {
 		if (!col %in% names(d)) {
 			stop(sprintf("Error reading mappability data: no column named '%s' in file.",col))
 		}
 	}
 
 	# Genes in this file should not be duplicated.
-	if (sum(duplicated(d$geneid)) > 0) {
-		stop("Error reading mappability data: duplicate geneids exist in file.")
+	if (sum(duplicated(d$gene_id)) > 0) {
+		stop("Error reading mappability data: duplicate gene_ids exist in file.")
 	}
 
 	# Mappability should be between 0 and 1.
@@ -78,24 +78,14 @@ setup_ldef = function(filepath) {
 	# other transcripts, or small nuclear RNAs, etc.
 	d = unique(d)
 
-	# Create an IRanges object representing the loci for each gene on that chromosome.
-	chroms = list()
-	for (chr in unique(d$chrom)) {
-		genes_chrom = subset(d, d$chrom == chr)
-		chroms[[chr]] = IRanges::IRanges(
-			start = genes_chrom$start,
-			end = genes_chrom$end,
-			names = genes_chrom$geneid)
-	}
-
 	object@dframe = d
-	object@chrom2iranges = chroms
 
+	### TODO: Use GenomicRanges::makeGRangesFromDataFrame() here instead
 	# Store as GRanges object as well, for convenience.
 	object@granges = GenomicRanges::GRanges(
 		seqnames = d$chrom,
 		ranges = IRanges::IRanges(start = d$start, end = d$end),
-		names = d$geneid)
+		gene_id = d$gene_id)
 
 	object
 }

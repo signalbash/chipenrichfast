@@ -1,8 +1,24 @@
+CHANGES IN VERSION 1.13.8
+-------------------------
+
+  o Changes to harmonize recent changes to the companion chipenrich.data package.
+
+    o These are mostly internal. Use 'gene_id' instead of 'geneid' in all column
+      names because so much Bioconductor infrastructure uses 'gene_id'.
+
+    o Add gene symbols in assign_peaks() and assign_peak_segments() instead of
+      in chipenrich().
+
+    o Updated vignette to describe new locus definitions.
+
+    o Updated unit tests to reflect new changing locus definitions. For example,
+      hg19 was updated since chipenrich and chipenrich.data debuted in Bioc.
+
 CHANGES IN VERSION 1.13.7
 -------------------------
 
   o Fixed a bug in the check for proper organism + geneset combinations. Prevented
-    combinations that are actually valid from running. 
+    combinations that are actually valid from running.
 
 CHANGES IN VERSION 1.13.6
 -------------------------
