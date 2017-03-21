@@ -241,7 +241,7 @@ chipenrich = function(
 	# CHECK genesets and load them if okay
 	# Determine if geneset codes are valid before moving on. The API for a user
 	# to use their own genesets will be to put a path in the genesets argument.
-	if (!any(supported_genesets()$organism == organism & genesets == supported_genesets()$geneset)) {
+	if (!any(supported_genesets()$organism == organism & genesets %in% supported_genesets()$geneset)) {
 		bad_args = check_arg(genesets, supported_genesets()$geneset, value=T)
 
 		# If the bad_args is a path that exists, then we know the user wants
