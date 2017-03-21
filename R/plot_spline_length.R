@@ -159,7 +159,7 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = 'hg19', 
 	}
 
 	# Number of peaks in data.
-	num_peaks = sum(sapply(peakobj, function(x) length(x)))
+	num_peaks = length(peakobj)
 
 	# Load locus definitions.
 	ldef_code = sprintf("locusdef.%s.%s", genome, locusdef)

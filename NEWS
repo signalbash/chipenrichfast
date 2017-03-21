@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.13.4
+-------------------------
+
+  o Streamlined some code that expected result of read_bed() to be a list of IRanges
+    from very early in development.
+
 CHANGES IN VERSION 1.13.3
 -------------------------
 
