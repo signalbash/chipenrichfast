@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.13.12
+--------------------------
+
+  o Add minimum geneset filter methods so that genesets with < 15 genes are not
+    tested. Logistic regression has convergence problems for such small genesets.
+
 CHANGES IN VERSION 1.13.11
 --------------------------
 
