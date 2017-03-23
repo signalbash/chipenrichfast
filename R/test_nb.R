@@ -47,7 +47,7 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
   # The gpw table will be truncated depending on which geneset type we're in.
   go_genes = go_genes[go_genes %in% gpw$gene_id];
 
-  if(sum(go_genes) < 15) {
+  if(length(go_genes) < 15) {
       message(sprintf('Skipping %s because geneset contains less than 15 genes...', go_id))
       out = data.frame(
         "P.value"=NA,
