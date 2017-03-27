@@ -10,6 +10,7 @@ bioc_required: true
 warnings_are_errors: false
 
 r_github_packages:
+  - sartorlab/chipenrich.data
   - jimhester/covr
 
 notifications:
