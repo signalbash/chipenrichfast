@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.13.14
+--------------------------
+
+  o Require chipenrich.data >= 1.11.4.
+  o Use sartorlab/chipenrich.data in Travis builds.
+
 CHANGES IN VERSION 1.13.12
 --------------------------
 
