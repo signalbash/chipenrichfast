@@ -44,8 +44,8 @@ os = Sys.info()[1]
 #' the file must have 4 columns: chrom, start, end, gene_id and be tab-delimited.
 #' @param method A character string specifying the method to use for enrichment
 #' testing. Must be one of ChIP-Enrich ('chipenrich') (default), ChIP-Enrich fast
-#' ('chipenrich_fast'), Broad-Enrich ('broadenrich'), Count-Enrich ('countenrich'),
-#' Count-Enrich fast ('countenrich_fast'), or Fisher's exact test ('fet').
+#' ('chipenrich_fast'), Broad-Enrich ('broadenrich'), Poly-Enrich ('polyenrich'),
+#' Poly-Enrich fast ('polyenrich_fast'), or Fisher's exact test ('fet').
 #' For a list of supported methods, use \code{\link{supported_methods}}.
 #' @param fisher_alt If method is 'fet', this option indicates the alternative
 #' for Fisher's exact test, and must be one of 'two-sided' (default), 'greater',

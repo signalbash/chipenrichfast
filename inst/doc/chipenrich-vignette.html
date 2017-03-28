@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
-<meta name="date" content="2017-03-22" />
+<meta name="date" content="2017-03-28" />
 
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><code>chipenrich</code>: Gene Set Enrichment For ChIP-seq Peak Data</h1>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
-<h4 class="date"><em>2017-03-22</em></h4>
+<h4 class="date"><em>2017-03-28</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#examples"><span class="toc-section-number">5</span> Examples</a><ul>
 <li><a href="#chip-enrich"><span class="toc-section-number">5.1</span> ChIP-Enrich</a></li>
 <li><a href="#chip-enrich-fast"><span class="toc-section-number">5.2</span> ChIP-Enrich Fast</a></li>
-<li><a href="#count-enrich"><span class="toc-section-number">5.3</span> Count-Enrich</a></li>
-<li><a href="#count-enrich-fast"><span class="toc-section-number">5.4</span> Count-Enrich Fast</a></li>
+<li><a href="#poly-enrich"><span class="toc-section-number">5.3</span> Poly-Enrich</a></li>
+<li><a href="#poly-enrich-fast"><span class="toc-section-number">5.4</span> Poly-Enrich Fast</a></li>
 <li><a href="#broad-enrich"><span class="toc-section-number">5.5</span> Broad-Enrich</a></li>
 <li><a href="#fishers-exact-test"><span class="toc-section-number">5.6</span> Fisher’s Exact Test</a></li>
 </ul></li>
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>This document describes how to use <code>chipenrich</code> to analyze results from ChIP-Seq experiments and other DNA sequencing experiments that result in a set of genomic regions. The <code>chipenrich</code> package includes three classes of methods that adjust for potential confounders of gene set enrichment testing (locus length and mappability of the sequence reads). The first, <code>chipenrich</code>, is designed for use with transcription-factor (TF) based ChIP-seq experiments and other DNA sequencing experiments with narrow genomic regions. The second, <code>countenrich</code>, is similarly designed for TF based ChIP-seq, but where the number of peaks present in gene loci may be important. The third, <code>broadenrich</code>, is designed for use with histone modification based ChIP-seq experiments and other DNA sequencing experiments with broad genomic regions.</p>
+<p>This document describes how to use <code>chipenrich</code> to analyze results from ChIP-Seq experiments and other DNA sequencing experiments that result in a set of genomic regions. The <code>chipenrich</code> package includes three classes of methods that adjust for potential confounders of gene set enrichment testing (locus length and mappability of the sequence reads). The first, <code>chipenrich</code>, is designed for use with transcription-factor (TF) based ChIP-seq experiments and other DNA sequencing experiments with narrow genomic regions. The second, <code>polyenrich</code>, is similarly designed for TF based ChIP-seq, but where the number of peaks present in gene loci may be important. The third, <code>broadenrich</code>, is designed for use with histone modification based ChIP-seq experiments and other DNA sequencing experiments with broad genomic regions.</p>
 </div>
 <div id="synopsis" class="section level1">
 <h1><span class="header-section-number">2</span> Synopsis</h1>
@@ -131,11 +131,10 @@ head(peaks_E2F4)</code></pre>
 ## 46 reactome      dme
 ## 2      GOBP      hsa
 ## 6      GOCC      hsa</code></pre>
-<p>Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (<code>chipenrich</code>); a faster version of the ChIP-Enrich method (<code>chipenrich_fast</code>); the Broad-Enrich method (<code>broadenrich</code>); Count-Enrich (<code>countenrich</code>), a negative-binomial based method; a faster version of Count-Enrich (<code>countenrich_fast</code>); and Fisher’s exact test (<code>fet</code>). The <code>chipenrich</code> methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The <code>countenrich</code> methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The <code>broadenrich</code> method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks. Finally, the <code>fet</code> method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).</p>
+<p>Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (<code>chipenrich</code>); a faster version of the ChIP-Enrich method (<code>chipenrich_fast</code>); the Broad-Enrich method (<code>broadenrich</code>); Poly-Enrich (<code>polyenrich</code>), a negative-binomial based method; a faster version of Poly-Enrich (<code>polyenrich_fast</code>); and Fisher’s exact test (<code>fet</code>). The <code>chipenrich</code> methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The <code>polyenrich</code> methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The <code>broadenrich</code> method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks. Finally, the <code>fet</code> method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).</p>
 <pre class="r"><code>supported_methods()</code></pre>
-<pre><code>## [1] &quot;chipenrich&quot;       &quot;chipenrich_fast&quot;  &quot;fet&quot;             
-## [4] &quot;broadenrich&quot;      &quot;countenrich&quot;      &quot;countenrich_fast&quot;
-## [7] &quot;chipapprox&quot;</code></pre>
+<pre><code>## [1] &quot;chipenrich&quot;      &quot;chipenrich_fast&quot; &quot;fet&quot;             &quot;broadenrich&quot;    
+## [5] &quot;polyenrich&quot;      &quot;polyenrich_fast&quot; &quot;chipapprox&quot;</code></pre>
 <p>Accounting for mappability of reads is optional and can only be accomplished using the ChIP-Enrich or Broad-Enrich method. See the section on mappability for more information on how it is calculated. Mappabilities for the following read lengths are available (24bp is only available for hg19):</p>
 <pre class="r"><code>head(supported_read_lengths())</code></pre>
 <pre><code>##   genome locusdef read_length
@@ -255,11 +254,11 @@ print(results.ce[1:5,1:5])</code></pre>
 ## 4 user-supplied GO:0034660  GO:0034660 0.3654230 0.7027365
 ## 5 user-supplied GO:0009101  GO:0009101 0.4005325 0.7152366</code></pre>
 </div>
-<div id="count-enrich" class="section level2">
-<h2><span class="header-section-number">5.3</span> Count-Enrich</h2>
+<div id="poly-enrich" class="section level2">
+<h2><span class="header-section-number">5.3</span> Poly-Enrich</h2>
 <pre class="r"><code># Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'countenrich',
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich',
     locusdef = &quot;nearest_tss&quot;, qc_plots = F, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])</code></pre>
@@ -270,11 +269,11 @@ print(results.ce[1:5,1:5])</code></pre>
 ## 4 user-supplied GO:0003013  GO:0003013 0.5214727 0.7867579
 ## 5 user-supplied GO:0009101  GO:0009101 0.5610293 0.7867579</code></pre>
 </div>
-<div id="count-enrich-fast" class="section level2">
-<h2><span class="header-section-number">5.4</span> Count-Enrich Fast</h2>
+<div id="poly-enrich-fast" class="section level2">
+<h2><span class="header-section-number">5.4</span> Poly-Enrich Fast</h2>
 <pre class="r"><code># Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'countenrich_fast',
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich_fast',
     locusdef = &quot;nearest_tss&quot;, qc_plots = F, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])</code></pre>
