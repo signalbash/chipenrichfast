@@ -73,7 +73,7 @@ print(results.ce[1:5,1:5])
 ## ---- warning = FALSE, message = FALSE-----------------------------------
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'countenrich',
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich',
 	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
@@ -81,7 +81,7 @@ print(results.ce[1:5,1:5])
 ## ---- warning = FALSE, message = FALSE-----------------------------------
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'countenrich_fast',
+results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich_fast',
 	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
