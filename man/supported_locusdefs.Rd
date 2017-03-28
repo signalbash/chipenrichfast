@@ -10,7 +10,22 @@ supported_locusdefs()
 A \code{data.frame} with columns \code{genome, locusdef}.
 }
 \description{
-Display supported locus definitions
+The locus definitions are defined as follows:
+\describe{
+  \item{nearest_tss:}{The locus is the region spanning the midpoints between the TSSs of adjacent genes.}
+  \item{nearest_gene:}{The locus is the region spanning the midpoints between the boundaries of each gene, where a gene is defined as the region between the furthest upstream TSS and furthest downstream TES for that gene. If two gene loci overlap each other, we take the midpoint of the overlap as the boundary between the two loci. When a gene locus is completely nested within another, we create a disjoint set of 3 intervals, where the outermost gene is separated into 2 intervals broken apart at the endpoints of the nested gene.}
+  \item{1kb:}{The locus is the region within 1kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 2 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.}
+  \item{1kb_outside_upstream:}{The locus is the region more than 1kb upstream from a TSS to the midpoint between the adjacent TSS.}
+  \item{1kb_outside:}{The locus is the region more than 1kb upstream or downstream from a TSS to the midpoint between the adjacent TSS.}
+  \item{5kb:}{The locus is the region within 5kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 10 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.}
+  \item{5kb_outside_upstream:}{The locus is the region more than 5kb upstream from a TSS to the midpoint between the adjacent TSS.}
+  \item{5kb_outside:}{The locus is the region more than 5kb upstream or downstream from a TSS to the midpoint between the adjacent TSS.}
+  \item{10kb:}{The locus is the region within 10kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 20 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.}
+  \item{10kb_outside_upstream:}{The locus is the region more than 10kb upstream from a TSS to the midpoint between the adjacent TSS.}
+  \item{10kb_outside:}{The locus is the region more than 10kb upstream or downstream from a TSS to the midpoint between the adjacent TSS.}
+  \item{exon:}{Each gene has multiple loci corresponding to its exons. Overlaps between different genes are allowed.}
+  \item{intron:}{Each gene has multiple loci corresponding to its introns. Overlaps between different genes are allowed.}
+}
 }
 \examples{
 

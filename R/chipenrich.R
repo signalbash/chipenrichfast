@@ -40,8 +40,8 @@ os = Sys.info()[1]
 #' @param locusdef A string denoting the gene locus definition to be used, or
 #' the full path to a user-defined locus definition file. A gene locus definition
 #' controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}}
-#' for a list of supported definitions built-in. If using a user-specified file,
-#' the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.
+#' for a list of supported definitions. If using a user-specified file,
+#' the file must have 4 columns: chrom, start, end, gene_id and be tab-delimited.
 #' @param method A character string specifying the method to use for enrichment
 #' testing. Must be one of ChIP-Enrich ('chipenrich') (default), ChIP-Enrich fast
 #' ('chipenrich_fast'), Broad-Enrich ('broadenrich'), Count-Enrich ('countenrich'),
