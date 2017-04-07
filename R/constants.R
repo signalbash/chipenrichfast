@@ -16,9 +16,10 @@ HIDDEN_METHODS = list(
 METHOD_NAMES = list(
 	'fet' = "Fisher's Exact Test",
 	'chipenrich' = "ChIP-Enrich",
+    'chipenrich_slow' = "ChIP-Enrich Original",
 	'broadenrich' = "Broad-Enrich",
 	'chipapprox' = "ChIP-Enrich Approximate",
 	'broadenrich_splineless' = "Broad-Enrich Splineless",
 	'polyenrich' = "Poly-Enrich",
-	'chipenrich_fast' = "ChIP-Enrich Fast"
+    'polyenrich_slow' = "Poly-Enrich Original"
 )
