@@ -1,5 +1,6 @@
 # Randomize the locus definition @dframe and rebuild the @granges and @chrom2iranges
 randomize_ldef_bylocation = function(ldef, resolution=50) {
+	message('Randomizing locus definition in location bins...')
 	# Extract GRanges representation
 	ldef_gr = ldef@granges
 
@@ -61,6 +62,7 @@ randomize_ppg_all = function(ppg) {
 
 # Randomize ppg after all additions have been made across all genes
 randomize_ldef_complete = function(ldef) {
+	message('Randomizing locus definition...')
 	gr = ldef@granges
 	df = ldef@dframe
 
@@ -96,6 +98,7 @@ randomize_ppg_length = function(ppg) {
 }
 
 randomize_ldef_bylength = function(ldef, resolution = 100) {
+	message('Randomizing locus definition in locus length bins...')
 	gr = ldef@granges
 	df = ldef@dframe
 
