@@ -5,8 +5,7 @@ NEW FEATURES
 
     o A new method for enrichment, polyenrich() is designed for gene set enrichment
       of experiments where the presence of multiple peaks in a gene is accounted
-      for in the model. Use the polyenrich() function for this method. [CHRIS,
-      MORE HERE]
+      for in the model. Use the polyenrich() function for this method.
 
     o New features resulting from chipenrich.data 2.0.0:
 
