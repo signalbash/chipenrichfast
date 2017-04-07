@@ -4,7 +4,7 @@
 \alias{plot_dist_to_tss}
 \title{Plot histogram of distance from peak to nearest TSS}
 \usage{
-plot_dist_to_tss(peaks, genome = "hg19")
+plot_dist_to_tss(peaks, genome = supported_genomes())
 }
 \arguments{
 \item{peaks}{A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,
@@ -12,8 +12,7 @@ broadPeak, etc) with the first three columns being chrom, start, and end. The
 data frame should have at least 3 columns: chrom, start, and end. Chrom
 should follow UCSC convention, e.g. "chrX".}
 
-\item{genome}{A string indicating the genome upon which the peaks file is
-based. Supported genomes are listed by the \code{\link{supported_genomes}} function.}
+\item{genome}{One of the \code{supported_genomes()}.}
 }
 \value{
 A trellis plot object.
@@ -27,6 +26,6 @@ start site (TSS) of any gene.
 # Create histogram of distance from peaks to nearest TSS.
 data(peaks_E2F4, package = 'chipenrich.data')
 peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-plot_dist_to_tss(peaks_E2F4)
+plot_dist_to_tss(peaks_E2F4, genome = 'hg19')
 
 }
