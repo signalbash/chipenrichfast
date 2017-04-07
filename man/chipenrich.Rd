@@ -11,8 +11,8 @@ chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
   genome = "hg19", genesets = c("GOBP", "GOCC", "GOMF"),
   locusdef = "nearest_tss", method = "chipenrich",
   fisher_alt = "two.sided", use_mappability = F, mappa_file = NULL,
-  read_length = 36, qc_plots = T, max_geneset_size = 2000,
-  num_peak_threshold = 1, n_cores = 1)
+  read_length = 36, qc_plots = T, min_geneset_size = 15,
+  max_geneset_size = 2000, num_peak_threshold = 1, n_cores = 1)
 }
 \arguments{
 \item{peaks}{A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,
@@ -70,6 +70,9 @@ to the length of reads from the original experiment.}
 
 \item{qc_plots}{A logical variable that enables the automatic generation of
 plots for quality control.}
+
+\item{min_geneset_size}{Sets the minimum number of genes a gene set may have
+to be considered for enrichment testing.}
 
 \item{max_geneset_size}{Sets the maximum number of genes a gene set may have
 to be considered for enrichment testing.}
