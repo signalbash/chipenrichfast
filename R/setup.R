@@ -72,18 +72,10 @@ read_mappa = function(file_path) {
 #' @return A \code{LocusDefinition} class object with slots \code{dframe},
 #' \code{granges}, \code{genome.build}, and \code{organism}.
 setup_ldef = function(file_path, genome = NA) {
-	if (!file.exists(file_path)) {
-		stop("Error: unable to open file for reading: ", file_path)
-	}
 
 	message("Reading user-specified gene locus definitions: ", file_path)
 	df = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
 
-	num_missing = sum(!complete.cases(df))
-	if (num_missing > 0) {
-		message(sprintf("Warning: %i rows of user-provided locus definition were missing values, skipping these rows.", num_missing))
-	}
-	df = na.omit(df)
 	# Remove duplicated rows, not duplicated genes.
 	# Some genes will exist on multiple rows because they are split by
 	# other transcripts, or small nuclear RNAs, etc.
