@@ -1,11 +1,9 @@
 #' chipenrich: Gene Set Enrichment For ChIP-seq Peak Data
 #'
-#' ChIP-Enrich performs gene set enrichment testing using peaks called from a
-#' ChIP-seq experiment. The method empirically corrects for confounding factors
-#' such as the length of genes, and the mappability of the sequence surrounding genes.
+#' The \code{chipenrich} package includes three classes of methods that adjust for potential confounders of gene set enrichment testing (locus length and mappability of the sequence reads). The first, \code{chipenrich}, is designed for use with transcription-factor (TF) based ChIP-seq experiments and other DNA sequencing experiments with narrow genomic regions. The second, \code{polyenrich}, is similarly designed for TF based ChIP-seq, but where the number of peaks present in gene loci may be important. The third, \code{broadenrich}, is designed for use with histone modification based ChIP-seq experiments and other DNA sequencing experiments with broad genomic regions.
 #'
 #' @docType package
-#' @name chipenrich
+#' @name chipenrich_package
 #'
 #' @importFrom AnnotationDbi mappedkeys
 #' @importFrom BiocGenerics unlist

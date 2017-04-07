@@ -1,7 +1,7 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 1.99.28
+Version: 1.99.29
 Date: 2017-04-03
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
@@ -58,9 +58,6 @@ VignetteBuilder: knitr
 Collate:
     'assign_peaks.R'
     'test_gam.R'
-    'test_fisher.R'
-    'test_binomial.R'
-    'test_approx.R'
     'peaks_per_gene.R'
     'read.R'
     'randomize.R'
@@ -72,8 +69,12 @@ Collate:
     'plot_gene_coverage.R'
     'plot_dist_to_tss.R'
     'broadenrich.R'
+    'test_fisher.R'
+    'test_binomial.R'
+    'test_approx.R'
     'chipenrich.R'
     'chipenrich_package_doc.R'
-    'test_gam_fast.R'
-    'test_nb.R'
     'test_nb_fast.R'
+    'test_nb.R'
+    'polyenrich.R'
+    'test_gam_fast.R'

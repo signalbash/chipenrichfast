@@ -7,8 +7,8 @@ os = Sys.info()[1]
 #' on histone modifications.
 #'
 #' The Broad-Enrich method uses the cumulative peak coverage of genes in its model
-#' for enrichment in the model \code{GO ~ ratio + s(log10_length)}. Here, \code{GO}
-#' is a binary vector indicating whether a gene is in the gene set being tested,
+#' for enrichment: \code{GO ~ ratio + s(log10_length)}. Here, \code{GO} is a
+#' binary vector indicating whether a gene is in the gene set being tested,
 #' \code{ratio} is a numeric vector indicating the ratio of the gene covered by
 #' peaks, and \code{s(log10_length)} is a binomial cubic smoothing spline which
 #' adjusts for the relationship between gene coverage and locus length.
@@ -137,7 +137,7 @@ os = Sys.info()[1]
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_gene_coverage.R plot_spline_length.R
-#' @include test_approx.R test_binomial.R test_fisher.R test_gam.R
+#' @include test_gam.R
 broadenrich = function(
 	peaks,
 	out_name = "broadenrich",
@@ -261,7 +261,6 @@ broadenrich = function(
 
 	######################################################
 	# Enrichment
-	# Run broadenrich method on each geneset.
 	results = list()
 	for (gobj in geneset_list) {
 		message("Test: Broad-Enrich")
