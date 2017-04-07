@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
-<meta name="date" content="2017-03-28" />
+<meta name="date" content="2017-03-29" />
 
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><code>chipenrich</code>: Gene Set Enrichment For ChIP-seq Peak Data</h1>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
-<h4 class="date"><em>2017-03-28</em></h4>
+<h4 class="date"><em>2017-03-29</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -110,27 +110,28 @@ head(peaks_E2F4)</code></pre>
 ## 6  chr1  47779789  47779907</code></pre>
 <p>The first task of <code>chipenrich()</code> is to assign the peaks to genes. Currently supported genomes are listed below, with <code>supported_genomes()</code>. Data from older genome versions may be converted using UCSC’s liftover tool: <a href="http://genome.ucsc.edu/cgi-bin/hgLiftOver" class="uri">http://genome.ucsc.edu/cgi-bin/hgLiftOver</a>.</p>
 <pre class="r"><code>supported_genomes()</code></pre>
-<pre><code>## [1] &quot;dm3&quot;  &quot;dm6&quot;  &quot;hg19&quot; &quot;hg38&quot; &quot;mm10&quot; &quot;mm9&quot;  &quot;rn4&quot;  &quot;rn5&quot;  &quot;rn6&quot;</code></pre>
+<pre><code>##  [1] &quot;danRer10&quot; &quot;dm3&quot;      &quot;dm6&quot;      &quot;hg19&quot;     &quot;hg38&quot;     &quot;mm10&quot;    
+##  [7] &quot;mm9&quot;      &quot;rn4&quot;      &quot;rn5&quot;      &quot;rn6&quot;</code></pre>
 <p>Peaks are assigned to genes according to a pre-defined locus definition, i.e. the region where peaks have to occur in order to be assigned to a gene. The following locus definitions are supported in <code>chipenrich</code>:</p>
 <pre class="r"><code>head(supported_locusdefs())</code></pre>
-<pre><code>##   genome              locusdef
-## 1    dm3                  10kb
-## 2    dm3          10kb_outside
-## 3    dm3 10kb_outside_upstream
-## 4    dm3                   1kb
-## 5    dm3           1kb_outside
-## 6    dm3  1kb_outside_upstream</code></pre>
+<pre><code>##     genome              locusdef
+## 1 danRer10                  10kb
+## 2 danRer10          10kb_outside
+## 3 danRer10 10kb_outside_upstream
+## 4 danRer10                   1kb
+## 5 danRer10           1kb_outside
+## 6 danRer10  1kb_outside_upstream</code></pre>
 <p>Using the options <code>1kb</code>, <code>5kb</code>, or <code>10kb</code> will only assign peaks to genes if the peaks are within 1 kilobases (kb), 5kb, or 10kb of a gene’s transcription start site (TSS), respectively. The option <code>exon</code> or <code>intron</code> will assign peaks to genes if the peaks occur within a gene’s exons or introns, respectively. The option <code>*kb_outside_upstream</code> will assign peaks to genes if the peaks occur in a region more than *kb upstream from a TSS to the midpoint between the adjacent TSS. The option <code>*kb_outside</code> will assign peaks to genes if the peaks occur in a region more than *kb upstream or downstream from a TSS to the midpoint between the adjacent TSS. Using <code>nearest_gene</code> or <code>nearest_tss</code> will assign peaks to genes according to the nearest gene or the nearest TSS. Only the <code>nearest_gene</code> and <code>nearest_tss</code> locus definitions retain all peaks, others use only a subset of peaks that fall within the defined region. All gene loci are non-overlapping. The command <code>help(chipenrich.data)</code> may also provide more information on the locus definitions.</p>
 <p>At present, users may provide custom locus definitions for <code>supported_genomes()</code> only. Custom locus definitions should be tab-delimited files with a header row and columns for <code>chr</code>, <code>start</code>, <code>end</code>, and <code>gene_id</code> or <code>geneid</code> (Entrez Gene ID). Optionally, users may provide a <code>symbol</code> column, but if the <code>genome</code> given in <code>chipenrich()</code> is one of the <code>supported_genomes()</code>, then the correct <code>orgDb</code> package will be loaded to obtain the Entrez gene to symbol mappings. User-supplied <code>symbol</code> columns will override <code>orgDb</code> mappings. In the absence of a <code>symbol</code> column or <code>supported_genomes()</code>, symbols will be <code>NA</code>.</p>
 <p>The default gene set database is Gene Ontology (GO) terms, comprising of all three GO branches (GOBP, GOCC, and GOMF). Though, many more genesets are supported by <code>chipenrich</code>:</p>
 <pre class="r"><code>head(supported_genesets())</code></pre>
 <pre><code>##     geneset organism
 ## 1      GOBP      dme
-## 5      GOCC      dme
-## 9      GOMF      dme
-## 46 reactome      dme
-## 2      GOBP      hsa
-## 6      GOCC      hsa</code></pre>
+## 6      GOCC      dme
+## 11     GOMF      dme
+## 49 reactome      dme
+## 2      GOBP      dre
+## 7      GOCC      dre</code></pre>
 <p>Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (<code>chipenrich</code>); a faster version of the ChIP-Enrich method (<code>chipenrich_fast</code>); the Broad-Enrich method (<code>broadenrich</code>); Poly-Enrich (<code>polyenrich</code>), a negative-binomial based method; a faster version of Poly-Enrich (<code>polyenrich_fast</code>); and Fisher’s exact test (<code>fet</code>). The <code>chipenrich</code> methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The <code>polyenrich</code> methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The <code>broadenrich</code> method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks. Finally, the <code>fet</code> method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).</p>
 <pre class="r"><code>supported_methods()</code></pre>
 <pre><code>## [1] &quot;chipenrich&quot;      &quot;chipenrich_fast&quot; &quot;fet&quot;             &quot;broadenrich&quot;    

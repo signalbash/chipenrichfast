@@ -1,34 +1,42 @@
-filter_genesets = function(x,max_geneset_size = 2000) {
-	x_class = class(x)
-	x_class_attr = attr(x_class, "package")
+#' Function to filter genesets from being too large
+#'
+#' @param gs_obj A valid GeneSet object
+#' @param max_geneset_size An integer indicating the ceiling for genes in a geneset. Default 2000.
+#'
+#' @return An altered \code{gs_obj} with changed \code{set.gene} and \code{all.genes} slots reflecting \code{max_geneset_size}.
+filter_genesets = function(gs_obj, max_geneset_size = 2000) {
+	gs_obj_class = class(gs_obj)
+	gs_obj_class_attr = attr(gs_obj_class, "package")
 
-	if (is.null(x_class) || is.null(x_class_attr)) {
-		stop("Error: bad geneset object in filtering step..")
+	if (gs_obj_class != "GeneSet") {
+		stop("Error: gs_obj not of class GeneSet")
 	}
 
-	if (x_class != "GeneSet" || x_class_attr != "chipenrich.data") {
-		stop("Error: bad geneset object in filtering step..")
-	}
+	tmp_set.gene = as.list(gs_obj@set.gene)
+	tmp_set.gene = Filter(function(gs) length(gs) <= max_geneset_size, tmp_set.gene)
 
-	g = as.list(x@set.gene)
-	g = Filter(function(x) length(x) <= max_geneset_size, g)
-	x@set.gene = as.environment(g)
+	gs_obj@set.gene = as.environment(tmp_set.gene)
+	gs_obj@all.genes = as.character(unlist(tmp_set.gene, use.names = FALSE))
 
-	return(x)
+	return(gs_obj)
 }
 
+#' Function to read custom mappability files
+#'
+#' This function reads a two-columned tab-delimited text file (with header). Expected
+#' column names are 'mappa' and 'gene_id'. Each line is for a unique 'gene_id'
+#' and contains the mappability (between 0 and 1) for that gene.
+#'
+#' @param file_path A file path for the custom mappability.
+#'
+#' @return A \code{data.frame} containing \code{gene_id} and \code{mappa} columns.
 read_mappa = function(file_path) {
-	if (!file.exists(file_path)) {
-		stop("Error: could not find mappability file: ", file_path)
-	}
 
 	d = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
 
 	# Check columns.
-	for (col in c("gene_id", "mappa")) {
-		if (!col %in% names(d)) {
-			stop(sprintf("Error reading mappability data: no column named '%s' in file.",col))
-		}
+	if(!(all(colnames(d) %in% c('mappa','gene_id')))) {
+		stop("Error: header must contain columns named 'mappa' and 'gene_id'")
 	}
 
 	# Genes in this file should not be duplicated.
@@ -58,18 +66,18 @@ read_mappa = function(file_path) {
 #' symbols in the custom locus definition, and leave \code{genome = NA}, or 2)
 #' leave \code{genome = NA}, do not provide gene symbols, and NAs will be used.
 #'
-#' @param filepath A valid file path for the custom locus definition.
+#' @param file_path A file path for the custom locus definition.
 #' @param genome A genome from \code{supported_genomes()}, default \code{NA}.
 #'
 #' @return A \code{LocusDefinition} class object with slots \code{dframe},
 #' \code{granges}, \code{genome.build}, and \code{organism}.
-setup_ldef = function(filepath, genome = NA) {
-	if (!file.exists(filepath)) {
-		stop("Error: unable to open file for reading: ", filepath)
+setup_ldef = function(file_path, genome = NA) {
+	if (!file.exists(file_path)) {
+		stop("Error: unable to open file for reading: ", file_path)
 	}
 
-	message("Reading user-specified gene locus definitions: ", filepath)
-	df = read.table(filepath, sep = "\t", header = T, stringsAsFactors = F)
+	message("Reading user-specified gene locus definitions: ", file_path)
+	df = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
 
 	num_missing = sum(!complete.cases(df))
 	if (num_missing > 0) {
@@ -141,44 +149,28 @@ setup_ldef = function(filepath, genome = NA) {
 #    ),
 #      package = "chipenrich.data"
 #    )
-# User supplied genesets are expected to come as two columned,
-# tab-delimited text files with the first column being the geneset
-# name and the second column being Entrez Gene ID
-setup_geneset = function(filepath) {
 
-	# Check if file exists.
-	if (!file.exists(filepath)) {
-		stop("Error: unable to open file for reading: ", filepath)
-	}
+#' Function read custom gene sets from file
+#'
+#' This function reads a two-columned tab-delimited text file (with header). Column
+#' names are ignored, but the first column should be geneset names or IDs and the
+#' second column should be Entrez Gene IDs.
+#'
+#' @param file_path A file path for the custom gene set.
+#'
+#' @return A \code{GeneSet} class object.
+setup_geneset = function(file_path) {
 
 	# Read in flat file.
-	message("Reading user-specified gene set definitions: ", filepath)
-	d = read.table(filepath, sep = "\t", header = T, stringsAsFactors = F)
+	message("Reading user-specified gene set definitions: ", file_path)
+	d = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
 
-	# Warn if missing entries, we'll ignore them though.
-	num_missing = sum(!stats::complete.cases(d))
-	if (num_missing > 0) {
-		message(sprintf("Warning: %i rows of user-provided locus definition were missing values, skipping these rows..", num_missing))
-	}
+	# Split the gene_id column (second) by the geneset_id column (first)
+	gs = split(d[,2], d[,1])
 
-	# Remove rows with missing data.
-	d = stats::na.omit(d)
-
-	filename = strip_ext(filepath)
-
-	# Create shell for geneset list
-	# Use numerical column accessors
-	gs.names = unique(d[,1])
-	gs = as.list(gs.names)
-	names(gs) = gs.names
-
-	gs.names.list = gs
-
-	# Populate the shell
-	# Use numerical column accessors
-	gs = lapply(gs, function(g){
-		return(unique(subset(d, d[,1] == g)[,2]))
-	})
+	# Create the names list which is identity
+	gs.names = as.list(names(gs))
+	names(gs.names) = names(gs)
 
 	# Create new GeneSet object
 	object = new('GeneSet')
@@ -189,9 +181,9 @@ setup_geneset = function(filepath) {
 	object@dburl = 'user-supplied'
 
 	object@set.gene = as.environment(gs)
-	object@all.genes = as.character(sort(Reduce(function(x,y) union(x,y), object@set.gene)))
+	object@all.genes = as.character(unlist(gs, use.names = FALSE))
 
-	object@set.name = as.environment(gs.names.list)
+	object@set.name = as.environment(gs.names)
 	message('Done setting up user-specified geneset..')
 
 	return(object)
