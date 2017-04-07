@@ -50,6 +50,12 @@ SIGNIFICANT USER-LEVEL CHANGES
     o The broadenrich method is now its own function, broadenrich(), instead
       of chipenrich(..., method = 'broadenrich', ...).
 
+    o User interface for mappability has been streamlined. 'mappability' parameter
+      in broadenrich(), chipenrich(), and polyenrich() functions replaces the
+      three parameters previously used: 'use_mappability', 'mappa_file', and
+      'read_length'. The unified 'mappability' parameter can be 'NULL', a file path,
+      or a string indicating the read length for mappability, e.g. '24'.
+
     o Input files are read according to their file extension. Supported extensions
       are bed, gff3, wig, bedGraph, narrowPeak, and broadPeak. Arbitrary extensions
       are also supported, but there can be no header, and the first three columns

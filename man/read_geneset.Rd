@@ -2,7 +2,7 @@
 % Please edit documentation in R/read.R
 \name{read_geneset}
 \alias{read_geneset}
-\title{Function read custom gene sets from file}
+\title{Function to read custom gene sets from file}
 \usage{
 read_geneset(file_path)
 }

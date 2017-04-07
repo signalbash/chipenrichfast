@@ -272,7 +272,7 @@ read_ldef = function(file_path, genome = NA) {
 #      package = "chipenrich.data"
 #    )
 
-#' Function read custom gene sets from file
+#' Function to read custom gene sets from file
 #'
 #' This function reads a two-columned tab-delimited text file (with header). Column
 #' names are ignored, but the first column should be geneset names or IDs and the
