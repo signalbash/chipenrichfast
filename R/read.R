@@ -29,7 +29,7 @@ postprocess_peak_grs = function(gr) {
 #' are supported under the conditions that the first 3 columns correspond to
 #' chr, start, and end and that there is either no header column, or it is
 #' commented out. Files may be compressed with gzip, and so might end in .narrowPeak.gz,
-#' for example. Forfiles with extension support, the \code{rtracklayer::import()}
+#' for example. For files with extension support, the \code{rtracklayer::import()}
 #' function is used to read peaks, so adherence to the mentioned file formats is
 #' necessary.
 #'
