@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.13.20
+--------------------------
+
+  o Bugfix: In refactoring chipenrich(), accidentally deleted something needed
+    for the QC plots. Slipped through because we don't print QC plots in testing.
+
 CHANGES IN VERSION 1.13.19
 --------------------------
 
