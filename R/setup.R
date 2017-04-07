@@ -79,6 +79,8 @@ setup_locusdef = function(ldef_code, genome, randomization = NULL) {
 		ldef = randomize_ldef_bylength(ldef, resolution = 100)
 	} else if (randomization == 'bylocation') {
 		ldef = randomize_ldef_bylocation(ldef, resolution = 50)
+	} else {
+		stop("Invalid randomization. Must be one of c(NULL, 'complete', 'bylength', 'bylocation')")
 	}
 
 	return(list(
