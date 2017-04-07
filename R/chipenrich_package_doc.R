@@ -20,6 +20,7 @@
 #' @import methods
 #' @import mgcv
 #' @import org.Dm.eg.db
+#' @import org.Dr.eg.db
 #' @import org.Hs.eg.db
 #' @import org.Mm.eg.db
 #' @import org.Rn.eg.db

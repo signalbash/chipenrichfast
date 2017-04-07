@@ -4,10 +4,10 @@
 \alias{setup_ldef}
 \title{Function to read custom locus definition from file}
 \usage{
-setup_ldef(filepath, genome = NA)
+setup_ldef(file_path, genome = NA)
 }
 \arguments{
-\item{filepath}{A valid file path for the custom locus definition.}
+\item{file_path}{A file path for the custom locus definition.}
 
 \item{genome}{A genome from \code{supported_genomes()}, default \code{NA}.}
 }

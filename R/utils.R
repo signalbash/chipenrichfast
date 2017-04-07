@@ -3,31 +3,8 @@
 # Recodes # of peaks to be:
 # { 0, if no peaks
 # { 1, if number of peaks is >= threshold argument
-recode_peaks = function(num_peaks,threshold=1) {
+recode_peaks = function(num_peaks, threshold = 1) {
   as.numeric(num_peaks >= threshold);
-}
-
-# Quick function to change column names of data frame
-# (by name, not by position.)
-change_names = function(dframe,name_list) {
-  for (n in names(name_list)) {
-    names(dframe)[names(dframe)==n] = name_list[[n]];
-  }
-  dframe;
-}
-
-# Remove a file extension from a file name.
-strip_ext = function(file) {
-  s = unlist(strsplit(file,".",fixed=T));
-  s = s[1:(length(s)-1)];
-  s = paste(s,collapse=".");
-  return(s);
-}
-
-# Get a file's extension.
-get_ext = function(file) {
-  s = unlist(strsplit(file,".",fixed=T));
-  return(tail(s,1));
 }
 
 # Checks to see if all elements of a list argument are possible.
@@ -43,59 +20,61 @@ check_arg = function(arg,possible_values,value=F) {
   }
 }
 
-genome_to_organism = function(genome) {
-  code = substr(as.character(genome),1,2);
-  if (code == 'mm') {
-    org = 'mmu';
-  } else if (code == 'hg') {
-    org = 'hsa';
-  } else if (code == 'rn') {
-    org = 'rno';
-  } else if (code == 'dm') {
-  	org = 'dme';
-  }
-  else {
-    org = NULL;
-  }
+#' Get the correct organism code based on genome
+#'
+#' Data from \code{chipenrich.data} uses three letter organism codes for the
+#' \code{GeneSet} objects. This function ensures the correct objects are loaded.
+#'
+#' @param genome One of the \code{supported_genomes()}.
+#'
+#' @return A string for the three letter organism code. Convention is first letter
+#' of the first word in the binomial name, and first two letters of the second word
+#' in the binomial name. 'Homo sapiens' is then 'hsa', for example.
+genome_to_organism = function(genome = supported_genomes()) {
+    genome = match.arg(genome)
 
-  if (is.null(org)) {
-    stop("Error: genome requested is not supported.");
-  }
+    if (grepl('^mm', genome)) {
+        org = 'mmu'
+    } else if (grepl('^hg', genome)) {
+        org = 'hsa'
+    } else if (grepl('^rn', genome)) {
+        org = 'rno'
+    } else if (grepl('^dm', genome)) {
+        org = 'dme'
+    } else if (grepl('^danRer', genome)) {
+        org = 'dre'
+    }
 
-  org;
+    return(org)
 }
 
-# Used to get eg2symbol mappings for custom locus definitions
+#' Get Entrez ID to gene symbol mappings for custom locus definitions
+#'
+#' If a custom locus definition is one of the \code{supported_genomes()}, then
+#' the gene symbol column of the custom locus definition is populated using the
+#' appropriate orgDb package.
+#'
+#' @param genome One of the \code{supported_genomes()}.
+#'
+#' @return A \code{data.frame} with \code{gene_id} and \code{symbol} columns.
 genome_to_orgdb = function(genome = supported_genomes()) {
     genome = match.arg(genome)
 
-    if(genome == 'hg19') {
+    if(genome %in% c('hg19','hg38')) {
         # Gives Entrez IDs
         egSYMBOL = org.Hs.eg.db::org.Hs.egSYMBOL
-    } else if (genome == 'hg38') {
-        # Gives Entrez IDs
-        egSYMBOL = org.Hs.eg.db::org.Hs.egSYMBOL
-    } else if (genome == 'mm9') {
+    } else if (genome %in% c('mm9','mm10')) {
         # Gives Entrez IDs
         egSYMBOL = org.Mm.eg.db::org.Mm.egSYMBOL
-    } else if (genome == 'mm10') {
-        # Gives Entrez IDs
-        egSYMBOL = org.Mm.eg.db::org.Mm.egSYMBOL
-    } else if (genome == 'rn4') {
+    } else if (genome %in% c('rn4','rn5','rn6')) {
         # Gives ENSEMBL IDs
         egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
-    } else if (genome == 'rn5') {
-        # Gives Entrez IDs
-        egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
-    } else if (genome == 'rn6') {
-        # Gives Entrez IDs
-        egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
-    } else if (genome == 'dm3') {
+    } else if (genome %in% c('dm3','dm6')) {
         # Gives ENSEMBL IDs
         egSYMBOL = org.Dm.eg.db::org.Dm.egSYMBOL
-    } else if (genome == 'dm6') {
+    } else if (genome == 'danRer10') {
         # Gives ENSEMBL IDs
-        egSYMBOL = org.Dm.eg.db::org.Dm.egSYMBOL
+        egSYMBOL = org.Dr.eg.db::org.Dr.egSYMBOL
     }
 
     ### Build Entrez ID to gene symbol mapping

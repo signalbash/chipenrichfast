@@ -1,3 +1,12 @@
+CHANGES IN VERSION 1.13.17
+--------------------------
+
+  o Cleanup utility and setup functions.
+
+    o Increase testing.
+
+    o Add internal documentation.
+
 CHANGES IN VERSION 1.13.16
 --------------------------
 
