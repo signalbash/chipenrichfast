@@ -219,11 +219,11 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 results.ce = results$results
 print(results.ce[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR
-## 1 user-supplied GO:0031400  GO:0031400 0.1344425 0.5598736
-## 2 user-supplied GO:0006631  GO:0006631 0.1547015 0.5598736
-## 3 user-supplied GO:0009314  GO:0009314 0.2704825 0.6842537
-## 4 user-supplied GO:0034660  GO:0034660 0.3654230 0.7027365
-## 5 user-supplied GO:0009101  GO:0009101 0.4005325 0.7152366</code></pre>
+## 1 user-supplied GO:0031400  GO:0031400 0.1425230 0.5620143
+## 2 user-supplied GO:0006631  GO:0006631 0.1602161 0.5620143
+## 3 user-supplied GO:0009101  GO:0009101 0.2760445 0.6322746
+## 4 user-supplied GO:0009314  GO:0009314 0.2795370 0.6322746
+## 5 user-supplied GO:0034660  GO:0034660 0.4013628 0.7167192</code></pre>
 <pre class="r"><code># With mappability
 results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
     locusdef = &quot;nearest_tss&quot;, mappability='24', qc_plots = FALSE,
@@ -231,32 +231,31 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 results.cem = results$results
 print(results.cem[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR
-## 1 user-supplied GO:0031400  GO:0031400 0.1249852 0.5225012
-## 2 user-supplied GO:0006631  GO:0006631 0.1355100 0.5225012
-## 3 user-supplied GO:0009314  GO:0009314 0.2530977 0.6548747
-## 4 user-supplied GO:0034660  GO:0034660 0.3110882 0.6548747
-## 5 user-supplied GO:0009101  GO:0009101 0.3667298 0.6548747</code></pre>
+## 1 user-supplied GO:0031400  GO:0031400 0.1314230 0.5118080
+## 2 user-supplied GO:0006631  GO:0006631 0.1417427 0.5118080
+## 3 user-supplied GO:0009101  GO:0009101 0.2479694 0.6027728
+## 4 user-supplied GO:0009314  GO:0009314 0.2623509 0.6027728
+## 5 user-supplied GO:0034660  GO:0034660 0.3303583 0.6027728</code></pre>
 </div>
 <div id="poly-enrich" class="section level2">
 <h2><span class="header-section-number">5.2</span> Poly-Enrich</h2>
 <pre class="r"><code># Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  method = 'polyenrich',
+results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  method = 'polyenrich',
     locusdef = &quot;nearest_tss&quot;, qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR
-## 1 user-supplied GO:0009314  GO:0009314 0.1485219 0.6130119
-## 2 user-supplied GO:0031400  GO:0031400 0.1791975 0.6130119
-## 3 user-supplied GO:0008015  GO:0008015 0.5140827 0.7867741
-## 4 user-supplied GO:0003013  GO:0003013 0.5214793 0.7867741
-## 5 user-supplied GO:0009101  GO:0009101 0.5610396 0.7867741</code></pre>
+## 1 user-supplied GO:0009314  GO:0009314 0.1574747 0.6345429
+## 2 user-supplied GO:0031400  GO:0031400 0.1899251 0.6345429
+## 3 user-supplied GO:0009101  GO:0009101 0.4588630 0.7647716
+## 4 user-supplied GO:0008015  GO:0008015 0.5232152 0.7804262
+## 5 user-supplied GO:0003013  GO:0003013 0.5306898 0.7804262</code></pre>
 </div>
 <div id="broad-enrich" class="section level2">
 <h2><span class="header-section-number">5.3</span> Broad-Enrich</h2>
-<pre class="r"><code>results = chipenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
-    method='broadenrich', locusdef = &quot;nearest_tss&quot;, qc_plots = FALSE,
-    out_name = NULL, n_cores=1)
+<pre class="r"><code>results = broadenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
+    locusdef = &quot;nearest_tss&quot;, qc_plots = FALSE, out_name = NULL, n_cores=1)
 results.be = results$results
 print(results.be[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description    P.value       FDR
@@ -274,11 +273,11 @@ print(results.be[1:5,1:5])</code></pre>
 results.fet = results$results
 print(results.fet[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description    P.value       FDR
-## 1 user-supplied GO:0031400  GO:0031400 0.09033288 0.4516644
-## 2 user-supplied GO:0009314  GO:0009314 0.16193480 0.6747283
-## 3 user-supplied GO:0007346  GO:0007346 0.36142668 0.8214243
-## 4 user-supplied GO:0006631  GO:0006631 0.43541174 0.8428948
-## 5 user-supplied GO:0009101  GO:0009101 0.53945270 0.8428948</code></pre>
+## 1 user-supplied GO:0031400  GO:0031400 0.09143674 0.4571837
+## 2 user-supplied GO:0009314  GO:0009314 0.16442590 0.6851079
+## 3 user-supplied GO:0009101  GO:0009101 0.35978192 0.7584545
+## 4 user-supplied GO:0007346  GO:0007346 0.36405818 0.7584545
+## 5 user-supplied GO:0006631  GO:0006631 0.43759523 0.8359051</code></pre>
 </div>
 </div>
 <div id="output" class="section level1">
@@ -288,27 +287,20 @@ print(results.fet[1:5,1:5])</code></pre>
 <h2><span class="header-section-number">6.1</span> Assigned peaks</h2>
 <p>Peak assignments are stored in <code>$peaks</code>. For example,</p>
 <pre class="r"><code>head(results$peaks)</code></pre>
-<pre><code>##   peak_id  chr peak_start peak_end gene_id gene_symbol gene_locus_start
-## 1  peak:1 chr1     816846   816937  284593      FAM41C           807182
-## 2  peak:2 chr1     859131   859258  148398      SAMD11           855530
-## 3  peak:3 chr1     877208   877306  148398      SAMD11           869655
-## 4  peak:4 chr1     895928   896050  339451      KLHL17           895324
-## 5 peak:10 chr1    1004767  1004867  401934      RNF223          1004687
-## 6 peak:11 chr1    1051327  1051501   54991    C1orf159          1046736
-##   gene_locus_end nearest_tss dist_to_tss nearest_tss_gene_id
-## 1         817181      812182       -4708              284593
-## 2         866301      860530       -1335              148398
-## 3         879482      876524         732              148398
-## 4         899806      895967          21              339451
-## 5        1014686     1009687        4869              401934
-## 6        1056735     1051736         321               54991
-##   nearest_tss_symbol nearest_tss_gene_strand
-## 1             FAM41C                       -
-## 2             SAMD11                       +
-## 3             SAMD11                       +
-## 4             KLHL17                       +
-## 5             RNF223                       -
-## 6           C1orf159                       -</code></pre>
+<pre><code>##   peak_id  chr peak_start peak_end gene_locus_start gene_locus_end gene_id
+## 1  peak:1 chr1     816846   816937           807182         817181  284593
+## 2  peak:2 chr1     859131   859258           855530         866301  148398
+## 3  peak:3 chr1     877208   877306           869655         879482  148398
+## 4  peak:4 chr1     895928   896050           895324         899806  339451
+## 5 peak:10 chr1    1004767  1004867          1004687        1014686  401934
+## 6 peak:11 chr1    1051327  1051501          1046736        1056735   54991
+##   gene_symbol overlap_start overlap_end peak_overlap
+## 1      FAM41C        816846      816937           92
+## 2      SAMD11        859131      859258          128
+## 3      SAMD11        877208      877306           99
+## 4      KLHL17        895928      896050          123
+## 5      RNF223       1004767     1004867          101
+## 6    C1orf159       1051327     1051501          175</code></pre>
 </div>
 <div id="peaks-per-gene" class="section level2">
 <h2><span class="header-section-number">6.2</span> Peaks-per-gene</h2>
@@ -327,25 +319,25 @@ print(results.fet[1:5,1:5])</code></pre>
 <p>Gene set enrichment results are stored in <code>$results</code>. For example,</p>
 <pre class="r"><code>head(results$results)</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description    P.value       FDR Odds.Ratio
-## 1 user-supplied GO:0031400  GO:0031400 0.09033288 0.4516644   1.588189
-## 2 user-supplied GO:0009314  GO:0009314 0.16193480 0.6747283   1.449422
-## 3 user-supplied GO:0007346  GO:0007346 0.36142668 0.8214243   1.272626
-## 4 user-supplied GO:0006631  GO:0006631 0.43541174 0.8428948   1.241708
-## 5 user-supplied GO:0009101  GO:0009101 0.53945270 0.8428948   1.189160
-## 6 user-supplied GO:0034660  GO:0034660 0.63742574 0.8986546   1.154799
+## 1 user-supplied GO:0031400  GO:0031400 0.09143674 0.4571837   1.577169
+## 2 user-supplied GO:0009314  GO:0009314 0.16442590 0.6851079   1.439494
+## 3 user-supplied GO:0009101  GO:0009101 0.35978192 0.7584545   1.278656
+## 4 user-supplied GO:0007346  GO:0007346 0.36405818 0.7584545   1.263962
+## 5 user-supplied GO:0006631  GO:0006631 0.43759523 0.8359051   1.233309
+## 6 user-supplied GO:0034660  GO:0034660 0.63863073 0.8991202   1.147033
 ##     Status N.Geneset.Genes N.Geneset.Peak.Genes
 ## 1 enriched             294                   18
 ## 2 enriched             282                   16
-## 3 enriched             296                   15
-## 4 enriched             282                   14
-## 5 enriched             293                   14
+## 3 enriched             293                   15
+## 4 enriched             296                   15
+## 5 enriched             282                   14
 ## 6 enriched             279                   13
 ##                                                                                                 Geneset.Peak.Genes
 ## 1 3725, 1647, 2810, 7161, 991, 1855, 2629, 5590, 5664, 5686, 5690, 6497, 8613, 10459, 54206, 64853, 116496, 374969
 ## 2             3725, 7398, 10277, 777, 1647, 7161, 261734, 1263, 4893, 7159, 7391, 8438, 23596, 25896, 51150, 51514
-## 3                     1104, 7161, 63967, 64326, 991, 1063, 1263, 4751, 5586, 5686, 5690, 7175, 10459, 54998, 79577
-## 4                            9261, 55268, 34, 1376, 2475, 5565, 5743, 5825, 6051, 8560, 11000, 11332, 51094, 64834
-## 5                         10905, 6487, 142, 1650, 2590, 6646, 6675, 8704, 9653, 22796, 23169, 29929, 79947, 148789
+## 3                 10905, 6487, 142, 1650, 2590, 6646, 6675, 8704, 9653, 22796, 23169, 29929, 79947, 126792, 148789
+## 4                     1104, 7161, 63967, 64326, 991, 1063, 1263, 4751, 5586, 5686, 5690, 7175, 10459, 54998, 79577
+## 5                            9261, 55268, 34, 1376, 2475, 5565, 5743, 5825, 6051, 8560, 11000, 11332, 51094, 64834
 ## 6                        55699, 79707, 5394, 6202, 7175, 23318, 25896, 25973, 55157, 84944, 113802, 116461, 126789</code></pre>
 </div>
 </div>

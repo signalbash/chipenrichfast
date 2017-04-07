@@ -1,17 +1,18 @@
 #!/usr/bin/env Rscript
 os = Sys.info()[1]
 
-#' Run ChIP-Enrich on a dataset of ChIP-seq peaks
+#' Run Poly-Enrich on a dataset of ChIP-seq peaks
 #'
-#' Run gene set enrichment testing with the ChIP-Enrich method. ChIP-Enrich is
-#' designed for datasets with narrow peaks.
+#' Run gene set enrichment testing with the Poly-Enrich method. Poly-Enrich is
+#' designed for datasets where multiple peaks in a gene should be taken into account.
 #'
-#' The ChIP-Enrich method uses the presence of a peak in its model for enrichment:
-#' \code{peak ~ GO + s(log10_length)}. Here, \code{GO} is a binary vector indicating
-#' whether a gene is in the gene set being tested, \code{peak} is a binary vector
-#' indicating the presence of a peak in a gene, and \code{s(log10_length)} is a
-#' binomial cubic smoothing spline which adjusts for the relationship between the
-#' presence of a peak and locus length.
+#' The Poly-Enrich method uses the number of peaks in genes in its model for
+#' enrichment: \code{num_peaks ~ GO + s(log10_length)}. Here, \code{GO} is a
+#' binary vector indicating whether a gene is in the gene set being tested,
+#' \code{num_peaks} is a numeric vector indicating the number of peaks in each
+#' gene, and \code{s(log10_length)} is a binomial cubic smoothing spline which
+#' adjusts for the relationship between the number of peaks in a gene and locus
+#' length.
 #'
 #' @param peaks Either a file path or a \code{data.frame} of peaks in BED-like
 #' format. If a file path, the following formats are fully supported via their
@@ -24,11 +25,11 @@ os = Sys.info()[1]
 #' acceptable column names.
 #' @param out_name Prefix string to use for naming output files. This should not
 #' contain any characters that would be illegal for the system being used (Unix,
-#' Windows, etc.) The default value is "chipenrich", and a file "chipenrich_results.tab"
-#' is produced. If \code{qc_plots} is set, then a file "chipenrich_qcplots.pdf"
+#' Windows, etc.) The default value is "polyenrich", and a file "polyenrich_results.tab"
+#' is produced. If \code{qc_plots} is set, then a file "polyenrich_qcplots.pdf"
 #' is produced containing a number of quality control plots. If \code{out_name}
 #' is set to NULL, no files are written, and results then must be retrieved from
-#' the list returned by \code{chipenrich}.
+#' the list returned by \code{polyenrich}.
 #' @param out_path Directory to which results files will be written out. Defaults
 #' to the current working directory as returned by \code{\link{getwd}}.
 #' @param genome One of the \code{supported_genomes()}.
@@ -42,26 +43,19 @@ os = Sys.info()[1]
 #' a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
 #' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.
 #' @param method A character string specifying the method to use for enrichment
-#' testing. Must be one of ChIP-Enrich ('chipenrich') (default), or
-#'Fisher's exact test ('fet'). For a list of supported methods, use
-#' \code{supported_methods()}.
+#' testing. Currently the only option is \code{polyenrich}, but future methods
+#' are in development.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
 #' Gene IDs should be Entrez IDs, and mappability values should range from 0 and 1.
 #' Default value is NULL.
-#' @param fisher_alt If method is 'fet', this option indicates the alternative
-#' for Fisher's exact test, and must be one of 'two-sided' (default), 'greater',
-#' or 'less'.
 #' @param qc_plots A logical variable that enables the automatic generation of
 #' plots for quality control.
 #' @param min_geneset_size Sets the minimum number of genes a gene set may have
 #' to be considered for enrichment testing.
 #' @param max_geneset_size Sets the maximum number of genes a gene set may have
 #' to be considered for enrichment testing.
-#' @param num_peak_threshold Sets the threshold for how many peaks a gene must
-#' have to be considered as having a peak. Defaults to 1. Only relevant for
-#' Fisher's exact test and ChIP-Enrich methods.
 #' @param n_cores The number of cores to use for enrichment testing. We recommend
 #' using only up to the maximum number of \emph{physical} cores present, as
 #' virtual cores do not significantly decrease runtime. Default number of cores
@@ -69,7 +63,7 @@ os = Sys.info()[1]
 #'
 #' @return A list, containing the following items:
 #'
-#' \item{opts }{A data frame containing the arguments/values passed to \code{chipenrich}.}
+#' \item{opts }{A data frame containing the arguments/values passed to \code{polyenrich}.}
 #'
 #' \item{peaks }{
 #' A data frame containing peak assignments to genes. Peaks which do not overlap
@@ -103,7 +97,7 @@ os = Sys.info()[1]
 #'   \item{length}{ is the length of the gene's locus (depending on which locus definition you chose.)}
 #'   \item{log10_length}{ is the log10(locus length) for the gene.}
 #'   \item{num_peaks}{ is the number of peaks that were assigned to the gene, given the current locus definition. }
-#'   \item{peak}{ is whether or not the gene is considered to have a peak, as defined by \code{num_peak_threshold}. }
+#'   \item{peak}{ is whether or not the gene has a peak. }
 #' }}
 #'
 #' \item{results }{
@@ -127,12 +121,12 @@ os = Sys.info()[1]
 #'
 #' @examples
 #'
-#' # Run ChipEnrich using an example dataset, assigning peaks to the nearest TSS,
+#' # Run Poly-Enrich using an example dataset, assigning peaks to the nearest TSS,
 #' # and on a small custom geneset
 #' data(peaks_E2F4, package = 'chipenrich.data')
 #' peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
 #' gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-#' results = chipenrich(peaks_E2F4, method='chipenrich', locusdef='nearest_tss',
+#' results = polyenrich(peaks_E2F4, method='polyenrich', locusdef='nearest_tss',
 #' 			genome = 'hg19', genesets=gs_path, out_name=NULL)
 #'
 #' # Get the list of peaks that were assigned to genes.
@@ -145,10 +139,10 @@ os = Sys.info()[1]
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_gene_coverage.R plot_spline_length.R
-#' @include test_approx.R test_binomial.R test_fisher.R test_gam.R
-chipenrich = function(
+#' @include test_nb.R test_nb_fast.R
+polyenrich = function(
 	peaks,
-	out_name = "chipenrich",
+	out_name = "polyenrich",
 	out_path = getwd(),
 	genome = supported_genomes(),
 	genesets = c(
@@ -156,13 +150,11 @@ chipenrich = function(
 		'GOCC',
 		'GOMF'),
 	locusdef = "nearest_tss",
-	method = 'chipenrich',
+	method = 'polyenrich',
 	mappability = NULL,
-	fisher_alt = "two.sided",
 	qc_plots = TRUE,
 	min_geneset_size = 15,
 	max_geneset_size = 2000,
-	num_peak_threshold = 1,
 	n_cores = 1
 ) {
 	genome = match.arg(genome)
@@ -285,14 +277,6 @@ chipenrich = function(
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
-	# This seems redundant given num_peaks_per_gene(...)
-	ppg$peak = recode_peaks(ppg$num_peaks, num_peak_threshold)
-
-	# Add relevant columns to ppg depending on the method
-	if(method == 'chipapprox') {
-		message("Calculating weights for approximate method..")
-		ppg = calc_approx_weights(ppg,mappa)
-	}
 
 	######################################################
 	# Randomize ppg table if randomization API invoked
@@ -312,25 +296,10 @@ chipenrich = function(
 		message(sprintf("Test: %s",method_name))
 		message(sprintf("Genesets: %s",gobj@type))
 		message("Running tests..")
-		if (testf == "test_gam") {
-			rtemp = test_func(gobj,ppg,n_cores)
-		}
-		if (testf == "test_fisher_exact") {
-			rtemp = test_func(gobj,ppg,alternative=fisher_alt)
-		}
-		if (testf == "test_binomial") {
-			rtemp = test_func(gobj,ppg)
-		}
-		if (testf == "test_approx") {
-			rtemp = test_func(gobj,ppg,nwp=FALSE,n_cores)
-		}
 		if (testf == "test_gam_nb") {
 			rtemp = test_func(gobj,ppg,n_cores);
 		}
 		if (testf == "test_gam_nb_fast") {
-			rtemp = test_func(gobj,ppg,n_cores);
-		}
-		if (testf == "test_gam_fast") {
 			rtemp = test_func(gobj,ppg,n_cores);
 		}
 

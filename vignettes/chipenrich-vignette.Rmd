@@ -167,7 +167,7 @@ print(results.cem[1:5,1:5])
 ```{r, warning = FALSE, message = FALSE}
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  method = 'polyenrich',
+results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  method = 'polyenrich',
 	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
