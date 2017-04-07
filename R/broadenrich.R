@@ -244,7 +244,7 @@ broadenrich = function(
 	######################################################
 	# Assign peaks to genes. NOTE: If method = 'broadenrich' use
 	# assign_peak_segments(), otherwise use assign_peaks().
-	message("Assigning peaks to genes with assigned_peak_segments(...) ..")
+	message("Assigning peaks to genes with assign_peak_segments(...) ..")
 	assigned_peaks = assign_peak_segments(peakobj, ldef)
 
 	peak_genes = unique(assigned_peaks$gene_id)
