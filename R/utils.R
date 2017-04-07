@@ -7,19 +7,6 @@ recode_peaks = function(num_peaks, threshold = 1) {
   as.numeric(num_peaks >= threshold);
 }
 
-# Checks to see if all elements of a list argument are possible.
-check_arg = function(arg,possible_values,value=F) {
-  if (!all(arg %in% possible_values)) {
-    if (value) {
-      return(arg[!arg %in% possible_values]);
-    } else {
-      return(F);
-    }
-  } else {
-    return(T);
-  }
-}
-
 #' Get the correct organism code based on genome
 #'
 #' Data from \code{chipenrich.data} uses three letter organism codes for the
@@ -61,19 +48,14 @@ genome_to_orgdb = function(genome = supported_genomes()) {
     genome = match.arg(genome)
 
     if(genome %in% c('hg19','hg38')) {
-        # Gives Entrez IDs
         egSYMBOL = org.Hs.eg.db::org.Hs.egSYMBOL
     } else if (genome %in% c('mm9','mm10')) {
-        # Gives Entrez IDs
         egSYMBOL = org.Mm.eg.db::org.Mm.egSYMBOL
     } else if (genome %in% c('rn4','rn5','rn6')) {
-        # Gives ENSEMBL IDs
         egSYMBOL = org.Rn.eg.db::org.Rn.egSYMBOL
     } else if (genome %in% c('dm3','dm6')) {
-        # Gives ENSEMBL IDs
         egSYMBOL = org.Dm.eg.db::org.Dm.egSYMBOL
     } else if (genome == 'danRer10') {
-        # Gives ENSEMBL IDs
         egSYMBOL = org.Dr.eg.db::org.Dr.egSYMBOL
     }
 
