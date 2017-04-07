@@ -63,6 +63,8 @@ os = Sys.info()[1]
 #' to the length of reads from the original experiment.
 #' @param qc_plots A logical variable that enables the automatic generation of
 #' plots for quality control.
+#' @param min_geneset_size Sets the minimum number of genes a gene set may have
+#' to be considered for enrichment testing.
 #' @param max_geneset_size Sets the maximum number of genes a gene set may have
 #' to be considered for enrichment testing.
 #' @param num_peak_threshold Sets the threshold for how many peaks a gene must
@@ -174,6 +176,7 @@ chipenrich = function(
 	mappa_file = NULL,
 	read_length = 36,
 	qc_plots = T,
+	min_geneset_size = 15,
 	max_geneset_size = 2000,
 	num_peak_threshold = 1,
 	n_cores = 1
@@ -240,33 +243,6 @@ chipenrich = function(
 	tss = get(tss_code)
 
 	############################################################################
-	# CHECK genesets and load them if okay
-	# Determine if geneset codes are valid before moving on. The API for a user
-	# to use their own genesets will be to put a path in the genesets argument.
-	user_defined_geneset = file.exists(genesets)
-	if(user_defined_geneset) {
-		geneset_list = list()
-		geneset_code = 'user-supplied'
-
-		geneset_list[[geneset_code]] = setup_geneset(genesets)
-		geneset_list[[geneset_code]] = filter_genesets(geneset_list[[geneset_code]], max_geneset_size)
-	} else {
-		if (!any(supported_genesets()$organism == organism & genesets %in% supported_genesets()$geneset)) {
-			stop("Invalid organism / geneset combination requested. Please see supported_genesets().")
-		}
-
-		# If the user does not provide a path to the geneset.
-		# That is, do the normal thing
-		geneset_list = list()
-		for (gs in genesets) {
-			geneset_code = sprintf("geneset.%s.%s", gs, organism)
-			data(list = geneset_code, package = "chipenrich.data", envir = environment())
-
-			geneset_list[[geneset_code]] = filter_genesets(get(geneset_code), max_geneset_size)
-		}
-	}
-
-	############################################################################
 	# CHECK locusdefs and load if okay
 	# The API for a user to use their own locusdef will be to put a path in
 	# the locusdef argument.
@@ -287,6 +263,35 @@ chipenrich = function(
 		# Randomize locus definition if rndloc == T
 		if(rndloc) {
 			ldef = randomize_locusdef(ldef, 50)
+		}
+	}
+
+	############################################################################
+	# CHECK genesets and load them if okay
+	# Determine if geneset codes are valid before moving on. The API for a user
+	# to use their own genesets will be to put a path in the genesets argument.
+	# NOTE, in v2.0.0, filter_genesets() will use the locus definition to help filter,
+	# and so we must setup the ldef before setting up the gene sets.
+	user_defined_geneset = file.exists(genesets)
+	if(user_defined_geneset) {
+		geneset_list = list()
+		geneset_code = 'user-supplied'
+
+		geneset_list[[geneset_code]] = setup_geneset(genesets)
+		geneset_list[[geneset_code]] = filter_genesets(geneset_list[[geneset_code]], ldef, min_geneset_size, max_geneset_size)
+	} else {
+		if (!any(supported_genesets()$organism == organism & genesets %in% supported_genesets()$geneset)) {
+			stop("Invalid organism / geneset combination requested. Please see supported_genesets().")
+		}
+
+		# If the user does not provide a path to the geneset.
+		# That is, do the normal thing
+		geneset_list = list()
+		for (gs in genesets) {
+			geneset_code = sprintf("geneset.%s.%s", gs, organism)
+			data(list = geneset_code, package = "chipenrich.data", envir = environment())
+
+			geneset_list[[geneset_code]] = filter_genesets(get(geneset_code), ldef, min_geneset_size, max_geneset_size)
 		}
 	}
 

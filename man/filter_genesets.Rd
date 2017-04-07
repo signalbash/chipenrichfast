@@ -2,18 +2,28 @@
 % Please edit documentation in R/setup.R
 \name{filter_genesets}
 \alias{filter_genesets}
-\title{Function to filter genesets from being too large}
+\title{Function to filter genesets by locus definition and size}
 \usage{
-filter_genesets(gs_obj, max_geneset_size = 2000)
+filter_genesets(gs_obj, ldef_obj, min_geneset_size = 15,
+  max_geneset_size = 2000)
 }
 \arguments{
 \item{gs_obj}{A valid GeneSet object}
 
+\item{ldef_obj}{A valid LocusDefinition object}
+
+\item{min_geneset_size}{An integer indicating the floor for genes in a geneset. Default 15.}
+
 \item{max_geneset_size}{An integer indicating the ceiling for genes in a geneset. Default 2000.}
 }
 \value{
-An altered \code{gs_obj} with changed \code{set.gene} and \code{all.genes} slots reflecting \code{max_geneset_size}.
+An altered \code{gs_obj} with changed \code{set.gene} and \code{all.genes}
+slots reflecting \code{min_geneset_size} and \code{max_geneset_size} after intersecting
+with the genes present in the particular locus definition.
 }
 \description{
-Function to filter genesets from being too large
+This function filters gene sets based on the genes that are present in a particular
+locus definition. After determining which genes are present in both the GeneSet,
+\code{gs_obj}, and the LocusDefinition \code{ldef_obj}, gene sets are filtered
+by size with \code{min_geneset_size} and \code{max_geneset_size}.
 }
