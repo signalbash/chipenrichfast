@@ -77,6 +77,7 @@ postprocess_peak_grs = function(gr) {
 #'
 #' @export
 read_bed = function(file_path, genome = NA) {
+	message(sprintf('Reading peaks from %s', file_path))
 
 	# Establish format and assign extraCols and format as needed
 	# See https://genome.ucsc.edu/FAQ/FAQformat for format details

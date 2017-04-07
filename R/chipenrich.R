@@ -243,24 +243,18 @@ chipenrich = function(
 	# CHECK genesets and load them if okay
 	# Determine if geneset codes are valid before moving on. The API for a user
 	# to use their own genesets will be to put a path in the genesets argument.
-	if (!any(supported_genesets()$organism == organism & genesets %in% supported_genesets()$geneset)) {
-		bad_args = check_arg(genesets, supported_genesets()$geneset, value=T)
+	user_defined_geneset = file.exists(genesets)
+	if(user_defined_geneset) {
+		geneset_list = list()
+		geneset_code = 'user-supplied'
 
-		# If the bad_args is a path that exists, then we know the user wants
-		# to provide their own genesets
-		if(file.exists(genesets)) {
-			message('User-specified geneset(s)...')
-		} else {
-			stop(
-				sprintf("Invalid organism / geneset(s) combination requested: %s %s",
-					organism, paste(bad_args, collapse = ", ")
-				)
-			)
+		geneset_list[[geneset_code]] = setup_geneset(genesets)
+		geneset_list[[geneset_code]] = filter_genesets(geneset_list[[geneset_code]], max_geneset_size)
+	} else {
+		if (!any(supported_genesets()$organism == organism & genesets %in% supported_genesets()$geneset)) {
+			stop("Invalid organism / geneset combination requested. Please see supported_genesets().")
 		}
-	}
 
-	# Load genesets and filter them
-	if(!file.exists(genesets)) {
 		# If the user does not provide a path to the geneset.
 		# That is, do the normal thing
 		geneset_list = list()
@@ -270,13 +264,6 @@ chipenrich = function(
 
 			geneset_list[[geneset_code]] = filter_genesets(get(geneset_code), max_geneset_size)
 		}
-	} else {
-		# If the user provides a path to the geneset, build it and filter it
-		geneset_list = list()
-		geneset_code = 'user-supplied'
-
-		geneset_list[[geneset_code]] = setup_geneset(genesets)
-		geneset_list[[geneset_code]] = filter_genesets(geneset_list[[geneset_code]], max_geneset_size)
 	}
 
 	############################################################################
@@ -289,11 +276,7 @@ chipenrich = function(
 		ldef = setup_ldef(locusdef, genome)
 	} else {
 		if (!any(supported_locusdefs()$genome == genome & locusdef == supported_locusdefs()$locusdef)) {
-			stop(
-				sprintf("Error: invalid genome / definition combination requested: %s %s",
-					genome, locusdef
-				)
-			)
+			stop(sprintf("Error: invalid genome / definition combination requested: %s %s", genome, locusdef))
 		}
 
 		# Load locus definitions.
