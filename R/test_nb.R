@@ -58,7 +58,7 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
         "Effect"=NA,
         "Odds.Ratio"=NA,
         "Geneset Avg Gene Length"=NA,
-        stringsAsFactors=F);
+        stringsAsFactors = FALSE);
 
     return(out)
   }
@@ -98,7 +98,7 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
       "Effect"=r_effect,
       "Odds.Ratio"=exp(r_effect),
       "Geneset Avg Gene Length"=r_go_genes_avg_length,
-      stringsAsFactors=F);
+      stringsAsFactors = FALSE);
   }
 
   return(out);

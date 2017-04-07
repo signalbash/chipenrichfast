@@ -3,9 +3,10 @@ CHANGES IN VERSION 2.0.0
 
 NEW FEATURES
 
-    o A new method for enrichment, polyenrich() (its own function, like chipenrich()),
-      is designed for gene set enrichment of experiments where the presence of
-      multiple peaks in a gene is accounted for in the model. [CHRIS, MORE HERE]
+    o A new method for enrichment, polyenrich() is designed for gene set enrichment
+      of experiments where the presence of multiple peaks in a gene is accounted
+      for in the model. Use the polyenrich() function for this method. [CHRIS,
+      MORE HERE]
 
     o New features resulting from chipenrich.data 2.0.0:
 
@@ -31,6 +32,9 @@ IMPROVEMENTS
       and used for all gene sets. The correlation between the resulting p-values
       is nearly always 1.0. This drastically speeds chipenrich() and polyenrich().
       Unfortunately, this approach cannot be used for broadenrich().
+
+        o The chipenrich(..., method='chipenrich', ...) function automatically
+          uses this faster method.
 
     o Clarified documentation for the supported_locusdefs() to give explanations
       for what each locus definition is.

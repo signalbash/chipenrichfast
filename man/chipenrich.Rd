@@ -10,8 +10,8 @@
 chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
   genome = "hg19", genesets = c("GOBP", "GOCC", "GOMF"),
   locusdef = "nearest_tss", method = "chipenrich",
-  fisher_alt = "two.sided", use_mappability = F, mappa_file = NULL,
-  read_length = 36, qc_plots = T, min_geneset_size = 15,
+  fisher_alt = "two.sided", use_mappability = FALSE, mappa_file = NULL,
+  read_length = 36, qc_plots = TRUE, min_geneset_size = 15,
   max_geneset_size = 2000, num_peak_threshold = 1, n_cores = 1)
 }
 \arguments{

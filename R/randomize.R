@@ -54,7 +54,7 @@ randomize_ppg_all = function(ppg) {
 	rownames(ppg) = 1:nrow(ppg)
 
 	reordering = sample(1:nrow(ppg), nrow(ppg))
-	ppg = data.frame('gene_id'=ppg$gene_id, ppg[reordering,2:ncol(ppg)], stringsAsFactors=F)
+	ppg = data.frame('gene_id'=ppg$gene_id, ppg[reordering,2:ncol(ppg)], stringsAsFactors = FALSE)
 
 	return(ppg)
 }
@@ -72,7 +72,7 @@ randomize_ppg_length = function(ppg) {
 	split_ppg = lapply(split_ppg, function(bin){
 		reordering = sample(1:nrow(bin), nrow(bin))
 
-		data.frame('gene_id'=bin$gene_id, bin[reordering,2:ncol(bin)], stringsAsFactors=F)
+		data.frame('gene_id'=bin$gene_id, bin[reordering,2:ncol(bin)], stringsAsFactors = FALSE)
 	})
 	ppg = Reduce(rbind, split_ppg)
 

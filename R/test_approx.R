@@ -5,7 +5,7 @@ single_approx = function(go_id, geneset, gpw) {
 		vv = diag(fit$var)
 		cof = fit$coef
 		z = cof/sqrt(vv)
-		pval = stats::pchisq(z^2,1,lower.tail=F)
+		pval = stats::pchisq(z^2, 1, lower.tail = FALSE)
 		c(cof[2],pval[2])
 	}
 
@@ -44,7 +44,7 @@ single_approx = function(go_id, geneset, gpw) {
 			weight = stats::quantile(gpw$weight,0.0025),
 			prob_peak = stats::quantile(gpw$prob_peak,0.0025),
 			resid.dev = stats::quantile(gpw$resid.dev,0.0025),
-			stringsAsFactors = F
+			stringsAsFactors = FALSE
 		)
 		if ("mappa" %in% names(gpw)) {
 			cont_gene$mappa = 1
@@ -75,12 +75,12 @@ single_approx = function(go_id, geneset, gpw) {
 		"Effect" = r_effect,
 		"Odds.Ratio" = exp(r_effect),
 		"Geneset Avg Gene Length" = r_go_genes_avg_length,
-		stringsAsFactors = F)
+		stringsAsFactors = FALSE)
 
 	return(out)
 }
 
-test_approx = function(geneset, gpw, nwp = F, n_cores) {
+test_approx = function(geneset, gpw, nwp = FALSE, n_cores) {
 
 	if (!"weight" %in% names(gpw)) {
     	stop("Error: you must fit weights first using one of the calc_weights* functions.")

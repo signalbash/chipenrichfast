@@ -16,10 +16,10 @@ test_fisher_exact = function(geneset,gpw,alternative="two.sided") {
 		pval = 1
 		odds_ratio = 0
 		try({
-			fet_result = stats::fisher.test(xt, conf.int = F, alternative = alternative)
+			fet_result = stats::fisher.test(xt, conf.int = FALSE, alternative = alternative)
 			pval = fet_result$p.value
 			odds_ratio = fet_result$estimate
-		}, silent = T)
+		}, silent = TRUE)
 
 		go_peak_genes = gpw[(gpw$gene_id %in% go_genes) & (gpw$peak == 1),]$gene_id
 		go_peak_genes_str = paste(go_peak_genes, collapse = ", ")
@@ -50,7 +50,7 @@ test_fisher_exact = function(geneset,gpw,alternative="two.sided") {
 			"Odds.Ratio" = odds_ratio,
 			"Status" = enr,
 			"P-value" = pval,
-			stringsAsFactors=F)
+			stringsAsFactors = FALSE)
 	})
 
 	results = plyr::rbind.fill(results)

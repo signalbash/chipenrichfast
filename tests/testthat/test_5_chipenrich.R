@@ -23,8 +23,8 @@ test_that('Test chipenrich method with mappability', {
 	expect_equal(class(results), 'list')
 })
 
-test_that('Test chipenrich_fast method', {
-	results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'chipenrich_fast',
+test_that('Test chipenrich_slow method', {
+	results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'chipenrich_slow',
 		locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
 
 	expect_equal(class(results), 'list')
@@ -44,8 +44,8 @@ test_that('Test polyenrich method', {
 	expect_equal(class(results), 'list')
 })
 
-test_that('Test polyenrich_fast method', {
-	results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich_fast',
+test_that('Test polyenrich_slow method', {
+	results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich_slow',
 		locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
 
 	expect_equal(class(results), 'list')
