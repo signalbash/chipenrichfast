@@ -176,9 +176,8 @@ print(results.ce[1:5,1:5])
 ## Broad-Enrich
 
 ```{r, warning = FALSE, message = FALSE}
-results = chipenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
-	method='broadenrich', locusdef = "nearest_tss", qc_plots = FALSE,
-	out_name = NULL, n_cores=1)
+results = broadenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
+	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores=1)
 results.be = results$results
 print(results.be[1:5,1:5])
 ```
