@@ -1,5 +1,5 @@
 # For each peak, find the nearest TSS, and distance to it.
-peak_nearest_tss = function(peaks, tss, midpoint=T) {
+peak_nearest_tss = function(peaks, tss) {
 	########################################################
 	# NOTE: THIS CODE IS RECYCLED FROM assign_peaks() with slight mods to
 	# mid_dist_df to match previous output.
@@ -91,7 +91,7 @@ plot_dist_to_tss = function(peaks, genome='hg19') {
 	plotobj = barchart(
 		dist_table,
 		panel = pf,
-		horizontal = F,
+		horizontal = FALSE,
 		scales = list(rot = 45, cex = 1.6),
 		col = "gray",
 		ylim = c(0,1),

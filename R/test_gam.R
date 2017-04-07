@@ -24,7 +24,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 				"Effect" = NA,
 				"Odds.Ratio" = NA,
 				"Geneset Avg Gene Length" = NA,
-				stringsAsFactors = F)
+				stringsAsFactors = FALSE)
 		} else if (method == 'broadenrich' || method == 'broadenrich_splineless') {
 			out = data.frame(
 				"P.value" = NA,
@@ -36,7 +36,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 				"Odds.Ratio" = NA,
 				"Geneset Avg Gene Length" = NA,
 				"Geneset Avg Gene Coverage" = NA,
-				stringsAsFactors = F)
+				stringsAsFactors = FALSE)
 		}
 
 		return(out)
@@ -72,7 +72,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 				log10_length = log10(cont_length),
 				num_peaks = 0,
 				peak = 0,
-				stringsAsFactors = F)
+				stringsAsFactors = FALSE)
 
 			if ("mappa" %in% names(gpw)) {
 				cont_gene$mappa = 1
@@ -104,7 +104,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 			"Effect" = r_effect,
 			"Odds.Ratio" = exp(r_effect),
 			"Geneset Avg Gene Length" = r_go_genes_avg_length,
-			stringsAsFactors = F)
+			stringsAsFactors = FALSE)
 	} else if (method == 'broadenrich' || method == 'broadenrich_splineless') {
 		out = data.frame(
 			"P.value" = r_pval,
@@ -116,7 +116,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 			"Odds.Ratio" = exp(r_effect),
 			"Geneset Avg Gene Length" = r_go_genes_avg_length,
 			"Geneset Avg Gene Coverage" = r_go_genes_avg_coverage,
-			stringsAsFactors = F)
+			stringsAsFactors = FALSE)
 	}
 
 	return(out)

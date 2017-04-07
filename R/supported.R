@@ -28,12 +28,12 @@ supported_locusdefs = function() {
 	piqr = data(package = "chipenrich.data")
 	data_files = piqr$results[,3]
 
-	ldefs = grep("locusdef", data_files, value = T)
+	ldefs = grep("locusdef", data_files, value = TRUE)
 	combos = Reduce(rbind,sapply(ldefs, strsplit, '[.]'))[,c(2,3)]
 	df = data.frame(
 		'genome' = combos[,1],
 		'locusdef' = combos[,2],
-		stringsAsFactors = F)
+		stringsAsFactors = FALSE)
 	return(df)
 }
 
@@ -50,13 +50,13 @@ supported_read_lengths = function() {
 	piqr = data(package = "chipenrich.data")
 	data_files = piqr$results[,3]
 
-	mappas = grep("mappa", data_files, value = T)
+	mappas = grep("mappa", data_files, value = TRUE)
 	combos = Reduce(rbind,sapply(mappas, strsplit, '[.]'))[,c(2,3,4)]
 	df = data.frame(
 		'genome' = combos[,1],
 		'locusdef' = combos[,2],
 		'read_length' = gsub('mer','',combos[,3]),
-		stringsAsFactors = F)
+		stringsAsFactors = FALSE)
 	return(df)
 }
 
@@ -73,12 +73,12 @@ supported_genesets = function() {
 	piqr = data(package = "chipenrich.data")
 	data_files = piqr$results[,3]
 
-	geneset_files = grep("geneset", data_files, value = T)
+	geneset_files = grep("geneset", data_files, value = TRUE)
 	combos = Reduce(rbind,sapply(geneset_files, strsplit, '[.]'))[,c(2,3)]
 	df = data.frame(
 		'geneset' = combos[,1],
 		'organism' = combos[,2],
-		stringsAsFactors = F)
+		stringsAsFactors = FALSE)
 	df = df[order(df$organism), ]
 	return(df)
 }

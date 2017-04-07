@@ -5,8 +5,8 @@ library(chipenrich)
 #  chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
 #    genome = "hg19", genesets = c("GOBP", "GOCC", "GOMF"),
 #    locusdef = "nearest_tss", method = "chipenrich",
-#    fisher_alt = "two.sided", use_mappability = F, mappa_file = NULL,
-#    read_length = 36, qc_plots = T, max_geneset_size = 2000,
+#    fisher_alt = "two.sided", use_mappability = FALSE, mappa_file = NULL,
+#    read_length = 36, qc_plots = TRUE, max_geneset_size = 2000,
 #    num_peak_threshold = 1, n_cores = 1)
 
 ## ---- warning = FALSE, message = FALSE-----------------------------------
@@ -41,7 +41,7 @@ plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')
 plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19')
 
 ## ---- fig.align='center', fig.cap='E2F4 spline with mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
-plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19', use_mappability = T, read_length = 24)
+plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19', use_mappability = TRUE, read_length = 24)
 
 ## ---- fig.align='center', fig.cap='H3K4me3 gene coverage', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
 plot_gene_coverage(peaks = peaks_H3K4me3_GM12878, locusdef = 'nearest_tss',  genome = 'hg19')
@@ -50,14 +50,14 @@ plot_gene_coverage(peaks = peaks_H3K4me3_GM12878, locusdef = 'nearest_tss',  gen
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path,
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
 
 ## ---- warning = FALSE, message = FALSE-----------------------------------
 # With mappability
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path,
-	locusdef = "nearest_tss", use_mappability=T, read_length=24, qc_plots = F,
+	locusdef = "nearest_tss", use_mappability = TRUE, read_length=24, qc_plots = FALSE,
 	out_name = NULL,n_cores=1)
 results.cem = results$results
 print(results.cem[1:5,1:5])
@@ -65,37 +65,21 @@ print(results.cem[1:5,1:5])
 ## ---- warning = FALSE, message = FALSE-----------------------------------
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'chipenrich_fast',
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
-results.ce = results$results
-print(results.ce[1:5,1:5])
-
-## ---- warning = FALSE, message = FALSE-----------------------------------
-# Without mappability
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich',
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
-results.ce = results$results
-print(results.ce[1:5,1:5])
-
-## ---- warning = FALSE, message = FALSE-----------------------------------
-# Without mappability
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich_fast',
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
 
 ## ---- warning = FALSE, message = FALSE-----------------------------------
 results = chipenrich(peaks = peaks_H3K4me3_GM12878, genesets = gs_path,
-	method='broadenrich', locusdef = "nearest_tss", qc_plots = F,
+	method='broadenrich', locusdef = "nearest_tss", qc_plots = FALSE,
 	out_name = NULL, n_cores=1)
 results.be = results$results
 print(results.be[1:5,1:5])
 
 ## ---- warning = FALSE, message = FALSE-----------------------------------
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, locusdef = "5kb",
-	method = "fet", fisher_alt = "two.sided", qc_plots = F, out_name = NULL)
+	method = "fet", fisher_alt = "two.sided", qc_plots = FALSE, out_name = NULL)
 results.fet = results$results
 print(results.fet[1:5,1:5])
 

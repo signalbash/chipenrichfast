@@ -5,7 +5,7 @@
 \title{Plot probability of peak being assigned to a gene vs. gene length}
 \usage{
 plot_gene_coverage(peaks, locusdef = "nearest_tss", genome = "hg19",
-  use_mappability = F, read_length = 36, legend = T, xlim = NULL)
+  use_mappability = FALSE, read_length = 36, legend = TRUE, xlim = NULL)
 }
 \arguments{
 \item{peaks}{A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,

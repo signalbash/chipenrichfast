@@ -48,7 +48,7 @@ filter_genesets = function(gs_obj, ldef_obj, min_geneset_size = 15, max_geneset_
 #' @return A \code{data.frame} containing \code{gene_id} and \code{mappa} columns.
 read_mappa = function(file_path) {
 
-	d = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
+	d = read.table(file_path, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 	# Check columns.
 	if(!(all(colnames(d) %in% c('mappa','gene_id')))) {
@@ -90,7 +90,7 @@ read_mappa = function(file_path) {
 setup_ldef = function(file_path, genome = NA) {
 
 	message("Reading user-specified gene locus definitions: ", file_path)
-	df = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
+	df = read.table(file_path, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 	# Remove duplicated rows, not duplicated genes.
 	# Some genes will exist on multiple rows because they are split by
@@ -171,7 +171,7 @@ setup_geneset = function(file_path) {
 
 	# Read in flat file.
 	message("Reading user-specified gene set definitions: ", file_path)
-	d = read.table(file_path, sep = "\t", header = T, stringsAsFactors = F)
+	d = read.table(file_path, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 	# Split the gene_id column (second) by the geneset_id column (first)
 	gs = split(d[,2], d[,1])

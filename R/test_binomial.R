@@ -68,7 +68,7 @@ test_binomial = function(geneset, ppg) {
 		"P-value" = pvals,
 		"FDR" = fdr,
 		"Geneset Peak Genes" = r_go_peak_genes,
-		stringsAsFactors = F)
+		stringsAsFactors = FALSE)
 
 	results = results[order(results$P.value), ]
 	return(results)
