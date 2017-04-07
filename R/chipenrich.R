@@ -286,8 +286,8 @@ chipenrich = function(
 
 	######################################################
 	# Assign peaks to genes.
-	message("Assigning peaks to genes with assigned_peak_segments(...) ..")
-	assigned_peaks = assign_peak_segments(peakobj, ldef)
+	message("Assigning peaks to genes with assign_peaks(...) ..")
+	assigned_peaks = assign_peaks(peakobj, ldef, tss)
 
 	peak_genes = unique(assigned_peaks$gene_id)
 
@@ -321,12 +321,6 @@ chipenrich = function(
 		}
 		if (testf == "test_approx") {
 			rtemp = test_func(gobj,ppg,nwp=FALSE,n_cores)
-		}
-		if (testf == "test_gam_nb") {
-			rtemp = test_func(gobj,ppg,n_cores);
-		}
-		if (testf == "test_gam_nb_fast") {
-			rtemp = test_func(gobj,ppg,n_cores);
 		}
 		if (testf == "test_gam_fast") {
 			rtemp = test_func(gobj,ppg,n_cores);

@@ -244,21 +244,6 @@ polyenrich = function(
 	method_name = METHOD_NAMES[[method]]
 
 	############################################################################
-	# Warn user if they are trying to use FET with a
-	# locus definition that might lead to biased results.
-	if (method == "fet") {
-		if (is.character(locusdef) && !locusdef %in% c("1kb","5kb")) {
-			message("Warning: Fisher's exact test should only be used with the 1kb or 5kb locus definition.")
-		}
-	}
-
-	# Warn user if they are using the binomial test.
-	if (method == "binomial") {
-		message("Warning: the binomial test is provided for comparison purposes only.")
-		message("This test will almost always give biased results favoring gene sets with short average locus length.")
-	}
-
-	############################################################################
 	############################################################################
     # Start enrichment process
 	############################################################################
@@ -278,8 +263,8 @@ polyenrich = function(
 
 	######################################################
 	# Assign peaks to genes.
-	message("Assigning peaks to genes with assigned_peak_segments(...) ..")
-	assigned_peaks = assign_peak_segments(peakobj, ldef)
+	message("Assigning peaks to genes with assign_peaks(...) ..")
+	assigned_peaks = assign_peaks(peakobj, ldef, tss)
 
 	peak_genes = unique(assigned_peaks$gene_id)
 
