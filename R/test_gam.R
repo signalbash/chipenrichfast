@@ -12,36 +12,6 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 	# The gpw table will be truncated depending on which geneset type we're in.
 	go_genes = go_genes[go_genes %in% gpw$gene_id]
 
-	if(length(go_genes) < 15) {
-		message(sprintf('Skipping %s because geneset contains less than 15 genes...', go_id))
-		if(method == 'chipenrich') {
-			out = data.frame(
-				"P.value" = NA,
-				"Geneset ID" = NA,
-				"N Geneset Genes" = NA,
-				"Geneset Peak Genes" = NA,
-				"N Geneset Peak Genes" = NA,
-				"Effect" = NA,
-				"Odds.Ratio" = NA,
-				"Geneset Avg Gene Length" = NA,
-				stringsAsFactors = FALSE)
-		} else if (method == 'broadenrich' || method == 'broadenrich_splineless') {
-			out = data.frame(
-				"P.value" = NA,
-				"Geneset ID" = NA,
-				"N Geneset Genes" = NA,
-				"Geneset Peak Genes" = NA,
-				"N Geneset Peak Genes" = NA,
-				"Effect" = NA,
-				"Odds.Ratio" = NA,
-				"Geneset Avg Gene Length" = NA,
-				"Geneset Avg Gene Coverage" = NA,
-				stringsAsFactors = FALSE)
-		}
-
-		return(out)
-	}
-
 	# Background genes and the background presence of a peak
 	b_genes = gpw$gene_id %in% go_genes
 	sg_go = gpw$peak[b_genes]
