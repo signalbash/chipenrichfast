@@ -38,8 +38,7 @@ peak_nearest_tss = function(peaks, tss) {
 #' broadPeak, etc) with the first three columns being chrom, start, and end. The
 #' data frame should have at least 3 columns: chrom, start, and end. Chrom
 #' should follow UCSC convention, e.g. "chrX".
-#' @param genome A string indicating the genome upon which the peaks file is
-#' based. Supported genomes are listed by the \code{\link{supported_genomes}} function.
+#' @param genome One of the \code{supported_genomes()}.
 #'
 #' @return A trellis plot object.
 #'
@@ -48,12 +47,12 @@ peak_nearest_tss = function(peaks, tss) {
 #' # Create histogram of distance from peaks to nearest TSS.
 #' data(peaks_E2F4, package = 'chipenrich.data')
 #' peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-#' plot_dist_to_tss(peaks_E2F4)
+#' plot_dist_to_tss(peaks_E2F4, genome = 'hg19')
 #'
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-plot_dist_to_tss = function(peaks, genome='hg19') {
+plot_dist_to_tss = function(peaks, genome = supported_genomes()) {
 	# Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
 		peakobj = load_peaks(peaks, genome = genome)

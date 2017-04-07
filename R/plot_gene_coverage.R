@@ -26,14 +26,11 @@ avg_binned_coverage = function(gpw, bin_size = 25) {
 #' the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.
 #' @param genome A string indicating the genome upon which the peaks file is
 #' based. Supported genomes are listed by the \code{\link{supported_genomes}} function.
-#' @param use_mappability A logical variable indicating whether to adjust for
-#' mappability. If enabled, this option will use our internally calculated
-#' mappabilities for each gene locus given the length of reads used in the
-#' experiment (see \code{read_length} option). NOTE: If providing a \code{mappa_file}
-#' this parameter should be set to FALSE.
-#' @param read_length If adjusting for mappability, this number specifies the
-#' read length to be used. The read length given here should ideally correspond
-#' to the length of reads from the original experiment.
+#' @param mappability One of \code{NULL}, a file path to a custom mappability file,
+#' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
+#' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
+#' Gene IDs should be Entrez IDs, and mappability values should range from 0 and 1.
+#' Default value is NULL.
 #' @param legend If true, a legend will be drawn on the plot.
 #' @param xlim Set the x-axis limit. NULL means select x-lim automatically.
 #'
@@ -44,59 +41,24 @@ avg_binned_coverage = function(gpw, bin_size = 25) {
 #' # Spline plot for E2F4 example peak dataset.
 #' data(peaks_E2F4, package = 'chipenrich.data')
 #' peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-#' plot_gene_coverage(peaks_E2F4)
+#' plot_gene_coverage(peaks_E2F4, genome = 'hg19')
 #'
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-plot_gene_coverage = function(peaks, locusdef = "nearest_tss", genome = 'hg19', use_mappability = FALSE, read_length = 36, legend = TRUE, xlim = NULL) {
-	# Check genome.
-	if (!genome %in% supported_genomes()) {
-		stop("genome not supported: ",genome)
-	}
+plot_gene_coverage = function(peaks, locusdef = "nearest_tss", genome = supported_genomes(), mappability = NULL, legend = TRUE, xlim = NULL) {
+	genome = match.arg(genome)
 
-	# Check locus definition. Should only be 1.
-	if (!any(supported_locusdefs()$genome == genome & supported_locusdefs()$locusdef == locusdef)) {
-		stop(
-			sprintf("Error: invalid genome / definition combination requested: %s %s",
-				genome, locusdef
-			)
-		)
-	}
+	ldef_list = setup_locusdef(locusdef, genome)
+	ldef = ldef_list[['ldef']]
 
-	# Check read length.
-	if (use_mappability) {
-		if (!any(supported_read_lengths()$genome == genome & supported_read_lengths()$locusdef == locusdef & supported_read_lengths()$read_length == as.numeric(read_length))) {
-			stop(
-				sprintf("Error: bad genome / locusdef / read length combination requested: %s %s %s",
-					genome, locusdef, read_length)
-			)
-		}
-	}
+	mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
 
 	# Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
 		peakobj = load_peaks(peaks, genome = genome)
 	} else if (class(peaks) == "character") {
 		peakobj = read_bed(peaks, genome = genome)
-	}
-
-	# Number of peaks in data.
-	num_peaks = sum(sapply(peakobj,function(x) length(x)))
-
-	# Load locus definitions.
-	ldef_code = sprintf("locusdef.%s.%s", genome, locusdef)
-	data(list = ldef_code, package = "chipenrich.data", envir = environment())
-	ldef = get(ldef_code)
-
-	# Load mappability if requested.
-	if (use_mappability) {
-		mappa_code = sprintf("mappa.%s.%s.%imer", genome, locusdef, read_length)
-		data(list = mappa_code, package = "chipenrich.data", envir = environment())
-		mappa = get(mappa_code)
-		colnames(mappa) = c('gene_id', 'mappa')
-	} else {
-		mappa = NULL
 	}
 
 	# Assign peaks to genes.

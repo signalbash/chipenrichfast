@@ -4,8 +4,9 @@
 \alias{plot_spline_length}
 \title{Plot probability of peak being assigned to a gene vs. gene length}
 \usage{
-plot_spline_length(peaks, locusdef = "nearest_tss", genome = "hg19",
-  use_mappability = FALSE, read_length = 36, legend = TRUE, xlim = NULL)
+plot_spline_length(peaks, locusdef = "nearest_tss",
+  genome = supported_genomes(), mappability = NULL, legend = TRUE,
+  xlim = NULL)
 }
 \arguments{
 \item{peaks}{A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,
@@ -22,15 +23,11 @@ the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.}
 \item{genome}{A string indicating the genome upon which the peaks file is
 based. Supported genomes are listed by the \code{\link{supported_genomes}} function.}
 
-\item{use_mappability}{A logical variable indicating whether to adjust for
-mappability. If enabled, this option will use our internally calculated
-mappabilities for each gene locus given the length of reads used in the
-experiment (see \code{read_length} option). NOTE: If providing a \code{mappa_file}
-this parameter should be set to FALSE.}
-
-\item{read_length}{If adjusting for mappability, this number specifies the
-read length to be used. The read length given here should ideally correspond
-to the length of reads from the original experiment.}
+\item{mappability}{One of \code{NULL}, a file path to a custom mappability file,
+or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
+If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
+Gene IDs should be Entrez IDs, and mappability values should range from 0 and 1.
+Default value is NULL.}
 
 \item{legend}{If true, a legend will be drawn on the plot.}
 
@@ -50,7 +47,7 @@ smoothing spline.
 data(peaks_E2F4, package = 'chipenrich.data')
 peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
 
-plot_spline_length(peaks_E2F4,genome='hg19')
+plot_spline_length(peaks_E2F4, genome='hg19')
 
 # Create the plot for a different locus definition
 # to compare the effect.
