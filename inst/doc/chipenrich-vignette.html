@@ -63,7 +63,12 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#locus-definitions"><span class="toc-section-number">2.2</span> Locus Definitions</a></li>
 <li><a href="#gene-sets"><span class="toc-section-number">2.3</span> Gene Sets</a></li>
 <li><a href="#mappability"><span class="toc-section-number">2.4</span> Mappability</a></li>
-<li><a href="#methods-for-gse"><span class="toc-section-number">2.5</span> Methods for GSE</a></li>
+<li><a href="#methods-for-gse"><span class="toc-section-number">2.5</span> Methods for GSE</a><ul>
+<li><a href="#broadenrich"><span class="toc-section-number">2.5.1</span> <code>broadenrich()</code></a></li>
+<li><a href="#chipenrich"><span class="toc-section-number">2.5.2</span> <code>chipenrich()</code></a></li>
+<li><a href="#polyenrich"><span class="toc-section-number">2.5.3</span> <code>polyenrich()</code></a></li>
+<li><a href="#choosing-a-method"><span class="toc-section-number">2.5.4</span> Choosing a method</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#implementation"><span class="toc-section-number">3</span> Implementation</a><ul>
 <li><a href="#peaks-1"><span class="toc-section-number">3.1</span> Peaks</a></li>
@@ -81,9 +86,9 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#custom-mappability"><span class="toc-section-number">3.5.2</span> Custom mappability</a></li>
 </ul></li>
 <li><a href="#testing-for-enrichment"><span class="toc-section-number">3.6</span> Testing for enrichment</a><ul>
-<li><a href="#broadenrich"><span class="toc-section-number">3.6.1</span> <code>broadenrich()</code></a></li>
-<li><a href="#chipenrich"><span class="toc-section-number">3.6.2</span> <code>chipenrich()</code></a></li>
-<li><a href="#polyenrich"><span class="toc-section-number">3.6.3</span> <code>polyenrich()</code></a></li>
+<li><a href="#broadenrich-1"><span class="toc-section-number">3.6.1</span> <code>broadenrich()</code></a></li>
+<li><a href="#chipenrich-1"><span class="toc-section-number">3.6.2</span> <code>chipenrich()</code></a></li>
+<li><a href="#polyenrich-1"><span class="toc-section-number">3.6.3</span> <code>polyenrich()</code></a></li>
 <li><a href="#qc-plots"><span class="toc-section-number">3.6.4</span> QC Plots</a></li>
 <li><a href="#output"><span class="toc-section-number">3.6.5</span> Output</a></li>
 </ul></li>
@@ -104,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </div>
 <div id="concepts" class="section level1">
 <h1><span class="header-section-number">2</span> Concepts</h1>
-<p>This section defines terms frequently used in the package.</p>
+<p>This section defines terms and methods used in the package.</p>
 <div id="peaks" class="section level2">
 <h2><span class="header-section-number">2.1</span> Peaks</h2>
 <p>A ChIP-seq peak is a genomic region that represents a transcription factor binding event or the presence of a histone complex with a particular histone modification. Typically peaks are called with a peak caller (such as <a href="https://github.com/taoliu/MACS">MACS2</a> or <a href="https://github.com/shawnzhangyx/PePr/">PePr</a>) and represent relative enrichment of reads in a sample where the antibody is present versus input. Typically, peaks are output by a peak caller in <a href="https://genome.ucsc.edu/FAQ/FAQformat.html"><code>BED</code>-like</a> format.</p>
@@ -130,12 +135,22 @@ M_{i} = (\frac{1}{2K-1}) \sum_{j=i-K+1}^{i+(K-1)} M_{j}
 <div id="methods-for-gse" class="section level2">
 <h2><span class="header-section-number">2.5</span> Methods for GSE</h2>
 <p>As stated in the introduction, the <code>chipenrich</code> package includes three classes of methods for doing gene set enrichment testing:</p>
-<ul>
-<li><code>broadenrich()</code> is designed for use with histone modification (HM) based ChIP-seq data resulting in broad peaks.</li>
-<li><code>chipenrich()</code> is designed for use with transcription factor (TF) based ChIP-seq data resulting in narrow peaks.</li>
-<li><code>polyenrich()</code> is also designed for TF data resulting in narrow peaks, but where the number of peaks in a gene may be of regulatory importance.</li>
-</ul>
+<div id="broadenrich" class="section level3">
+<h3><span class="header-section-number">2.5.1</span> <code>broadenrich()</code></h3>
+<p>Broad-Enrich is designed for broad genomic regions, as one often gets from ChIP-seq experiments on histone modifications. The Broad-Enrich method uses the cumulative peak coverage of genes in its logistic regression model for enrichment: <code>GO ~ ratio + s(log10_length)</code>. Here, <code>GO</code> is a binary vector indicating whether a gene is in the gene set being tested, <code>ratio</code> is a numeric vector indicating the ratio of the gene covered by peaks, and <code>s(log10_length)</code> is a binomial cubic smoothing spline which adjusts for the relationship between gene coverage and locus length.</p>
+</div>
+<div id="chipenrich" class="section level3">
+<h3><span class="header-section-number">2.5.2</span> <code>chipenrich()</code></h3>
+<p>ChIP-Enrich is designed for datasets with narrow peaks. The ChIP-Enrich method uses the presence of a peak in its logistic regression model for enrichment: <code>peak ~ GO + s(log10_length)</code>. Here, <code>GO</code> is a binary vector indicating whether a gene is in the gene set being tested, <code>peak</code> is a binary vector indicating the presence of a peak in a gene, and <code>s(log10_length)</code> is a binomial cubic smoothing spline which adjusts for the relationship between the presence of a peak and locus length.</p>
+</div>
+<div id="polyenrich" class="section level3">
+<h3><span class="header-section-number">2.5.3</span> <code>polyenrich()</code></h3>
+<p>Poly-Enrich is designed for datasets where multiple peaks in a gene should be taken into account. The Poly-Enrich method uses the number of peaks in genes in its logistic regression model for enrichment: <code>num_peaks ~ GO + s(log10_length)</code>. Here, <code>GO</code> is a binary vector indicating whether a gene is in the gene set being tested, <code>num_peaks</code> is a numeric vector indicating the number of peaks in each gene, and <code>s(log10_length)</code> is a binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.</p>
+</div>
+<div id="choosing-a-method" class="section level3">
+<h3><span class="header-section-number">2.5.4</span> Choosing a method</h3>
 <p>HERE IS WHERE WE’D TALK ABOUT RECOMMENDATIONS FOR WHICH METHOD TO USE…?</p>
+</div>
 </div>
 </div>
 <div id="implementation" class="section level1">
@@ -208,7 +223,7 @@ head(supported_locusdefs())</code></pre>
 </div>
 <div id="custom-locus-definitions" class="section level3">
 <h3><span class="header-section-number">3.3.2</span> Custom locus definitions</h3>
-<p>Users can create custom locus definitions for any of the <code>supported_genomes()</code>, and pass the file path as the value of the <code>locusdef</code> parameter in <code>broadenrich()</code>, <code>chipenrich()</code>, or <code>polyenrich()</code>. Custom locus definitions should be defined a tab-delimited text files with column names <code>chr</code>, <code>start</code>, <code>end</code>, and <code>gene_id</code>. For example:</p>
+<p>Users can create custom locus definitions for any of the <code>supported_genomes()</code>, and pass the file path as the value of the <code>locusdef</code> parameter in <code>broadenrich()</code>, <code>chipenrich()</code>, or <code>polyenrich()</code>. Custom locus definitions should be defined in a tab-delimited text file with column names <code>chr</code>, <code>start</code>, <code>end</code>, and <code>gene_id</code>. For example:</p>
 <pre class="r"><code>chr start   end geneid
 chr1    839460  839610  148398
 chr1    840040  840190  148398
@@ -287,7 +302,7 @@ head(supported_read_lengths())</code></pre>
 <li><code>polyenrich()</code> is also designed for TF data resulting in narrow peaks, but where the number of peaks in a gene may be of regulatory importance.</li>
 </ul>
 <p>Below are examples of calls to each function.</p>
-<div id="broadenrich" class="section level3">
+<div id="broadenrich-1" class="section level3">
 <h3><span class="header-section-number">3.6.1</span> <code>broadenrich()</code></h3>
 <pre class="r"><code>gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = broadenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
@@ -301,7 +316,7 @@ print(results.be[1:5,1:5])</code></pre>
 ## 4 user-supplied GO:0009314  GO:0009314 0.26867389 0.7495913
 ## 5 user-supplied GO:0022411  GO:0022411 0.29579774 0.7495913</code></pre>
 </div>
-<div id="chipenrich" class="section level3">
+<div id="chipenrich-1" class="section level3">
 <h3><span class="header-section-number">3.6.2</span> <code>chipenrich()</code></h3>
 <pre class="r"><code># Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
@@ -329,7 +344,7 @@ print(results.cem[1:5,1:5])</code></pre>
 ## 4 user-supplied GO:0009314  GO:0009314 0.2623509 0.6027728
 ## 5 user-supplied GO:0034660  GO:0034660 0.3303583 0.6027728</code></pre>
 </div>
-<div id="polyenrich" class="section level3">
+<div id="polyenrich-1" class="section level3">
 <h3><span class="header-section-number">3.6.3</span> <code>polyenrich()</code></h3>
 <pre class="r"><code>gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  method = 'polyenrich',
