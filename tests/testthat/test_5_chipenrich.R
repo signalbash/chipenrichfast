@@ -52,8 +52,8 @@ test_that('Test polyenrich_slow method', {
 })
 
 test_that('Test broadenrich method', {
-	results = suppressWarnings(chipenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
-		method='broadenrich', locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores=1))
+	results = suppressWarnings(broadenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
+		locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores=1))
 
 	expect_equal(class(results), 'list')
 })
