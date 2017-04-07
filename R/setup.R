@@ -46,11 +46,11 @@ filter_genesets = function(gs_obj, ldef_obj, min_geneset_size = 15, max_geneset_
 #' must have columns 'chr', 'start', 'end', and 'gene_id', or 'geneid'.
 #' @param genome One of the \code{supported_genomes()}.
 #' @param randomization One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
-#' See the Randomizations section in \code{?chipenrich}.
+#' See the Randomizations section in \code{?chipenrich}. Default NULL.
 #'
 #' @return A list with components \code{ldef} and \code{tss}.
 #' @include randomize.R
-setup_locusdef = function(ldef_code, genome, randomization) {
+setup_locusdef = function(ldef_code, genome, randomization = NULL) {
 	user_defined_ldef = file.exists(ldef_code)
 
 	if (user_defined_ldef) {
