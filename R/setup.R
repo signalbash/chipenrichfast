@@ -28,7 +28,7 @@ filter_genesets = function(gs_obj, ldef_obj, min_geneset_size = 15, max_geneset_
 	tmp_set.gene = as.list(gs_obj@set.gene)
 
 	tmp_set.gene = lapply(tmp_set.gene, function(gs){intersect(ldef_gene_ids, gs)})
-	tmp_set.gene = Filter(function(gs) length(gs) > min_geneset_size, tmp_set.gene)
+	tmp_set.gene = Filter(function(gs) length(gs) >= min_geneset_size, tmp_set.gene)
 	tmp_set.gene = Filter(function(gs) length(gs) <= max_geneset_size, tmp_set.gene)
 
 	gs_obj@set.gene = as.environment(tmp_set.gene)
