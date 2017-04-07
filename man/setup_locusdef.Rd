@@ -4,7 +4,7 @@
 \alias{setup_locusdef}
 \title{Function to setup locus definitions}
 \usage{
-setup_locusdef(ldef_code, genome, randomization)
+setup_locusdef(ldef_code, genome, randomization = NULL)
 }
 \arguments{
 \item{ldef_code}{One of 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
@@ -16,7 +16,7 @@ must have columns 'chr', 'start', 'end', and 'gene_id', or 'geneid'.}
 \item{genome}{One of the \code{supported_genomes()}.}
 
 \item{randomization}{One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
-See the Randomizations section in \code{?chipenrich}.}
+See the Randomizations section in \code{?chipenrich}. Default NULL.}
 }
 \value{
 A list with components \code{ldef} and \code{tss}.
