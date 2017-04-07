@@ -4,14 +4,39 @@ os = Sys.info()[1]
 #' Run ChIP-Enrich on a dataset of ChIP-seq peaks
 #'
 #' Run gene set enrichment testing with the ChIP-Enrich method. ChIP-Enrich is
-#' designed for datasets with narrow peaks.
+#' designed for datasets with narrow peaks. For more details, see the ChIP-Enrich
+#' Method section below.
 #'
+#' @section ChIP-Enrich Method:
 #' The ChIP-Enrich method uses the presence of a peak in its model for enrichment:
 #' \code{peak ~ GO + s(log10_length)}. Here, \code{GO} is a binary vector indicating
 #' whether a gene is in the gene set being tested, \code{peak} is a binary vector
 #' indicating the presence of a peak in a gene, and \code{s(log10_length)} is a
 #' binomial cubic smoothing spline which adjusts for the relationship between the
 #' presence of a peak and locus length.
+#'
+#' @section Randomizations:
+#' Randomization of locus definitions allows for the assessment of Type I Error
+#' under the null hypothesis. The randomization codes are:
+#' \describe{
+#'	\item{\code{NULL}:}{ No randomizations, the default.}
+#' 	\item{'complete':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
+#' \code{locusdef} without regard for the chromosome location, or locus length.
+#' The null hypothesis is that there is no true gene set enrichment.}
+#' 	\item{'bylength':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
+#' \code{locusdef} within bins of 100 genes sorted by locus length. The null
+#' hypothesis is that there is no true gene set enrichment, but with preserved locus
+#' length relationship.}
+#' 	\item{'bylocation':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
+#' \code{locusdef} within bins of 50 genes sorted by genomic location. The null
+#' hypothesis is that there is no true gene set enrichment, but with preserved
+#' genomic location.}
+#' }
+#' The result of the function with a selected randomization is the same as without.
+#' To assess the Type I error, the \code{alpha} level for the particular data set
+#' can be calculated by dividing the total number of gene sets with p-value < 0.05
+#' by the total number of tests. Users may want to perform multiple randomizations
+#' for a set of peaks and take the median of the \code{alpha} values.
 #'
 #' @param peaks Either a file path or a \code{data.frame} of peaks in BED-like
 #' format. If a file path, the following formats are fully supported via their
@@ -62,6 +87,8 @@ os = Sys.info()[1]
 #' @param num_peak_threshold Sets the threshold for how many peaks a gene must
 #' have to be considered as having a peak. Defaults to 1. Only relevant for
 #' Fisher's exact test and ChIP-Enrich methods.
+#' @param randomization One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
+#' See the Randomizations section below.
 #' @param n_cores The number of cores to use for enrichment testing. We recommend
 #' using only up to the maximum number of \emph{physical} cores present, as
 #' virtual cores do not significantly decrease runtime. Default number of cores
@@ -163,6 +190,7 @@ chipenrich = function(
 	min_geneset_size = 15,
 	max_geneset_size = 2000,
 	num_peak_threshold = 1,
+	randomization = NULL,
 	n_cores = 1
 ) {
 	genome = match.arg(genome)
@@ -177,22 +205,6 @@ chipenrich = function(
 		values = as.character(opts_list),
 		stringsAsFactors = FALSE
 	)
-
-	############################################################################
-	# Deal with randomizations if present
-	# Randomizations are accessed by appending _rndall or _rndlength to
-	# the geneset names. Parsing is done here.
-	rndall = all(grepl('rndall',genesets))
-	rndlength = all(grepl('rndlength',genesets))
-	rndloc = all(grepl('rndloc',genesets))
-
-	if(rndall) {
-		genesets = gsub('_rndall','',genesets)
-	} else if (rndlength) {
-		genesets = gsub('_rndlength','',genesets)
-	} else if (rndloc) {
-		genesets = gsub('_rndloc','',genesets)
-	}
 
 	############################################################################
 	############################################################################
@@ -214,12 +226,9 @@ chipenrich = function(
 	############################################################################
 	############################################################################
 
-	ldef_list = setup_locusdef(locusdef, genome, rndloc)
+	ldef_list = setup_locusdef(locusdef, genome, randomization)
 	ldef = ldef_list[['ldef']]
 	tss = ldef_list[['tss']]
-	if(rndloc) {
-		ldef = randomize_locusdef(ldef, 50)
-	}
 
 	geneset_list = setup_genesets(gs_codes = genesets, ldef_obj = ldef, genome = genome, min_geneset_size = min_geneset_size, max_geneset_size = max_geneset_size)
 
@@ -292,17 +301,6 @@ chipenrich = function(
 	if(method == 'chipapprox') {
 		message("Calculating weights for approximate method..")
 		ppg = calc_approx_weights(ppg,mappa)
-	}
-
-	######################################################
-	# Randomize ppg table if randomization API invoked
-	# Catch randomizations if present
-	if(rndall) {
-		message('Randomizing across all genes.')
-		ppg = randomize_ppg_all(ppg)
-	} else if (rndlength) {
-		message('Randomizing within length bins.')
-		ppg = randomize_ppg_length(ppg)
 	}
 
 	######################################################
