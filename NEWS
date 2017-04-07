@@ -50,9 +50,6 @@ SIGNIFICANT USER-LEVEL CHANGES
       are bed, gff3, wig, bedGraph, narrowPeak, and broadPeak. Arbitrary extensions
       are also supported, but there can be no header, and the first three columns
       must be chr, start, and end.
-      
-    o Add minimum geneset filter methods so that genesets with < 15 genes are not
-      tested. Logistic regression has convergence problems for such small genesets.
 
     o Refactor randomize_locusdef() to be much faster.
 
@@ -83,6 +80,9 @@ SIGNIFICANT BACKEND CHANGES
           peaks for possible use in future methods.
 
     o Refactor load_peaks() to use GenomicRanges::makeGRangesFromDataFrame().
+
+    o Filtering gene sets is now based on the locus definition, and can be done
+      from below (min) or above (max). Defaults are 15 and 2000, respectively.
 
     o Added lots of unit tests to increase test coverage.
 
