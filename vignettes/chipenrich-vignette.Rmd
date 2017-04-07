@@ -22,7 +22,7 @@ The `chipenrich` package includes three classes of methods that adjust for this 
 
 # Concepts
 
-This section defines terms frequently used in the package.
+This section defines terms and methods used in the package.
 
 ## Peaks
 
@@ -52,9 +52,19 @@ where $M_{i}$ is the mappability of base pair $i$, and $M_{j}$ is mappability (f
 
 As stated in the introduction, the `chipenrich` package includes three classes of methods for doing gene set enrichment testing:
 
-* `broadenrich()` is designed for use with histone modification (HM) based ChIP-seq data resulting in broad peaks.
-* `chipenrich()` is designed for use with transcription factor (TF) based ChIP-seq data resulting in narrow peaks.
-* `polyenrich()` is also designed for TF data resulting in narrow peaks, but where the number of peaks in a gene may be of regulatory importance.
+### `broadenrich()`
+
+Broad-Enrich is designed for broad genomic regions, as one often gets from ChIP-seq experiments on histone modifications. The Broad-Enrich method uses the cumulative peak coverage of genes in its logistic regression model for enrichment: `GO ~ ratio + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `ratio` is a numeric vector indicating the ratio of the gene covered by peaks, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between gene coverage and locus length.
+
+### `chipenrich()`
+
+ChIP-Enrich is designed for datasets with narrow peaks. The ChIP-Enrich method uses the presence of a peak in its logistic regression model for enrichment: `peak ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `peak` is a binary vector indicating the presence of a peak in a gene, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between the presence of a peak and locus length.
+
+### `polyenrich()`
+
+Poly-Enrich is designed for datasets where multiple peaks in a gene should be taken into account. The Poly-Enrich method uses the number of peaks in genes in its logistic regression model for enrichment: `num_peaks ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `num_peaks` is a numeric vector indicating the number of peaks in each gene, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.
+
+### Choosing a method
 
 HERE IS WHERE WE'D TALK ABOUT RECOMMENDATIONS FOR WHICH METHOD TO USE...?
 
@@ -126,7 +136,7 @@ head(supported_locusdefs())
 
 ### Custom locus definitions
 
-Users can create custom locus definitions for any of the `supported_genomes()`, and pass the file path as the value of the `locusdef` parameter in `broadenrich()`, `chipenrich()`, or `polyenrich()`. Custom locus definitions should be defined a tab-delimited text files with column names `chr`, `start`, `end`, and `gene_id`. For example:
+Users can create custom locus definitions for any of the `supported_genomes()`, and pass the file path as the value of the `locusdef` parameter in `broadenrich()`, `chipenrich()`, or `polyenrich()`. Custom locus definitions should be defined in a tab-delimited text file with column names `chr`, `start`, `end`, and `gene_id`. For example:
 
 ```{r, eval=FALSE}
 chr	start	end	geneid
