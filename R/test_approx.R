@@ -22,7 +22,7 @@ single_approx = function(go_id, geneset, gpw) {
 	sg_go = gpw$peak[b_genes]
 	wg_go = gpw$weight[b_genes]
 
- 	# Information about the geneset
+	# Information about the geneset
 	r_go_id = go_id
 	r_go_genes_num = length(go_genes)
 	r_go_genes_avg_length = mean(gpw$length[b_genes])

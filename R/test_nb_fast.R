@@ -8,7 +8,7 @@ test_gam_nb_fast = function(geneset,gpw,n_cores) {
 		stop("Error: no peaks in your data!");
 	}
 	fitspl = gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
-	as.numeric(predict(fitspl, gpw, type="terms"))->gpw$spline
+	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
 
 
 	# Construct model formula.
@@ -78,31 +78,6 @@ single_gam_nb_fast = function(go_id, geneset, gpw, fitspl, method, model) {
 	go_genes_peak = gpw$gene_id[b_genes][sg_go==1];
 	r_go_genes_peak = paste(go_genes_peak,collapse=", ");
 	r_go_genes_peak_num = length(go_genes_peak);
-
-	# Small correction for case where every gene in this geneset has a peak.
-	if (all(as.logical(sg_go))) {
-		cont_length = quantile(gpw$length,0.0025);
-
-		if (method == "nbspeed") {
-			cont_gene = data.frame(
-				gene_id = "continuity_correction",
-				length = cont_length,
-				log10_length = log10(cont_length),
-				num_peaks = 0,
-				peak = 0,
-				stringsAsFactors = FALSE
-			);
-			as.numeric(predict(fitspl, cont_gene, type="terms"))->cont_gene$spline
-		}
-
-		if ("mappa" %in% names(gpw)) {
-			cont_gene$mappa = 1;
-		}
-		gpw = rbind(gpw,cont_gene);
-		b_genes = c(b_genes,1);
-
-		message(sprintf("Applying correction for geneset %s with %i genes...",go_id,length(go_genes)));
-	}
 
 	# Logistic regression works no matter the method because final_model is chosen above
 	# and the data required from gpw will automatically be correct based on the method used.
