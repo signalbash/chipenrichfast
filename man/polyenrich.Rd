@@ -8,7 +8,7 @@ polyenrich(peaks, out_name = "polyenrich", out_path = getwd(),
   genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
   locusdef = "nearest_tss", method = "polyenrich", mappability = NULL,
   qc_plots = TRUE, min_geneset_size = 15, max_geneset_size = 2000,
-  n_cores = 1)
+  randomization = NULL, n_cores = 1)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
@@ -63,6 +63,9 @@ to be considered for enrichment testing.}
 
 \item{max_geneset_size}{Sets the maximum number of genes a gene set may have
 to be considered for enrichment testing.}
+
+\item{randomization}{One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
+See the Randomizations section below.}
 
 \item{n_cores}{The number of cores to use for enrichment testing. We recommend
 using only up to the maximum number of \emph{physical} cores present, as
@@ -131,8 +134,10 @@ frame.) The columns are:
 \description{
 Run gene set enrichment testing with the Poly-Enrich method. Poly-Enrich is
 designed for datasets where multiple peaks in a gene should be taken into account.
+For more details, see the Poly-Enrich Method section below.
 }
-\details{
+\section{Poly-Enrich Method}{
+
 The Poly-Enrich method uses the number of peaks in genes in its model for
 enrichment: \code{num_peaks ~ GO + s(log10_length)}. Here, \code{GO} is a
 binary vector indicating whether a gene is in the gene set being tested,
@@ -141,6 +146,32 @@ gene, and \code{s(log10_length)} is a binomial cubic smoothing spline which
 adjusts for the relationship between the number of peaks in a gene and locus
 length.
 }
+
+\section{Randomizations}{
+
+Randomization of locus definitions allows for the assessment of Type I Error
+under the null hypothesis. The randomization codes are:
+\describe{
+\item{\code{NULL}:}{ No randomizations, the default.}
+	\item{'complete':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
+\code{locusdef} without regard for the chromosome location, or locus length.
+The null hypothesis is that there is no true gene set enrichment.}
+	\item{'bylength':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
+\code{locusdef} within bins of 100 genes sorted by locus length. The null
+hypothesis is that there is no true gene set enrichment, but with preserved locus
+length relationship.}
+	\item{'bylocation':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
+\code{locusdef} within bins of 50 genes sorted by genomic location. The null
+hypothesis is that there is no true gene set enrichment, but with preserved
+genomic location.}
+}
+The result of the function with a selected randomization is the same as without.
+To assess the Type I error, the \code{alpha} level for the particular data set
+can be calculated by dividing the total number of gene sets with p-value < 0.05
+by the total number of tests. Users may want to perform multiple randomizations
+for a set of peaks and take the median of the \code{alpha} values.
+}
+
 \examples{
 
 # Run Poly-Enrich using an example dataset, assigning peaks to the nearest TSS,
