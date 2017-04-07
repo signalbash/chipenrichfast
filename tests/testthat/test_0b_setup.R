@@ -18,16 +18,16 @@ test_that('Filter genesets works for nearest_tss', {
 	data(geneset.GOBP.hsa, package='chipenrich.data')
 	filtered = filter_genesets(geneset.GOBP.hsa, locusdef.hg19.nearest_tss, 15, 100)
 
-	expect_equal(min(sapply(as.list(filtered@set.gene), length)), 15)
+	expect_equal(min(sapply(as.list(filtered@set.gene), length)),15)
 	expect_equal(max(sapply(as.list(filtered@set.gene), length)), 100)
 })
 
 test_that('Filter genesets works for 5kb', {
 	data(locusdef.hg19.5kb, package='chipenrich.data')
 	data(geneset.GOBP.hsa, package='chipenrich.data')
-	filtered = filter_genesets(geneset.GOBP.hsa, locusdef.hg19.5kb, 15, 100)
+	filtered = filter_genesets(geneset.GOBP.hsa, locusdef.hg19.5kb, 20, 100)
 
-	expect_equal(min(sapply(as.list(filtered@set.gene), length)), 15)
+	expect_equal(min(sapply(as.list(filtered@set.gene), length)), 20)
 	expect_equal(max(sapply(as.list(filtered@set.gene), length)), 100)
 })
 
