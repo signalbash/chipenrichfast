@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
-<meta name="date" content="2017-04-04" />
+<meta name="date" content="2017-04-07" />
 
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><code>chipenrich</code>: Gene Set Enrichment For ChIP-seq Peak Data</h1>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
-<h4 class="date"><em>2017-04-04</em></h4>
+<h4 class="date"><em>2017-04-07</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#polyenrich"><span class="toc-section-number">2.5.3</span> <code>polyenrich()</code></a></li>
 <li><a href="#choosing-a-method"><span class="toc-section-number">2.5.4</span> Choosing a method</a></li>
 </ul></li>
+<li><a href="#assessing-type-i-error-with-randomizations"><span class="toc-section-number">2.6</span> Assessing Type I Error with Randomizations</a></li>
 </ul></li>
 <li><a href="#implementation"><span class="toc-section-number">3</span> Implementation</a><ul>
 <li><a href="#peaks-1"><span class="toc-section-number">3.1</span> Peaks</a></li>
@@ -92,6 +93,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#qc-plots"><span class="toc-section-number">3.6.4</span> QC Plots</a></li>
 <li><a href="#output"><span class="toc-section-number">3.6.5</span> Output</a></li>
 </ul></li>
+<li><a href="#assessing-type-i-error-with-randomizations-1"><span class="toc-section-number">3.7</span> Assessing Type I Error with Randomizations</a></li>
 </ul></li>
 <li><a href="#references"><span class="toc-section-number">4</span> References</a></li>
 </ul>
@@ -151,6 +153,16 @@ M_{i} = (\frac{1}{2K-1}) \sum_{j=i-K+1}^{i+(K-1)} M_{j}
 <h3><span class="header-section-number">2.5.4</span> Choosing a method</h3>
 <p>HERE IS WHERE WE’D TALK ABOUT RECOMMENDATIONS FOR WHICH METHOD TO USE…?</p>
 </div>
+</div>
+<div id="assessing-type-i-error-with-randomizations" class="section level2">
+<h2><span class="header-section-number">2.6</span> Assessing Type I Error with Randomizations</h2>
+<p>Randomization of locus definitions allows for the assessment of Type I Error under the null hypothesis of no true gene set enrichment. A well-calibrated Type I Error means that the false positive rate is controlled, and the p-values reported for actual data can be trusted. In both Welch &amp; Lee, et al. and Cavalcante, et al., we demonstrated that both <code>chipenrich()</code> and <code>broadenrich()</code> have well-calibrated Type I Error over dozens of publicly available ENCODE ChIP-seq datasets. Unpublished data suggests the same is true for <code>polyenrich()</code>.</p>
+<p>We have implemented three types of randomizations,</p>
+<ul>
+<li><code>complete</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> without regard for the chromosome location, or locus length. The null hypothesis is that there is no true gene set enrichment. An incorrect Type I error with this randomization indicates that a different enrichment test should be used.</li>
+<li><code>bylength</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> within bins of 100 genes sorted by locus length. The null hypothesis is that there is no true gene set enrichment, but with preserved locus length relationship. An incorrect Type I Error with this randomization indicates that the relationship between the presence of a peak and the locus length is influencing the Type I Error.</li>
+<li><code>bylocation</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> within bins of 50 genes sorted by genomic location. The null hypothesis is that there is no true gene set enrichment, but with preserved genomic location. An incorrect Type I Error with this randomization indicates that the genomic proximity of genes is influencing the Type I Error.</li>
+</ul>
 </div>
 </div>
 <div id="implementation" class="section level1">
@@ -325,11 +337,11 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 results.ce = results$results
 print(results.ce[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR
-## 1 user-supplied GO:0031400  GO:0031400 0.1425230 0.5620143
-## 2 user-supplied GO:0006631  GO:0006631 0.1602161 0.5620143
-## 3 user-supplied GO:0009101  GO:0009101 0.2760445 0.6322746
-## 4 user-supplied GO:0009314  GO:0009314 0.2795370 0.6322746
-## 5 user-supplied GO:0034660  GO:0034660 0.4013628 0.7167192</code></pre>
+## 1 user-supplied GO:0031400  GO:0031400 0.1344425 0.5598736
+## 2 user-supplied GO:0006631  GO:0006631 0.1547015 0.5598736
+## 3 user-supplied GO:0009314  GO:0009314 0.2704825 0.6842537
+## 4 user-supplied GO:0034660  GO:0034660 0.3654230 0.7027365
+## 5 user-supplied GO:0009101  GO:0009101 0.4005325 0.7152366</code></pre>
 <pre class="r"><code># With mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
@@ -338,11 +350,11 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 results.cem = results$results
 print(results.cem[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR
-## 1 user-supplied GO:0031400  GO:0031400 0.1314230 0.5118080
-## 2 user-supplied GO:0006631  GO:0006631 0.1417427 0.5118080
-## 3 user-supplied GO:0009101  GO:0009101 0.2479694 0.6027728
-## 4 user-supplied GO:0009314  GO:0009314 0.2623509 0.6027728
-## 5 user-supplied GO:0034660  GO:0034660 0.3303583 0.6027728</code></pre>
+## 1 user-supplied GO:0031400  GO:0031400 0.1249852 0.5225012
+## 2 user-supplied GO:0006631  GO:0006631 0.1355100 0.5225012
+## 3 user-supplied GO:0009314  GO:0009314 0.2530977 0.6548747
+## 4 user-supplied GO:0034660  GO:0034660 0.3110882 0.6548747
+## 5 user-supplied GO:0009101  GO:0009101 0.3667298 0.6548747</code></pre>
 </div>
 <div id="polyenrich-1" class="section level3">
 <h3><span class="header-section-number">3.6.3</span> <code>polyenrich()</code></h3>
@@ -352,11 +364,11 @@ results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  m
 results.pe = results$results
 print(results.pe[1:5,1:5])</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR
-## 1 user-supplied GO:0009314  GO:0009314 0.1574747 0.6345429
-## 2 user-supplied GO:0031400  GO:0031400 0.1899251 0.6345429
-## 3 user-supplied GO:0009101  GO:0009101 0.4588630 0.7647716
-## 4 user-supplied GO:0008015  GO:0008015 0.5232152 0.7804262
-## 5 user-supplied GO:0003013  GO:0003013 0.5306898 0.7804262</code></pre>
+## 1 user-supplied GO:0009314  GO:0009314 0.1485219 0.6130119
+## 2 user-supplied GO:0031400  GO:0031400 0.1791975 0.6130119
+## 3 user-supplied GO:0008015  GO:0008015 0.5140827 0.7867741
+## 4 user-supplied GO:0003013  GO:0003013 0.5214793 0.7867741
+## 5 user-supplied GO:0009101  GO:0009101 0.5610396 0.7867741</code></pre>
 </div>
 <div id="qc-plots" class="section level3">
 <h3><span class="header-section-number">3.6.4</span> QC Plots</h3>
@@ -406,20 +418,27 @@ H3K4me3 gene coverage
 <h4><span class="header-section-number">3.6.5.1</span> Assigned peaks</h4>
 <p>Peak assignments are stored in <code>$peaks</code>.</p>
 <pre class="r"><code>head(results$peaks)</code></pre>
-<pre><code>##   peak_id  chr peak_start peak_end gene_locus_start gene_locus_end gene_id
-## 1  peak:1 chr1     816846   816937           787681         836356  284593
-## 2  peak:2 chr1     859131   859258           836357         879482  148398
-## 3  peak:3 chr1     877208   877306           836357         879482  148398
-## 4  peak:4 chr1     895928   896050           895324         899806  339451
-## 5  peak:5 chr1     968519   968706           952176         982595  375790
-## 6  peak:6 chr1     968678   968804           952176         982595  375790
-##   gene_symbol overlap_start overlap_end peak_overlap
-## 1      FAM41C        816846      816937           92
-## 2      SAMD11        859131      859258          128
-## 3      SAMD11        877208      877306           99
-## 4      KLHL17        895928      896050          123
-## 5        AGRN        968519      968706          188
-## 6        AGRN        968678      968804          127</code></pre>
+<pre><code>##   peak_id  chr peak_start peak_end gene_id gene_symbol gene_locus_start
+## 1  peak:1 chr1     816846   816937  284593      FAM41C           787681
+## 2  peak:2 chr1     859131   859258  148398      SAMD11           836357
+## 3  peak:3 chr1     877208   877306  148398      SAMD11           836357
+## 4  peak:4 chr1     895928   896050  339451      KLHL17           895324
+## 5  peak:5 chr1     968519   968706  375790        AGRN           952176
+## 6  peak:6 chr1     968678   968804  375790        AGRN           952176
+##   gene_locus_end nearest_tss dist_to_tss nearest_tss_gene_id
+## 1         836356      812182       -4708              284593
+## 2         879482      860530       -1335              148398
+## 3         879482      876524         732              148398
+## 4         899806      895967          21              339451
+## 5         982595      955503       13108              375790
+## 6         982595      955503       13237              375790
+##   nearest_tss_symbol nearest_tss_gene_strand
+## 1             FAM41C                       -
+## 2             SAMD11                       +
+## 3             SAMD11                       +
+## 4             KLHL17                       +
+## 5               AGRN                       +
+## 6               AGRN                       +</code></pre>
 </div>
 <div id="peaks-per-gene" class="section level4">
 <h4><span class="header-section-number">3.6.5.2</span> Peaks-per-gene</h4>
@@ -438,35 +457,47 @@ H3K4me3 gene coverage
 <p>Gene set enrichment results are stored in <code>$results</code>.</p>
 <pre class="r"><code>head(results$results)</code></pre>
 <pre><code>##    Geneset.Type Geneset.ID Description   P.value       FDR    Effect
-## 1 user-supplied GO:0009314  GO:0009314 0.1574747 0.6345429 0.4334812
-## 2 user-supplied GO:0031400  GO:0031400 0.1899251 0.6345429 0.3979179
-## 3 user-supplied GO:0009101  GO:0009101 0.4588630 0.7647716 0.2291171
-## 4 user-supplied GO:0008015  GO:0008015 0.5232152 0.7804262 0.1967666
-## 5 user-supplied GO:0003013  GO:0003013 0.5306898 0.7804262 0.1930559
-## 6 user-supplied GO:0034220  GO:0034220 0.5772055 0.8016743 0.1721612
+## 1 user-supplied GO:0009314  GO:0009314 0.1485219 0.6130119 0.4431825
+## 2 user-supplied GO:0031400  GO:0031400 0.1791975 0.6130119 0.4079158
+## 3 user-supplied GO:0008015  GO:0008015 0.5140827 0.7867741 0.2012870
+## 4 user-supplied GO:0003013  GO:0003013 0.5214793 0.7867741 0.1975742
+## 5 user-supplied GO:0009101  GO:0009101 0.5610396 0.7867741 0.1815771
+## 6 user-supplied GO:0034220  GO:0034220 0.5664774 0.7867741 0.1771723
 ##   Odds.Ratio   Status N.Geneset.Genes N.Geneset.Peak.Genes
-## 1   1.542618 enriched             282                   18
-## 2   1.488722 enriched             294                   20
-## 3   1.257489 enriched             293                   19
-## 4   1.217460 enriched             297                   16
-## 5   1.212951 enriched             298                   16
-## 6   1.187869 enriched             298                   14
+## 1   1.557657 enriched             282                   18
+## 2   1.503680 enriched             294                   20
+## 3   1.222976 enriched             297                   16
+## 4   1.218443 enriched             298                   16
+## 5   1.199107 enriched             293                   18
+## 6   1.193837 enriched             298                   14
 ##   Geneset.Avg.Gene.Length
 ## 1                126212.6
 ## 2                132200.6
-## 3                186781.8
-## 4                154731.9
-## 5                154615.4
+## 3                154731.9
+## 4                154615.4
+## 5                186781.8
 ## 6                179041.7
 ##                                                                                                              Geneset.Peak.Genes
 ## 1              777, 3725, 7398, 10277, 1647, 7161, 261734, 1263, 2140, 3713, 4893, 7159, 7391, 8438, 23596, 25896, 51150, 51514
 ## 2 3725, 6497, 11221, 1647, 2810, 5690, 7161, 8613, 54206, 991, 1855, 2629, 5590, 5664, 5686, 5999, 10459, 64853, 116496, 374969
-## 3  8707, 10905, 256435, 142, 6487, 22796, 29929, 1650, 2590, 6646, 6675, 8704, 9653, 23169, 79947, 80267, 81849, 126792, 148789
+## 3                                  476, 777, 947, 6262, 23576, 1907, 2035, 2730, 140, 1889, 5664, 5743, 6051, 6846, 7042, 57085
 ## 4                                  476, 777, 947, 6262, 23576, 1907, 2035, 2730, 140, 1889, 5664, 5743, 6051, 6846, 7042, 57085
-## 5                                  476, 777, 947, 6262, 23576, 1907, 2035, 2730, 140, 1889, 5664, 5743, 6051, 6846, 7042, 57085
+## 5          8707, 10905, 256435, 142, 6487, 22796, 29929, 1650, 2590, 6646, 6675, 8704, 9653, 23169, 79947, 80267, 81849, 148789
 ## 6                                            476, 481, 777, 6262, 343450, 533, 3749, 6548, 7779, 493, 3738, 10768, 27173, 57198</code></pre>
 </div>
 </div>
+</div>
+<div id="assessing-type-i-error-with-randomizations-1" class="section level2">
+<h2><span class="header-section-number">3.7</span> Assessing Type I Error with Randomizations</h2>
+<p>Within <code>chipenrich()</code>, <code>broadenrich()</code>, and <code>polyenrich()</code>, the <code>randomization</code> parameters can be used to assess the Type I Error for the data being analyzed.</p>
+<p>The randomization codes, and their effects are:</p>
+<ul>
+<li><code>NULL</code>: No randomizations, the default.</li>
+<li><code>complete</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> without regard for the chromosome location, or locus length. The null hypothesis is that there is no true gene set enrichment.</li>
+<li><code>bylength</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> within bins of 100 genes sorted by locus length. The null hypothesis is that there is no true gene set enrichment, but with preserved locus length relationship.</li>
+<li><code>bylocation</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> within bins of 50 genes sorted by genomic location. The null hypothesis is that there is no true gene set enrichment, but with preserved genomic location.</li>
+</ul>
+<p>The result of <code>chipenrich()</code>, <code>broadenrich()</code>, or <code>polyenrich()</code> with a selected randomization is the same as without (see above). To assess the Type I error, the <code>alpha</code> level for the particular data set can be calculated by dividing the total number of gene sets with p-value &lt; 0.05 by the total number of tests tested. Users may want to perform multiple randomizations for a set of peaks and take the median of the <code>alpha</code> values.</p>
 </div>
 </div>
 <div id="references" class="section level1">

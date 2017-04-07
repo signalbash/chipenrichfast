@@ -20,11 +20,6 @@ NEW FEATURES
           exon, intron, 1kb, 5kb, 10kb, 1kb_outside_upstream, 5kb_outside_upstream,
           10kb_outside_upstream, 1kb_outside, 5kb_outside, and 10kb_outside.
 
-    o As a result of updates to chipenrich.data, ENRICHMENT RESULTS MAY DIFFER
-      between chipenrich 1.Y.Z and chipenrich 2.Y.Z. This is because revised
-      versions of all genomes have been used to update LocusDefinitions, and
-      GO and Reactome gene sets have been updated to more recent versions.
-
 IMPROVEMENTS
 
     o Chris Lee figured out that spline calculations in chipenrich are not required
@@ -47,6 +42,11 @@ IMPROVEMENTS
 
 SIGNIFICANT USER-LEVEL CHANGES
 
+    o As a result of updates to chipenrich.data, ENRICHMENT RESULTS MAY DIFFER
+      between chipenrich 1.Y.Z and chipenrich 2.Y.Z. This is because revised
+      versions of all genomes have been used to update LocusDefinitions, and
+      GO and Reactome gene sets have been updated to more recent versions.
+
     o The broadenrich method is now its own function, broadenrich(), instead
       of chipenrich(..., method = 'broadenrich', ...).
 
@@ -55,6 +55,10 @@ SIGNIFICANT USER-LEVEL CHANGES
       three parameters previously used: 'use_mappability', 'mappa_file', and
       'read_length'. The unified 'mappability' parameter can be 'NULL', a file path,
       or a string indicating the read length for mappability, e.g. '24'.
+
+    o A formerly hidden API for randomizations to assess Type I Error rates for
+      data sets is now exposed to the user. Each of the enrich functions has a
+      'randomization' parameter. See documentation and vignette for details.
 
     o Many functions with the 'genome' parameter had a default of 'hg19', which
       was not ideal. Now users must specify a genome and it is checked against
