@@ -79,7 +79,6 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
 
   # Logistic regression works no matter the method because final_model is chosen above
   # and the data required from gpw will automatically be correct based on the method used.
-
   fit = gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family='nb');
 
   # Results from the logistic regression
@@ -88,7 +87,6 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
 
   # Currently no reason for this if statement, but saving for future
   # methods that use the nb family
-  if(method == 'nb') {
     out = data.frame(
       "P.value"=r_pval,
       "Geneset ID"=r_go_id,
@@ -99,7 +97,6 @@ single_gam_nb = function(go_id, geneset, gpw, method, model) {
       "Odds.Ratio"=exp(r_effect),
       "Geneset Avg Gene Length"=r_go_genes_avg_length,
       stringsAsFactors = FALSE);
-  }
 
   return(out);
 }
