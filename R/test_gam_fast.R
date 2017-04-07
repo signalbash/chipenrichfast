@@ -10,7 +10,7 @@ test_gam_fast = function(geneset,gpw,n_cores) {
 
   # Making the first spline
   fitspl = gam(peak~s(log10_length,bs='cr'),data=gpw,family="binomial")
-  as.numeric(predict(fitspl, gpw, type="terms"))->gpw$spline
+  gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
 
   # Construct model formula.
   model = "peak ~ goterm + spline";
@@ -84,21 +84,19 @@ single_gam_fast = function(go_id, geneset, gpw, fitspl, method, model) {
   if (all(as.logical(sg_go))) {
     cont_length = quantile(gpw$length,0.0025);
 
-    if (method == "chipspeed") {
-      cont_gene = data.frame(
+    cont_gene = data.frame(
         gene_id = "continuity_correction",
         length = cont_length,
         log10_length = log10(cont_length),
         num_peaks = 0,
         peak = 0,
         stringsAsFactors = FALSE
-      );
-      as.numeric(predict(fitspl, cont_gene, type="terms"))->cont_gene$spline
-    }
+    );
+    cont_gene$spline = as.numeric(predict(fitspl, cont_gene, type="terms"))
 
 
     if ("mappa" %in% names(gpw)) {
-      cont_gene$mappa = 1;
+        cont_gene$mappa = 1;
     }
     gpw = rbind(gpw,cont_gene);
     b_genes = c(b_genes,1);
