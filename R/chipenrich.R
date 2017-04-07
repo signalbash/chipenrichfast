@@ -415,6 +415,8 @@ chipenrich = function(
 		message("Successfully assigned peaks..")
 	}
 
+	peak_genes = unique(assigned_peaks$gene_id)
+
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
