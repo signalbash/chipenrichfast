@@ -1,15 +1,5 @@
 #!/usr/bin/env Rscript
 os = Sys.info()[1]
-# library(chipenrich.data)
-# library(mgcv)
-# library(IRanges)
-# library(GenomicRanges)
-# library(lattice)
-# library(latticeExtra)
-# library(grid)
-# library(stringr)
-# library(rms)
-# library(parallel)
 
 #' Run ChIP-Enrich on a dataset of ChIP-seq peaks
 #'
@@ -249,7 +239,7 @@ chipenrich = function(
 	user_defined_ldef = file.exists(locusdef)
 	if (user_defined_ldef) {
 		# Load user-defined locus definition file.
-		ldef = setup_ldef(locusdef, genome)
+		ldef = read_ldef(locusdef, genome)
 	} else {
 		if (!any(supported_locusdefs()$genome == genome & locusdef == supported_locusdefs()$locusdef)) {
 			stop(sprintf("Error: invalid genome / definition combination requested: %s %s", genome, locusdef))
@@ -277,7 +267,7 @@ chipenrich = function(
 		geneset_list = list()
 		geneset_code = 'user-supplied'
 
-		geneset_list[[geneset_code]] = setup_geneset(genesets)
+		geneset_list[[geneset_code]] = read_geneset(genesets)
 		geneset_list[[geneset_code]] = filter_genesets(geneset_list[[geneset_code]], ldef, min_geneset_size, max_geneset_size)
 	} else {
 		if (!any(supported_genesets()$organism == organism & genesets %in% supported_genesets()$geneset)) {
