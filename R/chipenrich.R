@@ -172,10 +172,10 @@ chipenrich = function(
 	locusdef = "nearest_tss",
 	method = 'chipenrich',
 	fisher_alt = "two.sided",
-	use_mappability = F,
+	use_mappability = FALSE,
 	mappa_file = NULL,
 	read_length = 36,
-	qc_plots = T,
+	qc_plots = TRUE,
 	min_geneset_size = 15,
 	max_geneset_size = 2000,
 	num_peak_threshold = 1,
@@ -470,7 +470,7 @@ chipenrich = function(
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
 		if (testf == "test_approx") {
-			rtemp = test_func(gobj,ppg,nwp=F,n_cores)
+			rtemp = test_func(gobj,ppg,nwp=FALSE,n_cores)
 		}
 		if (testf == "test_gam_ratio_splineless") {
 			rtemp = test_func(gobj,ppg,n_cores)
@@ -520,7 +520,7 @@ chipenrich = function(
 
 	# If there is a status column, re-sort so enriched terms are on top.
 	if ("Status" %in% names(enrich)) {
-		enrich = enrich[order(enrich$Status, decreasing=T), ]
+		enrich = enrich[order(enrich$Status, decreasing=TRUE), ]
 	}
 
 	# Pull out tests that failed.
@@ -532,19 +532,19 @@ chipenrich = function(
 	# Write result objects to files
 	if (!is.null(out_name)) {
 		filename_analysis = file.path(out_path, sprintf("%s_results.tab", out_name))
-		write.table(enrich, file = filename_analysis, row.names = F, quote = F, sep = "\t")
+		write.table(enrich, file = filename_analysis, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote results to: ", filename_analysis)
 
 		filename_peaks = file.path(out_path, sprintf("%s_peaks.tab", out_name))
-		write.table(assigned_peaks, file = filename_peaks, row.names = F, quote = F, sep = "\t")
+		write.table(assigned_peaks, file = filename_peaks, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote peak-to-gene assignments to: ", filename_peaks)
 
 		filename_opts = file.path(out_path, sprintf("%s_opts.tab", out_name))
-		write.table(opts, file = filename_opts, row.names = F, quote = F, sep = "\t")
+		write.table(opts, file = filename_opts, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote run options/arguments to: ", filename_opts)
 
 		filename_ppg = file.path(out_path, sprintf("%s_peaks-per-gene.tab", out_name))
-		write.table(ppg, file = filename_ppg, row.names = F, quote = F, sep = "\t")
+		write.table(ppg, file = filename_ppg, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote count of peaks per gene to: ", filename_ppg)
 
 		# If the user requested QC plots, generate those as well.

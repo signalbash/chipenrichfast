@@ -28,8 +28,8 @@ This will load `chipenrich`, the `chipenrich.data` package, and necessary depend
 chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
   genome = "hg19", genesets = c("GOBP", "GOCC", "GOMF"),
   locusdef = "nearest_tss", method = "chipenrich",
-  fisher_alt = "two.sided", use_mappability = F, mappa_file = NULL,
-  read_length = 36, qc_plots = T, max_geneset_size = 2000,
+  fisher_alt = "two.sided", use_mappability = FALSE, mappa_file = NULL,
+  read_length = 36, qc_plots = TRUE, max_geneset_size = 2000,
   num_peak_threshold = 1, n_cores = 1)
 ```
 
@@ -70,7 +70,7 @@ The default gene set database is Gene Ontology (GO) terms, comprising of all thr
 head(supported_genesets())
 ```
 
-Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (`chipenrich`); a faster version of the ChIP-Enrich method (`chipenrich_fast`); the Broad-Enrich method (`broadenrich`); Poly-Enrich (`polyenrich`), a negative-binomial based method; a faster version of Poly-Enrich (`polyenrich_fast`); and Fisher's exact test (`fet`). The `chipenrich` methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The `polyenrich` methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The `broadenrich` method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks.  Finally, the `fet` method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).
+Five methods for gene set enrichment testing are provided: the main ChIP-Enrich method (`chipenrich`), now faster in `v2.0.0`; the Broad-Enrich method (`broadenrich`); Poly-Enrich (`polyenrich`), a negative-binomial based method; and Fisher's exact test (`fet`). The `chipenrich` methods are designed for datasets with narrow genomic regions such as transcription factor ChIP-seq peaks. The `polyenrich` methods are similarly designed for datasets with narrow genomic regions, but where the number of peaks at gene loci may be important. The `broadenrich` method is designed for datasets with broad genomic regions such as histone modification ChIP-seq peaks.  Finally, the `fet` method is also offered for comparison purposes and/or for use in limited situations when its assumptions are met (see examples).
 
 ```{r}
 supported_methods()
@@ -120,7 +120,7 @@ We define locus mappability as the average of all base pair mappability values f
 
 # Examples
 
-If `method = chipenrich` and `qc_plots = T` then two pdf files will be output: One with a binomial smoothing spline fitted to the probability of a peak given gene length and one showing the distribution of the distance of peaks to the nearest TSS of a gene. These plots may also be generated using separate functions as illustrated below. The first figure below shows the distribution of peaks to the nearest TSS. In the second figure below, spline is fitted to the data given gene locus length. In the third figure below, we do the same but here we account for the mappable locus length ($mappability \times locuslength$).
+If `method = chipenrich` and `qc_plots = TRUE` then two pdf files will be output: One with a binomial smoothing spline fitted to the probability of a peak given gene length and one showing the distribution of the distance of peaks to the nearest TSS of a gene. These plots may also be generated using separate functions as illustrated below. The first figure below shows the distribution of peaks to the nearest TSS. In the second figure below, spline is fitted to the data given gene locus length. In the third figure below, we do the same but here we account for the mappable locus length ($mappability \times locuslength$).
 
 ```{r, fig.align='center', fig.cap='E2F4 peak distances to TSS', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')
@@ -131,10 +131,10 @@ plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19'
 ```
 
 ```{r, fig.align='center', fig.cap='E2F4 spline with mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
-plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19', use_mappability = T, read_length = 24)
+plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss',  genome = 'hg19', use_mappability = TRUE, read_length = 24)
 ```
 
-If `method = broadenrich` and `qc_plots = T` then one pdf file is output: A plot showing the relationship between the gene locus length and the proportion of the locus covered by a peak. Figure 4 shows this relationship.
+If `method = broadenrich` and `qc_plots = TRUE` then one pdf file is output: A plot showing the relationship between the gene locus length and the proportion of the locus covered by a peak. Figure 4 shows this relationship.
 
 ```{r, fig.align='center', fig.cap='H3K4me3 gene coverage', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 plot_gene_coverage(peaks = peaks_H3K4me3_GM12878, locusdef = 'nearest_tss',  genome = 'hg19')
@@ -148,7 +148,7 @@ There are many combinations of methods, genesets, and mappabiity settings that m
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path,
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
 ```
@@ -156,21 +156,10 @@ print(results.ce[1:5,1:5])
 ```{r, warning = FALSE, message = FALSE}
 # With mappability
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path,
-	locusdef = "nearest_tss", use_mappability=T, read_length=24, qc_plots = F,
+	locusdef = "nearest_tss", use_mappability = TRUE, read_length=24, qc_plots = FALSE,
 	out_name = NULL,n_cores=1)
 results.cem = results$results
 print(results.cem[1:5,1:5])
-```
-
-## ChIP-Enrich Fast
-
-```{r, warning = FALSE, message = FALSE}
-# Without mappability
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'chipenrich_fast',
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
-results.ce = results$results
-print(results.ce[1:5,1:5])
 ```
 
 ## Poly-Enrich
@@ -179,18 +168,7 @@ print(results.ce[1:5,1:5])
 # Without mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich',
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
-results.ce = results$results
-print(results.ce[1:5,1:5])
-```
-
-## Poly-Enrich Fast
-
-```{r, warning = FALSE, message = FALSE}
-# Without mappability
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, method = 'polyenrich_fast',
-	locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
 ```
@@ -199,7 +177,7 @@ print(results.ce[1:5,1:5])
 
 ```{r, warning = FALSE, message = FALSE}
 results = chipenrich(peaks = peaks_H3K4me3_GM12878, genesets = gs_path,
-	method='broadenrich', locusdef = "nearest_tss", qc_plots = F,
+	method='broadenrich', locusdef = "nearest_tss", qc_plots = FALSE,
 	out_name = NULL, n_cores=1)
 results.be = results$results
 print(results.be[1:5,1:5])
@@ -211,7 +189,7 @@ Fisher's Exact test assumes that each gene is equally likely to have a peak. We 
 
 ```{r, warning = FALSE, message = FALSE}
 results = chipenrich(peaks = peaks_E2F4, genesets = gs_path, locusdef = "5kb",
-	method = "fet", fisher_alt = "two.sided", qc_plots = F, out_name = NULL)
+	method = "fet", fisher_alt = "two.sided", qc_plots = FALSE, out_name = NULL)
 results.fet = results$results
 print(results.fet[1:5,1:5])
 ```

@@ -44,7 +44,7 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 
 	# If mappability was requested, add that in.
 	if (!is.null(mappa)) {
-		d = merge(d, mappa, by = "gene_id", sort = F)
+		d = merge(d, mappa, by = "gene_id", sort = FALSE)
 		d$orig_length = d$length
 		d$length = as.numeric((d$mappa * d$length) + 1)
 		d$log10_length = log10(d$length)
@@ -59,8 +59,8 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 
 	# Compute weights for each gene, based on the predicted prob(peak) for each gene.
 	ppeak = fitted(fit)
-	w0 = 1 / (ppeak/mean(d$peak, na.rm = T))
-	w0 = w0 / mean(w0,na.rm=T)
+	w0 = 1 / (ppeak/mean(d$peak, na.rm = TRUE))
+	w0 = w0 / mean(w0, na.rm = TRUE)
 
 	d$weight = w0
 	d$prob_peak = ppeak
@@ -120,7 +120,7 @@ calc_weights_gam = function(locusdef,peak_genes,mappa=NULL,...) {
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = 'hg19', use_mappability = F, read_length = 36, legend = T, xlim = NULL) {
+plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = 'hg19', use_mappability = FALSE, read_length = 36, legend = TRUE, xlim = NULL) {
 	# Check genome.
 	if (!genome %in% supported_genomes()) {
 		stop("genome not supported: ",genome)
@@ -186,7 +186,7 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = 'hg19', 
 
 # Create diagnostic plot of Proportion of Peaks from your data against log locus length (of genes)
 # along with the spline fit.
-..plot_spline_length = function(locusdef, peak_genes, num_peaks, mappa = NULL, legend = T, xlim = NULL) {
+..plot_spline_length = function(locusdef, peak_genes, num_peaks, mappa = NULL, legend = TRUE, xlim = NULL) {
 	# Calculate smoothing spline fit.
 	gpw = calc_weights_gam(locusdef, peak_genes, mappa = mappa) # gpw = genes, peaks, weights
 

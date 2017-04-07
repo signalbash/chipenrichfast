@@ -61,7 +61,7 @@ single_gam_fast = function(go_id, geneset, gpw, fitspl, method, model) {
         "Effect"=NA,
         "Odds.Ratio"=NA,
         "Geneset Avg Gene Length"=NA,
-        stringsAsFactors=F);
+        stringsAsFactors = FALSE);
 
     return(out)
   }
@@ -91,7 +91,7 @@ single_gam_fast = function(go_id, geneset, gpw, fitspl, method, model) {
         log10_length = log10(cont_length),
         num_peaks = 0,
         peak = 0,
-        stringsAsFactors = F
+        stringsAsFactors = FALSE
       );
       as.numeric(predict(fitspl, cont_gene, type="terms"))->cont_gene$spline
     }
@@ -126,7 +126,7 @@ single_gam_fast = function(go_id, geneset, gpw, fitspl, method, model) {
     "Effect"=r_effect,
     "Odds.Ratio"=exp(r_effect),
     "Geneset Avg Gene Length"=r_go_genes_avg_length,
-    stringsAsFactors=F);
+    stringsAsFactors = FALSE);
 
   return(out);
 }

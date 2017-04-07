@@ -53,7 +53,7 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 		x = d,
 		y = d_ppg,
 		by = 'gene_id',
-		all.x=T)
+		all.x= TRUE)
 	result[is.na(result$num_peaks), ]$num_peaks = 0
 
 	# Mappable length if requested
@@ -63,13 +63,13 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 			x = result,
 			y = mappa,
 			by = 'gene_id',
-			sort=F)
+			sort= FALSE)
 		result$length = as.numeric((result$mappa * result$length) + 1)
 		result$log10_length = log10(result$length)
 	}
 
 	# Order by number of peaks in a gene.
-	result = result[order(result$num_peaks, decreasing=T), ]
+	result = result[order(result$num_peaks, decreasing= TRUE), ]
 
 	# Add in peak vector (0,1).
 	result$peak = as.numeric(result$num_peaks >= 1)
@@ -123,7 +123,7 @@ calc_peak_gene_overlap = function(assigned_peaks, ppg) {
 		x = ppg,
 		y = d_rpg,
 		by = 'gene_id',
-		all.x=T)
+		all.x= TRUE)
 	result$peak_overlap[is.na(result$peak_overlap)] = 0
 
 	result$ratio = result$peak_overlap / result$length
@@ -131,7 +131,7 @@ calc_peak_gene_overlap = function(assigned_peaks, ppg) {
 	result$ratio[result$ratio > 1] = 1
 
 	# Order by number of peaks in a gene.
-	result = result[order(result$num_peaks,decreasing=T),]
+	result = result[order(result$num_peaks,decreasing= TRUE),]
 
 	return(result)
 }
@@ -150,8 +150,8 @@ calc_approx_weights = function(ppg, mappa) {
 
 	# Compute weights for each gene, based on the predicted prob(peak) for each gene.
 	ppeak = fitted(fit)
-	w0 = 1 / (ppeak/mean(d$peak,na.rm=T))
-	w0 = w0 / mean(w0,na.rm=T)
+	w0 = 1 / (ppeak/mean(d$peak,na.rm= TRUE))
+	w0 = w0 / mean(w0,na.rm= TRUE)
 
 	d$weight = w0
 	d$prob_peak = ppeak
