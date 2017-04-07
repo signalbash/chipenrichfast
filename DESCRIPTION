@@ -1,8 +1,8 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 1.13.16
-Date: 2017-03-28
+Version: 1.13.17
+Date: 2017-03-29
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -29,6 +29,7 @@ Imports:
 	methods,
 	mgcv,
 	org.Dm.eg.db,
+	org.Dr.eg.db,
 	org.Hs.eg.db,
 	org.Mm.eg.db,
 	org.Rn.eg.db,

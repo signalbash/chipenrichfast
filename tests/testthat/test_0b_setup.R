@@ -1,4 +1,51 @@
-context('Test User Supplied LocusDefinitions')
+context('Test setup functions')
+
+################################################################################
+# Filter genesets
+
+test_that('Filter genesets errors', {
+	expect_error(filter_genesets('test', 100), 'gs_obj not of class GeneSet')
+})
+
+test_that('Filter genesets works', {
+
+	data(geneset.GOBP.hsa, package='chipenrich.data')
+	filtered = filter_genesets(geneset.GOBP.hsa, 100)
+
+	expect_equal(max(sapply(as.list(filtered@set.gene), length)), 100)
+})
+
+################################################################################
+# Custom mappability definitions
+
+test_that('Bad mappability header', {
+	mappa_file = system.file('extdata', 'test_mappa_badhead.txt', package='chipenrich')
+	expect_error(read_mappa(mappa_file), 'header must contain columns named')
+})
+
+test_that('Duplicate mappability gene_ids', {
+	mappa_file = system.file('extdata', 'test_mappa_dup.txt', package='chipenrich')
+	expect_error(read_mappa(mappa_file), 'duplicate gene_ids exist')
+})
+
+test_that('Negative mappability', {
+	mappa_file = system.file('extdata', 'test_mappa_neg.txt', package='chipenrich')
+	expect_error(read_mappa(mappa_file), 'mappability must be >= 0')
+})
+
+test_that('Too big mappability', {
+	mappa_file = system.file('extdata', 'test_mappa_one.txt', package='chipenrich')
+	expect_error(read_mappa(mappa_file), 'mappability must be <= 1')
+})
+
+test_that('Fine mappability', {
+	mappa_file = system.file('extdata', 'test_mappa_good.txt', package='chipenrich')
+	mappa = read_mappa(mappa_file)
+	expect_true(all(mappa$gene_id == c(8487,84,91)))
+})
+
+################################################################################
+# Custom locus definitions
 
 ldef_noextras_file = system.file('extdata', 'test_ldef_noextras.txt', package='chipenrich')
 ldef_geneid_file = system.file('extdata', 'test_ldef_geneid.txt', package='chipenrich')
@@ -63,4 +110,23 @@ test_that('Test symbol and unsupported genome', {
 
 	expect_true(all(ldef@dframe$symbol == c('HI','BYE','SURE')))
 	expect_true(all(ldef@granges$symbol == c('HI','BYE','SURE')))
+})
+
+################################################################################
+# Custom genesets
+
+# Test building the geneset itself
+geneset_file = system.file('extdata', 'test_geneset.txt', package='chipenrich')
+test_geneset = suppressMessages(setup_geneset(geneset_file))
+
+test_that('Object of GeneSet class is returned',{
+    expect_equal(class(test_geneset)[1], 'GeneSet')
+})
+
+test_that('Three genesets are created',{
+    expect_equal(length(test_geneset@set.gene), 3)
+})
+
+test_that('Test names of genesets',{
+    expect_equal(all(ls(test_geneset@set.gene) == c('GO:0035909','GO:0045822','GO:0045823')), TRUE)
 })
