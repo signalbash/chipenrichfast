@@ -9,7 +9,7 @@ data(list = hg19_ldefs, package = 'chipenrich.data')
 tss = get(data('tss.hg19', package = 'chipenrich.data'))
 
 file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
-peaks = read_bed(file)
+peaks = suppressMessages(read_bed(file))
 
 # Expected values for peak assignments
 expected_genes = list(
