@@ -1,8 +1,11 @@
-# This is really a function to check for a valid method
-
-# Recodes # of peaks to be:
-# { 0, if no peaks
-# { 1, if number of peaks is >= threshold argument
+#' Recode a vector of number of peaks to binary based on threshold
+#'
+#' @param num_peaks An \code{integer} vector representing numbers of peaks per gene.
+#' @param threshold An \code{integer} specifying the minimum number of peaks
+#' required to code as 1.
+#'
+#' @return An binary vector where an entry is 1 if the corresponding entry of
+#' \code{num_peaks} is >= \code{threshold} and is otherwise 0.
 recode_peaks = function(num_peaks, threshold = 1) {
   as.numeric(num_peaks >= threshold);
 }
