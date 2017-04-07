@@ -68,6 +68,16 @@ Poly-Enrich is designed for datasets where multiple peaks in a gene should be ta
 
 HERE IS WHERE WE'D TALK ABOUT RECOMMENDATIONS FOR WHICH METHOD TO USE...?
 
+## Assessing Type I Error with Randomizations
+
+Randomization of locus definitions allows for the assessment of Type I Error under the null hypothesis of no true gene set enrichment. A well-calibrated Type I Error means that the false positive rate is controlled, and the p-values reported for actual data can be trusted. In both Welch & Lee, et al. and Cavalcante, et al., we demonstrated that both `chipenrich()` and `broadenrich()` have well-calibrated Type I Error over dozens of publicly available ENCODE ChIP-seq datasets. Unpublished data suggests the same is true for `polyenrich()`.
+
+We have implemented three types of randomizations,
+
+* `complete`: Shuffle the `gene_id` and `symbol` columns of the `locusdef` without regard for the chromosome location, or locus length. The null hypothesis is that there is no true gene set enrichment. An incorrect Type I error with this randomization indicates that a different enrichment test should be used.
+* `bylength`: Shuffle the `gene_id` and `symbol` columns of the `locusdef` within bins of 100 genes sorted by locus length. The null hypothesis is that there is no true gene set enrichment, but with preserved locus length relationship. An incorrect Type I Error with this randomization indicates that the relationship between the presence of a peak and the locus length is influencing the Type I Error.
+* `bylocation`: Shuffle the `gene_id` and `symbol` columns of the `locusdef` within bins of 50 genes sorted by genomic location. The null hypothesis is that there is no true gene set enrichment, but with preserved genomic location. An incorrect Type I Error with this randomization indicates that the genomic proximity of genes is influencing the Type I Error.
+
 # Implementation
 
 This section will highlight the workflow and implementation details for doing gene set enrichment testing with `chipenrich`. First, load the package:
@@ -311,6 +321,19 @@ Gene set enrichment results are stored in `$results`.
 ```{r}
 head(results$results)
 ```
+
+## Assessing Type I Error with Randomizations
+
+Within `chipenrich()`, `broadenrich()`, and `polyenrich()`, the `randomization` parameters can be used to assess the Type I Error for the data being analyzed.
+
+The randomization codes, and their effects are:
+
+* `NULL`: No randomizations, the default.
+* `complete`: Shuffle the `gene_id` and `symbol` columns of the `locusdef` without regard for the chromosome location, or locus length. The null hypothesis is that there is no true gene set enrichment.
+* `bylength`: Shuffle the `gene_id` and `symbol` columns of the `locusdef` within bins of 100 genes sorted by locus length. The null hypothesis is that there is no true gene set enrichment, but with preserved locus length relationship.
+* `bylocation`: Shuffle the `gene_id` and `symbol` columns of the `locusdef` within bins of 50 genes sorted by genomic location. The null hypothesis is that there is no true gene set enrichment, but with preserved genomic location.
+
+The result of `chipenrich()`, `broadenrich()`, or `polyenrich()` with a selected randomization is the same as without (see above). To assess the Type I error, the `alpha` level for the particular data set can be calculated by dividing the total number of gene sets with p-value < 0.05 by the total number of tests tested. Users may want to perform multiple randomizations for a set of peaks and take the median of the `alpha` values.
 
 # References
 
