@@ -1,5 +1,5 @@
 # Randomize the locus definition @dframe and rebuild the @granges and @chrom2iranges
-randomize_locusdef = function(ldef, resolution=50) {
+randomize_ldef_bylocation = function(ldef, resolution=50) {
 	# Extract GRanges representation
 	ldef_gr = ldef@granges
 
@@ -59,6 +59,22 @@ randomize_ppg_all = function(ppg) {
 	return(ppg)
 }
 
+# Randomize ppg after all additions have been made across all genes
+randomize_ldef_complete = function(ldef) {
+	gr = ldef@granges
+	df = ldef@dframe
+
+	shuffle = base::sample(seq_along(gr), length(gr))
+
+	GenomicRanges::mcols(gr) = GenomicRanges::mcols(gr)[shuffle, ]
+	df[, c('gene_id', 'symbol')] = df[shuffle, c('gene_id', 'symbol')]
+
+	ldef@granges = gr
+	ldef@dframe = df
+
+	return(ldef)
+}
+
 # Randomize ppg after all additions have been made within length bins
 randomize_ppg_length = function(ppg) {
 	ppg = ppg[sample(1:nrow(ppg),nrow(ppg)),]
@@ -77,4 +93,36 @@ randomize_ppg_length = function(ppg) {
 	ppg = Reduce(rbind, split_ppg)
 
 	return(ppg)
+}
+
+randomize_ldef_bylength = function(ldef, resolution = 100) {
+	gr = ldef@granges
+	df = ldef@dframe
+
+	widths = data.frame(
+		original_idx = seq_along(gr),
+		width = GenomicRanges::width(gr),
+		stringsAsFactors = FALSE)
+	widths = widths[order(widths$width), ]
+	rownames(widths) = seq_along(gr)
+
+	group = floor(as.numeric(rownames(widths))+ (resolution - 1)) / resolution
+	group = floor(group)
+
+	split_widths = split(widths, group)
+	split_widths = lapply(split_widths, function(bin){
+		shuffle = base::sample(1:nrow(bin), nrow(bin))
+		bin$shuffle_idx = bin$original_idx[shuffle]
+
+		return(bin)
+	})
+	widths = Reduce(rbind, split_widths)
+
+	GenomicRanges::mcols(gr)[widths$original_idx, ] = GenomicRanges::mcols(gr)[widths$shuffle_idx, ]
+	df[widths$original_idx, c('gene_id', 'symbol')] = df[widths$shuffle_idx, c('gene_id', 'symbol')]
+
+	ldef@granges = gr
+	ldef@dframe = df
+
+	return(ldef)
 }

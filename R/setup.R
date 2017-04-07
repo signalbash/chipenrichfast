@@ -45,11 +45,12 @@ filter_genesets = function(gs_obj, ldef_obj, min_geneset_size = 15, max_geneset_
 #' a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
 #' must have columns 'chr', 'start', 'end', and 'gene_id', or 'geneid'.
 #' @param genome One of the \code{supported_genomes()}.
-#' @param rndloc A \code{logical} indicating whether to randomize the locus definition
-#' based on genomic location. Default FALSE.
+#' @param randomization One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
+#' See the Randomizations section in \code{?chipenrich}.
 #'
 #' @return A list with components \code{ldef} and \code{tss}.
-setup_locusdef = function(ldef_code, genome, rndloc = FALSE) {
+#' @include randomize.R
+setup_locusdef = function(ldef_code, genome, randomization) {
 	user_defined_ldef = file.exists(ldef_code)
 
 	if (user_defined_ldef) {
@@ -62,16 +63,23 @@ setup_locusdef = function(ldef_code, genome, rndloc = FALSE) {
 		ldef_rdata_code = sprintf("locusdef.%s.%s", genome, ldef_code)
 		data(list = ldef_rdata_code, package = "chipenrich.data", envir = environment())
 		ldef = get(ldef_rdata_code)
-
-		if(rndloc) {
-			ldef = randomize_locusdef(ldef, 50)
-		}
 	}
 
 	# Load TSS site info.
 	tss_code = sprintf("tss.%s", genome)
 	data(list=tss_code, package = "chipenrich.data", envir = environment())
 	tss = get(tss_code)
+
+	# Deal with randomizations
+	if(is.null(randomization)) {
+
+	} else if (randomization == 'complete') {
+		ldef = randomize_ldef_complete(ldef)
+	} else if (randomization == 'bylength') {
+		ldef = randomize_ldef_bylength(ldef, resolution = 100)
+	} else if (randomization == 'bylocation') {
+		ldef = randomize_ldef_bylocation(ldef, resolution = 50)
+	}
 
 	return(list(
 		ldef = ldef,
