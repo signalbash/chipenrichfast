@@ -1,4 +1,6 @@
 test_binomial = function(geneset, ppg) {
+	warning("The binomial test is provided for comparison purposes only. It will almost always give biased results favoring gene sets with short average locus length.")
+
 	# Restrict to genes only within the genesets.
 	ppg = subset(ppg, ppg$gene_id %in% geneset@all.genes)
 

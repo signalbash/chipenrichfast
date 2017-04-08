@@ -161,7 +161,7 @@
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-#' @include plot_dist_to_tss.R plot_gene_coverage.R plot_spline_length.R
+#' @include plot_gene_coverage.R
 #' @include test_gam.R
 broadenrich = function(
 	peaks,
@@ -182,11 +182,7 @@ broadenrich = function(
 ) {
 	genome = match.arg(genome)
 
-	os = Sys.info()[1]
-	if(os == 'Windows') {
-		message('Setting n_cores = 1 because Windows detected as OS.')
-		n_cores = 1
-	}
+	n_cores = reset_ncores_for_windows(n_cores)
 
 	############################################################################
 	# Collect options for opts output
@@ -200,10 +196,7 @@ broadenrich = function(
 	)
 
 	############################################################################
-	############################################################################
-	# Checks and genome, locusdef, geneset, and mappa setup
-	############################################################################
-	############################################################################
+	# Setup locus definitions, genesets, and mappability
 
 	ldef_list = setup_locusdef(locusdef, genome, randomization)
 	ldef = ldef_list[['ldef']]
@@ -265,39 +258,10 @@ broadenrich = function(
 	enrich = Reduce(rbind,results)
 
 	######################################################
-	# Post-process enrichment with various orderings
-
-	# Re-order the columns to something sensible.
-	column_order = c(
-		"Geneset.Type",
-		"Geneset.ID",
-		"Description",
-		"P.value",
-		"FDR",
-		"Effect",
-		"Odds.Ratio",
-		"P.Success",
-		"Status",
-		"N.Geneset.Genes",
-		"N.Geneset.Peak.Genes",
-		"Geneset.Avg.Gene.Length",
-		"Geneset.Avg.Gene.Coverage",
-		"Geneset.Peak.Genes")
-	column_order = intersect(column_order, names(enrich))
-	enrich = enrich[, column_order]
-
-	# Order results by p-value.
-	enrich = enrich[order(enrich$P.value), ]
-
-	# If there is a status column, re-sort so enriched terms are on top.
-	if ("Status" %in% names(enrich)) {
-		enrich = enrich[order(enrich$Status, decreasing=TRUE), ]
-	}
-
-	# Pull out tests that failed.
-	bad_enrich = subset(enrich, is.na(enrich$P.value))
-	enrich = subset(enrich, !is.na(enrich$P.value))
-	rownames(enrich) = c(1:nrow(enrich))
+	# Post-process enrichment
+	# Order columns, add enriched/depleted column as needed, remove bad tests,
+	# sort by p-value, rename rownames to integers
+	enrich = post_process_enrichments(enrich)
 
 	######################################################
 	# Write result objects to files
