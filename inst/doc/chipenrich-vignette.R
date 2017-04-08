@@ -112,3 +112,12 @@ head(results$peaks_per_gene)
 ## ------------------------------------------------------------------------
 head(results$results)
 
+## ---- warning = FALSE, message = FALSE-----------------------------------
+# Assessing if alpha = 0.05
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+	locusdef = "nearest_tss", qc_plots = FALSE, randomization = 'complete',
+    out_name = NULL, n_cores = 1)
+alpha = sum(results$results$P.value < 0.05) / nrow(results$results)
+print(alpha)
+
