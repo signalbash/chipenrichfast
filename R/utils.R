@@ -1,3 +1,13 @@
+get_test_method = function(method) {
+    if (method %in% names(SUPPORTED_METHODS)) {
+        return(SUPPORTED_METHODS[[method]])
+    } else if (method %in% names(HIDDEN_METHODS)) {
+        return(HIDDEN_METHODS[[method]])
+    } else {
+        stop(sprintf("Error: invalid enrichment test requested: %s, contact developer.",method))
+    }
+}
+
 #' Recode a vector of number of peaks to binary based on threshold
 #'
 #' @param num_peaks An \code{integer} vector representing numbers of peaks per gene.
