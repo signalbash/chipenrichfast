@@ -9,8 +9,8 @@ head(peaks_E2F4)
 head(peaks_H3K4me3_GM12878)
 
 ## ---- echo=FALSE---------------------------------------------------------
-peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-peaks_H3K4me3_GM12878 = subset(peaks_H3K4me3_GM12878, peaks_H3K4me3_GM12878$chrom == 'chr1')
+#peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
+#peaks_H3K4me3_GM12878 = subset(peaks_H3K4me3_GM12878, peaks_H3K4me3_GM12878$chrom == 'chr1')
 
 ## ------------------------------------------------------------------------
 supported_genomes()

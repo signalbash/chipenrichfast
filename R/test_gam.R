@@ -32,7 +32,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 	}
 
 	# Small correction for case where every gene in this geneset has a peak.
-	if(method == 'chipenrich') {
+	if(method == 'chipenrich_slow') {
 		if (all(as.logical(sg_go))) {
 			cont_length = quantile(gpw$length, 0.0025)
 
@@ -64,7 +64,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 
 	# The only difference between chipenrich and broadenrich here is
 	# the Geneset Avg Gene Coverage column
-	if(method == 'chipenrich') {
+	if(method == 'chipenrich_slow') {
 		out = data.frame(
 			"P.value" = r_pval,
 			"Geneset ID" = r_go_id,
@@ -105,16 +105,10 @@ test_gam = function(geneset,gpw,n_cores) {
 	# Construct model formula.
 	model = "peak ~ goterm + s(log10_length,bs='cr')"
 
-	# Run tests on genesets and beware of Windows!
-	if(os != 'Windows' && n_cores > 1) {
-		results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_gam(go_id, geneset, gpw, 'chipenrich', model)
-		}, mc.cores = n_cores)
-	} else {
-		results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_gam(go_id, geneset, gpw, 'chipenrich', model)
-		})
-	}
+	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
+	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'chipenrich_slow', model)
+	}, mc.cores = n_cores)
 
 	# Collapse results into one table
 	results = Reduce(rbind,results_list)
@@ -141,16 +135,10 @@ test_gam_ratio = function(geneset,gpw,n_cores) {
 	# Construct model formula.
 	model = "goterm ~ ratio + s(log10_length,bs='cr')"
 
-	# Run multicore tests on genesets and beware of Windows!
-	if(os != 'Windows' && n_cores > 1) {
-		results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_gam(go_id, geneset, gpw, 'broadenrich', model)
-		}, mc.cores = n_cores)
-	} else {
-		results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_gam(go_id, geneset, gpw, 'broadenrich', model)
-		})
-	}
+	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
+	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'broadenrich', model)
+	}, mc.cores = n_cores)
 
 	# Collapse results into one table
 	results = Reduce(rbind,results_list)
@@ -179,16 +167,10 @@ test_gam_ratio_splineless = function(geneset,gpw,n_cores) {
 	# Construct model formula.
 	model = "goterm ~ ratio"
 
-	# Run multicore tests on genesets and beware of Windows!
-	if(os != 'Windows' && n_cores > 1) {
-		results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_gam(go_id, geneset, gpw, 'broadenrich_splineless', model)
-		}, mc.cores = n_cores)
-	} else {
-		results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_gam(go_id, geneset, gpw, 'broadenrich_splineless', model)
-		})
-	}
+	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
+	results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_gam(go_id, geneset, gpw, 'broadenrich_splineless', model)
+	}, mc.cores = n_cores)
 
 	# Collapse results into one table
 	results = Reduce(rbind,results_list)

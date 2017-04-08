@@ -11,16 +11,10 @@ test_gam_nb = function(geneset,gpw,n_cores) {
   # Construct model formula.
   model = "num_peaks ~ goterm + s(log10_length,bs='cr')";
 
-  # Run tests on genesets and beware of Windows!
-  if(os != 'Windows' && n_cores > 1) {
+  # Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
     results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-      single_gam_nb(go_id, geneset, gpw, 'nb', model)
+      single_gam_nb(go_id, geneset, gpw, 'polyenrich_slow', model)
     }, mc.cores = n_cores)
-  } else {
-    results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
-      single_gam_nb(go_id, geneset, gpw, 'nb', model)
-    })
-  }
 
   # Collapse results into one table
   results = Reduce(rbind,results_list)

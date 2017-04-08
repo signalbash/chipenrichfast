@@ -1,6 +1,3 @@
-#!/usr/bin/env Rscript
-os = Sys.info()[1]
-
 #' Run Poly-Enrich on a dataset of ChIP-seq peaks
 #'
 #' Run gene set enrichment testing with the Poly-Enrich method. Poly-Enrich is
@@ -187,6 +184,12 @@ polyenrich = function(
 ) {
 	genome = match.arg(genome)
 
+	os = Sys.info()[1]
+	if(os == 'Windows') {
+		message('Setting n_cores = 1 because Windows detected as OS.')
+		n_cores = 1
+	}
+
 	############################################################################
 	# Collect options for opts output
 	opts_list = as.list(sys.call())
@@ -197,20 +200,6 @@ polyenrich = function(
 		values = as.character(opts_list),
 		stringsAsFactors = FALSE
 	)
-
-	############################################################################
-	############################################################################
-	# Warnings based on OS or method/ldef combinations
-	############################################################################
-	############################################################################
-
-	############################################################################
-	# CHECK OS and give multicore warning if Windows
-	if(os == 'Windows') {
-		# NOTE: instead of warning, set n_cores to 1 and remove all OS checks
-		# in the test_*() functions.
-		message('Warning! Multicore enrichment is not supported on Windows.')
-	}
 
 	############################################################################
 	############################################################################
