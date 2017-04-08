@@ -162,7 +162,7 @@
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-#' @include plot_dist_to_tss.R plot_spline_length.R plot_polyenrich_spline.R
+#' @include plot_dist_to_tss.R plot_polyenrich_spline.R
 #' @include test_nb.R test_nb_fast.R
 polyenrich = function(
 	peaks,

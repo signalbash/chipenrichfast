@@ -137,7 +137,7 @@ calc_peak_gene_overlap = function(assigned_peaks, ppg) {
 }
 
 # Used for method='chipapprox'
-# Identical to post-mappa part of calc_weights_gam(...)
+# Identical to post-mappa part of calc_weights_chipenrich(...)
 # Adds weight, prob_peak, resid.dev columns to peaks per gene result
 calc_approx_weights = function(ppg, mappa) {
 	d = ppg
