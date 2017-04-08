@@ -335,6 +335,16 @@ The randomization codes, and their effects are:
 
 The result of `chipenrich()`, `broadenrich()`, or `polyenrich()` with a selected randomization is the same as without (see above). To assess the Type I error, the `alpha` level for the particular data set can be calculated by dividing the total number of gene sets with p-value < 0.05 by the total number of tests tested. Users may want to perform multiple randomizations for a set of peaks and take the median of the `alpha` values.
 
+```{r, warning = FALSE, message = FALSE}
+# Assessing if alpha = 0.05
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+	locusdef = "nearest_tss", qc_plots = FALSE, randomization = 'complete',
+    out_name = NULL, n_cores = 1)
+alpha = sum(results$results$P.value < 0.05) / nrow(results$results)
+print(alpha)
+```
+
 # References
 
 R.P. Welch^, C. Lee^, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor. "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. doi:10.1093/nar/gku463

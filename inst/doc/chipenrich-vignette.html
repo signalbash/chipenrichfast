@@ -498,6 +498,14 @@ H3K4me3 gene coverage
 <li><code>bylocation</code>: Shuffle the <code>gene_id</code> and <code>symbol</code> columns of the <code>locusdef</code> within bins of 50 genes sorted by genomic location. The null hypothesis is that there is no true gene set enrichment, but with preserved genomic location.</li>
 </ul>
 <p>The result of <code>chipenrich()</code>, <code>broadenrich()</code>, or <code>polyenrich()</code> with a selected randomization is the same as without (see above). To assess the Type I error, the <code>alpha</code> level for the particular data set can be calculated by dividing the total number of gene sets with p-value &lt; 0.05 by the total number of tests tested. Users may want to perform multiple randomizations for a set of peaks and take the median of the <code>alpha</code> values.</p>
+<pre class="r"><code># Assessing if alpha = 0.05
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+    locusdef = &quot;nearest_tss&quot;, qc_plots = FALSE, randomization = 'complete',
+    out_name = NULL, n_cores = 1)
+alpha = sum(results$results$P.value &lt; 0.05) / nrow(results$results)
+print(alpha)</code></pre>
+<pre><code>## [1] 0.04</code></pre>
 </div>
 </div>
 <div id="references" class="section level1">
