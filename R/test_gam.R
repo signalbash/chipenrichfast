@@ -98,10 +98,6 @@ test_gam = function(geneset,gpw,n_cores) {
 	# i.e. A specific one.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
-	if (sum(gpw$peak) == 0) {
-		stop("Error: no peaks in your data!")
-	}
-
 	# Construct model formula.
 	model = "peak ~ goterm + s(log10_length,bs='cr')"
 
@@ -127,10 +123,6 @@ test_gam = function(geneset,gpw,n_cores) {
 test_gam_ratio = function(geneset,gpw,n_cores) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
-
-	if (sum(gpw$peak) == 0) {
-		stop("Error: no peaks in your data!")
-	}
 
 	# Construct model formula.
 	model = "goterm ~ ratio + s(log10_length,bs='cr')"
@@ -159,10 +151,6 @@ test_gam_ratio_splineless = function(geneset,gpw,n_cores) {
 
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
-
-	if (sum(gpw$peak) == 0) {
-		stop("Error: no peaks in your data!")
-	}
 
 	# Construct model formula.
 	model = "goterm ~ ratio"
