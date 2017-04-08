@@ -7,7 +7,6 @@ test_gam_nb_fast = function(geneset,gpw,n_cores) {
 	fitspl = gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
 	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
 
-
 	# Construct model formula.
 	model = "num_peaks ~ goterm + spline";
 
@@ -35,10 +34,6 @@ single_gam_nb_fast = function(go_id, geneset, gpw, fitspl, method, model) {
 
 	# Genes in the geneset
 	go_genes = geneset@set.gene[[go_id]];
-
-	# Filter genes in the geneset to only those in the gpw table.
-	# The gpw table will be truncated depending on which geneset type we're in.
-	go_genes = go_genes[go_genes %in% gpw$gene_id];
 
 	# Background genes and the background presence of a peak
 	b_genes = gpw$gene_id %in% go_genes;
