@@ -163,7 +163,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_polyenrich_spline.R
-#' @include test_nb.R test_nb_fast.R
+#' @include test_polyenrich.R test_polyenrich_slow.R
 polyenrich = function(
 	peaks,
 	out_name = "polyenrich",
@@ -248,10 +248,10 @@ polyenrich = function(
 		message(sprintf("Test: %s",method_name))
 		message(sprintf("Genesets: %s",gobj@type))
 		message("Running tests..")
-		if (testf == "test_gam_nb") {
+		if (testf == "test_polyenrich_slow") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
-		if (testf == "test_gam_nb_fast") {
+		if (testf == "test_polyenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
 
