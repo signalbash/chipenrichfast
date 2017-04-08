@@ -4,9 +4,6 @@ test_gam_nb_fast = function(geneset,gpw,n_cores) {
 	# i.e. A specific one.
 	gpw = subset(gpw,gene_id %in% geneset@all.genes);
 
-	if (sum(gpw$peak) == 0) {
-		stop("Error: no peaks in your data!");
-	}
 	fitspl = gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
 	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
 
