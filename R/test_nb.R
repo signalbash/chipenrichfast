@@ -4,10 +4,6 @@ test_gam_nb = function(geneset,gpw,n_cores) {
   # i.e. A specific one.
   gpw = subset(gpw,gene_id %in% geneset@all.genes);
 
-  if (sum(gpw$peak) == 0) {
-    stop("Error: no peaks in your data!");
-  }
-
   # Construct model formula.
   model = "num_peaks ~ goterm + s(log10_length,bs='cr')";
 

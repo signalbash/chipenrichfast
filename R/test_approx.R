@@ -86,10 +86,6 @@ test_approx = function(geneset, gpw, nwp = FALSE, n_cores) {
     	stop("Error: you must fit weights first using one of the calc_weights* functions.")
 	}
 
-	if (sum(gpw$peak) == 0) {
-		stop("Error: no peaks in your data!")
-	}
-
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 

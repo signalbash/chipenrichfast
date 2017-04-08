@@ -1,5 +1,27 @@
 context('Test enrich functions')
 
+test_that('Errors from no peaks', {
+	ldef_file = system.file('extdata', 'test_ldef_symbol.txt', package = 'chipenrich')
+	peak_file = system.file('extdata', 'test.broadPeak', package = 'chipenrich')
+	gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+
+	expect_error(
+		suppressWarnings(chipenrich(peaks = peak_file, genome = 'hg19', genesets = gs_path, locusdef = ldef_file, method = 'binomial', qc_plots = F, out_name = NULL, n_cores = 1)),
+		'Intersection between peak midpoints and locus definition is empty')
+
+	expect_error(
+		suppressWarnings(chipenrich(peaks = peak_file, genome = 'hg19', genesets = gs_path, locusdef = ldef_file, qc_plots = F, out_name = NULL, n_cores = 1)),
+		'Intersection between peak midpoints and locus definition is empty')
+
+	expect_error(
+		suppressWarnings(polyenrich(peaks = peak_file, genome = 'hg19', genesets = gs_path, locusdef = ldef_file, qc_plots = F, out_name = NULL, n_cores = 1)),
+		'Intersection between peak midpoints and locus definition is empty')
+
+	expect_error(
+		suppressWarnings(broadenrich(peaks = peak_file, genome = 'hg19', genesets = gs_path, locusdef = ldef_file, qc_plots = F, out_name = NULL, n_cores=1)),
+		'Intersection between peaks and locus definition is empty')
+})
+
 data(peaks_E2F4, package = 'chipenrich.data')
 peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
 

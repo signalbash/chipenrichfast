@@ -4,10 +4,6 @@ test_gam_fast = function(geneset,gpw,n_cores) {
   # i.e. A specific one.
   gpw = subset(gpw,gene_id %in% geneset@all.genes);
 
-  if (sum(gpw$peak) == 0) {
-    stop("Error: no peaks in your data!");
-  }
-
   # Making the first spline
   fitspl = gam(peak~s(log10_length,bs='cr'),data=gpw,family="binomial")
   gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))

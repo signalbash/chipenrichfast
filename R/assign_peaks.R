@@ -41,6 +41,10 @@ assign_peaks = function(peaks, locusdef, tss) {
 	# Determine overlaps of peak midpoints with locus definition
 	mid_ldef_overlaps = GenomicRanges::findOverlaps(mids_gr, ldef_gr)
 
+	if(length(mid_ldef_overlaps) == 0) {
+		stop('Intersection between peak midpoints and locus definition is empty. Try selecting a different locus definition.')
+	}
+
 	# Determine distance of peak midpoints to nearest TSSs
 	mid_dist_to_ntss = GenomicRanges::distanceToNearest(mids_gr, tss)
 
@@ -148,6 +152,10 @@ assign_peak_segments = function(peaks, locusdef) {
 
 	# Determine overlaps of peaks with locus definition
 	peak_ldef_overlaps = GenomicRanges::findOverlaps(peaks, ldef_gr)
+
+	if(length(peak_ldef_overlaps) == 0) {
+		stop('Intersection between peaks and locus definition is empty. Try selecting a different locus definition.')
+	}
 
 	# Determine start and ends for peaks and genes that overlap
 	peak_indices = S4Vectors::queryHits(peak_ldef_overlaps)

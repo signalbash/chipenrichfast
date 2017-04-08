@@ -5,12 +5,6 @@ test_binomial = function(geneset, ppg) {
 	# Total # of peaks.
 	total_peaks = sum(ppg$num_peaks)
 
-	# If there are no total peaks, it means there were no genes w/ peaks that overlap
-	# with all genes across all gene sets. We can't analyze in this case.
-	if (total_peaks == 0) {
-		stop("None of the peaks in this dataset were assigned to any of the genes across all pathways/genesets being tested.")
-	}
-
 	# Gene IDs must be character to be stored into an environment as names.
 	ppg$gene_id = as.character(ppg$gene_id)
 
