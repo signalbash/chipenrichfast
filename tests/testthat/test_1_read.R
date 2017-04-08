@@ -26,7 +26,7 @@ test_that('Too big mappability', {
 test_that('Fine mappability', {
 	mappa_file = system.file('extdata', 'test_mappa_good.txt', package='chipenrich')
 	mappa = read_mappa(mappa_file)
-	expect_true(all(mappa$gene_id == c(8487,84,91)))
+	expect_true(all(mappa$gene_id == c(1,10,1000)))
 })
 
 ################################################################################

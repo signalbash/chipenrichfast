@@ -1,25 +1,25 @@
 SUPPORTED_METHODS = list(
-    'chipenrich' = "test_gam_fast",
+    'broadenrich' = "test_broadenrich",
+    'chipenrich' = "test_chipenrich",
     'fet' = "test_fisher_exact",
-    'broadenrich' = "test_gam_ratio",
-    'polyenrich' = "test_gam_nb_fast"
+    'polyenrich' = "test_polyenrich"
 )
 
 HIDDEN_METHODS = list(
     'binomial' = "test_binomial",
-    'broadenrich_splineless' = "test_gam_ratio_splineless",
-    'chipenrich_slow' = 'test_gam',
-    'polyenrich_slow' = 'test_gam_nb',
-    'chipapprox' = 'test_approx'
+    'broadenrich_splineless' = "test_broadenrich_splineless",
+    'chipenrich_slow' = 'test_chipenrich_slow',
+    'chipapprox' = 'test_approx',
+    'polyenrich_slow' = 'test_polyenrich_slow'
 )
 
 METHOD_NAMES = list(
-	'fet' = "Fisher's Exact Test",
-	'chipenrich' = "ChIP-Enrich",
+    'broadenrich' = "Broad-Enrich",
+    'broadenrich_splineless' = "Broad-Enrich Splineless",
+    'chipenrich' = "ChIP-Enrich",
     'chipenrich_slow' = "ChIP-Enrich Original",
-	'broadenrich' = "Broad-Enrich",
 	'chipapprox' = "ChIP-Enrich Approximate",
-	'broadenrich_splineless' = "Broad-Enrich Splineless",
-	'polyenrich' = "Poly-Enrich",
+    'fet' = "Fisher's Exact Test",
+    'polyenrich' = "Poly-Enrich",
     'polyenrich_slow' = "Poly-Enrich Original"
 )
