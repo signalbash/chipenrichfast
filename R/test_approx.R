@@ -102,16 +102,10 @@ test_approx = function(geneset, gpw, nwp = FALSE, n_cores) {
 		gpw$weight[b_haspeak] = gpw$weight[b_haspeak] / mean(gpw$weight[b_haspeak])
 	}
 
-	# Run multicore tests on genesets and beware of Windows!
-	if(os != 'Windows' && n_cores > 1) {
-		results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_approx(go_id, geneset, gpw)
-		}, mc.cores = n_cores)
-	} else {
-		results_list = lapply(as.list(ls(geneset@set.gene)), function(go_id) {
-			single_approx(go_id, geneset, gpw)
-		})
-	}
+	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
+	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+		single_approx(go_id, geneset, gpw)
+	}, mc.cores = n_cores)
 
 	# Collapse results into one table
 	results = Reduce(rbind, results_list)
