@@ -1,37 +1,36 @@
-# Used in ..plot_spline_length(...)
-avg_binned_peak = function(gpw) {
-	bygroup = stats::aggregate(cbind(peak, length) ~ group, gpw, mean)
+# Used in ..plot_polyenrich_spline(...)
+avg_binned_numpeaks = function(gpw) {
+	bygroup = stats::aggregate(cbind(num_peaks, length) ~ group, gpw, mean)
 	bygroup$log_avg_length = log10(bygroup$length)
-	names(bygroup) = c("group", "peak", "avg_length", "log_avg_length")
+	names(bygroup) = c("group", "num_peaks", "avg_length", "log_avg_length")
 
 	return(bygroup)
 }
 
-# Used in ..plot_spline_length(...)
-calc_weights_gam = function(gpw) {
+# Used in ..plot_polyenrich_spline(...)
+calc_weights_polyenrich = function(gpw) {
 	# Create model.
-	model = "peak ~ s(log10_length, bs = 'cr')"
+	model = "num_peaks ~ s(log10_length, bs = 'cr')"
 
 	# Compute binomial spline fit.
-	fit = gam(as.formula(model), data = gpw, family = "binomial")
+	fit = gam(as.formula(model), data = gpw, family = "nb")
 
-	# Compute weights for each gene, based on the predicted prob(peak) for each gene.
-	ppeak = fitted(fit)
+	fitted_numpeaks = fitted(fit)
 
 	# These are not used, likely part of development
 	# Perhaps of use for Chris in weighted polyenrich
-	w0 = 1 / (ppeak / mean(gpw$peak, na.rm = TRUE))
+	w0 = 1 / (fitted_numpeaks / mean(gpw$num_peaks, na.rm = TRUE))
 	w0 = w0 / mean(w0, na.rm = TRUE)
 	gpw$weight = w0
 	gpw$resid.dev = resid(fit, type="deviance")
 
 	# This is the only part that gets used
-	gpw$prob_peak = ppeak
+	gpw$fitted_numpeaks = fitted_numpeaks
 
 	return(gpw)
 }
 
-#' Plot QC plot for ChIP-Enrich
+#' Plot QC plot for Poly-Enrich
 #'
 #' Create a plot showing the probability of a gene being assigned a peak given
 #' its locus length. The plot shows an empirical fit to the data using a binomial
@@ -59,6 +58,7 @@ calc_weights_gam = function(gpw) {
 #' Default value is NULL.
 #' @param legend If true, a legend will be drawn on the plot.
 #' @param xlim Set the x-axis limit. NULL means select x-lim automatically.
+#' @param ylim Set the y-axis limit. NULL means select y-lim automatically.
 #'
 #' @return A trellis plot object.
 #'
@@ -69,12 +69,12 @@ calc_weights_gam = function(gpw) {
 #'
 #' # Create the plot for a different locus definition
 #' # to compare the effect.
-#' plot_spline_length(peaks_E2F4, locusdef = 'nearest_gene', genome = 'hg19')
+#' plot_polyenrich_spline(peaks_E2F4, locusdef = 'nearest_gene', genome = 'hg19')
 #'
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supported_genomes(), mappability = NULL, legend = TRUE, xlim = NULL) {
+plot_polyenrich_spline = function(peaks, locusdef = "nearest_tss", genome = supported_genomes(), mappability = NULL, legend = TRUE, xlim = NULL, ylim = NULL) {
 	genome = match.arg(genome)
 
 	ldef_list = setup_locusdef(locusdef, genome)
@@ -94,11 +94,11 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supporte
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
 
 	# Make plot.
-	plotobj = ..plot_spline_length(gpw = ppg, mappability = mappability, num_peaks = num_peaks, legend = legend, xlim = xlim)
+	plotobj = ..plot_polyenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks, legend = legend, xlim = xlim, ylim = ylim)
 	return(plotobj)
 }
 
-..plot_spline_length = function(gpw, mappability, num_peaks, legend = TRUE, xlim = NULL) {
+..plot_polyenrich_spline = function(gpw, mappability, num_peaks, legend = TRUE, xlim = NULL, ylim = NULL) {
 	############################################################################
 	# Prepare the gpw table
 	gpw = gpw[order(gpw$log10_length), ]
@@ -108,37 +108,32 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supporte
 	# Quantities for the plot
 
 	# Scatterplot stuff
-	avg_bins = avg_binned_peak(gpw)
+	avg_bins = avg_binned_numpeaks(gpw)
 
 	# Spline stuff
-	gpw = calc_weights_gam(gpw) # gpw = genes, peaks, weights
-	genome_length = sum(as.numeric(gpw$length))
-	gpw$false_prob = 1 - (1 - (gpw$length / genome_length))^(num_peaks)
+	gpw = calc_weights_polyenrich(gpw) # gpw = genes, peaks, weights
+	# genome_length = sum(as.numeric(gpw$length))
+	# gpw$false_prob = 1 - (1 - (gpw$length / genome_length))^(num_peaks)
 
 	############################################################################
 	# Plotting parameters
-	col_rand_gene = "grey35"
-	col_rand_peak = "grey74"
 	col_spline = "darkorange"
 
 	panel_func = function(x,y,...) {
 		lattice::panel.xyplot(x, y, ...)
-		lattice::panel.abline(h = mean(y), col = col_rand_gene, lwd = 3)
 	}
 
 	custom_key = list(
 		text = list(
 		c(
-			"Expected Fit - Peaks Independent of Locus Length",
-			"Expected Fit - Peaks Proportional to Locus Length",
 			"Binomial Smoothing Spline Fit",
-			"Proportion of Genes in Bin with at Least 1 Peak"
+			"Avg Number of Peaks per Gene in Bins"
 			)
 		),
 		lines = list(
-			pch = c(20, 15, 17, 20),
-			type = c("l", "l", "l", "p"),
-			col = c(col_rand_gene, col_rand_peak, col_spline, "black"),
+			pch = c(17, 20),
+			type = c("l", "p"),
+			col = c(col_spline, "black"),
 			lwd = 3
 		),
 		cex = 1.2
@@ -157,6 +152,9 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supporte
 	xmin_nopad = base::ifelse(is.null(xlim[1]), floor(min(gpw$log10_length)), floor(xlim[1]))
 	xmax_nopad = base::ifelse(is.null(xlim[2]), ceiling(max(gpw$log10_length)), ceiling(xlim[2]))
 
+	ymin_nopad = base::ifelse(is.null(ylim[1]), floor(min(avg_bins$num_peaks)), floor(ylim[1]))
+	ymax_nopad = base::ifelse(is.null(ylim[2]), ceiling(max(avg_bins$num_peaks)), ceiling(ylim[2]))
+
 	scales = list(
 		x = list(
 			axs = 'i',
@@ -164,26 +162,26 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supporte
 		),
 		y = list(
 			axs = 'i',
-			at = seq(0, 1, 0.2)
+			at = seq(ymin_nopad, ymax_nopad, 0.2)
 		)
 	)
 
 	############################################################################
 	# Plot
 	plotobj = lattice::xyplot(
-		false_prob + prob_peak ~ log10_length,
+		fitted_numpeaks ~ log10_length,
 		gpw,
 		xlab = list(label = xlab, cex = 1.4),
-		ylab = list(label = "Proportion of Peaks", cex = 1.4),
-		ylim = c(-0.05, 1.05),
+		ylab = list(label = "Avg Number of Peaks per Gene in Bins", cex = 1.4),
+		ylim = c(ymin_nopad - 0.5, ymax_nopad + 0.5),
 		xlim = c(xmin_nopad - 0.5, xmax_nopad + 0.5),
 		panel = panel_func,
 		type = "l",
 		lwd = 3,
 		key = custom_key,
 		scales = list(cex = 1.4),
-		par.settings = lattice::simpleTheme(pch = c(15,17), col = c(col_rand_peak, col_spline))
-	) + latticeExtra::as.layer(lattice::xyplot(peak ~ log_avg_length, avg_bins, pch = 20, cex = 0.4, col = "black"))
+		par.settings = lattice::simpleTheme(pch = c(17), col = c(col_spline))
+	) + latticeExtra::as.layer(lattice::xyplot(num_peaks ~ log_avg_length, avg_bins, pch = 20, cex = 0.4, col = "black"))
 
 	return(plotobj)
 }

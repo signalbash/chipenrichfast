@@ -52,7 +52,7 @@ single_gam = function(go_id, geneset, gpw, method, model) {
 
     # Logistic regression works no matter the method because final_model is chosen above
     # and the data required from gpw will automatically be correct based on the method used.
-    fit = gam(final_model, data = cbind(gpw, goterm = as.numeric(b_genes)), family = "binomial")
+    fit = mgcv::gam(final_model, data = cbind(gpw, goterm = as.numeric(b_genes)), family = "binomial")
 
 	# Results from the logistic regression
     r_effect = coef(fit)[2]
@@ -152,7 +152,7 @@ test_gam_ratio_splineless = function(geneset,gpw,n_cores) {
 	model = "goterm ~ ratio"
 
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
-	results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
 		single_gam(go_id, geneset, gpw, 'broadenrich_splineless', model)
 	}, mc.cores = n_cores)
 

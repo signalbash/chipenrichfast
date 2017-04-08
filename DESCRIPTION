@@ -1,7 +1,7 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 1.99.43
+Version: 1.99.44
 Date: 2017-04-08
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
@@ -75,6 +75,7 @@ Collate:
     'plot_dist_to_tss.R'
     'chipenrich.R'
     'chipenrich_package_doc.R'
+    'plot_polyenrich_spline.R'
     'test_nb_fast.R'
     'test_nb.R'
     'polyenrich.R'

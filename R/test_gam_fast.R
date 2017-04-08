@@ -5,7 +5,7 @@ test_gam_fast = function(geneset,gpw,n_cores) {
   gpw = subset(gpw,gene_id %in% geneset@all.genes);
 
   # Making the first spline
-  fitspl = gam(peak~s(log10_length,bs='cr'),data=gpw,family="binomial")
+  fitspl = mgcv::gam(peak~s(log10_length,bs='cr'),data=gpw,family="binomial")
   gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
 
   # Construct model formula.
@@ -76,7 +76,7 @@ single_gam_fast = function(go_id, geneset, gpw, fitspl, method, model) {
 
   # Logistic regression works no matter the method because final_model is chosen above
   # and the data required from gpw will automatically be correct based on the method used.
-  fit = gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="binomial");
+  fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="binomial");
 
   # Results from the logistic regression
   r_effect = coef(fit)[2];
