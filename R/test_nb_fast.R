@@ -4,14 +4,14 @@ test_gam_nb_fast = function(geneset,gpw,n_cores) {
 	# i.e. A specific one.
 	gpw = subset(gpw,gene_id %in% geneset@all.genes);
 
-	fitspl = gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
+	fitspl = mgcv::gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
 	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
 
 	# Construct model formula.
 	model = "num_peaks ~ goterm + spline";
 
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
-	results_list = mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
+	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
 		single_gam_nb_fast(go_id, geneset, gpw, fitspl, 'polyenrich', model)
 	}, mc.cores = n_cores)
 
@@ -51,7 +51,7 @@ single_gam_nb_fast = function(go_id, geneset, gpw, fitspl, method, model) {
 
 	# Logistic regression works no matter the method because final_model is chosen above
 	# and the data required from gpw will automatically be correct based on the method used.
-	fit = gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="nb");
+	fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="nb");
 
 	# Results from the logistic regression
 	r_effect = coef(fit)[2];

@@ -162,7 +162,7 @@
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-#' @include plot_dist_to_tss.R plot_spline_length.R
+#' @include plot_dist_to_tss.R plot_spline_length.R plot_polyenrich_spline.R
 #' @include test_nb.R test_nb_fast.R
 polyenrich = function(
 	peaks,
@@ -237,8 +237,6 @@ polyenrich = function(
 	message("Assigning peaks to genes with assign_peaks(...) ..")
 	assigned_peaks = assign_peaks(peakobj, ldef, tss)
 
-	peak_genes = unique(assigned_peaks$gene_id)
-
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
@@ -293,7 +291,7 @@ polyenrich = function(
 		if (qc_plots) {
 			filename_qcplots = file.path(out_path, sprintf("%s_qcplots.pdf", out_name))
 			grDevices::pdf(filename_qcplots)
-				print(..plot_spline_length(ldef, peak_genes, num_peaks, mappa=mappa))
+				print(..plot_polyenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
 				print(..plot_dist_to_tss(peakobj, tss))
 			grDevices::dev.off()
 			message("Wrote QC plots to: ",filename_qcplots)

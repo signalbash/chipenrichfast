@@ -1,31 +1,32 @@
 # Used in ..plot_gene_coverage(...)
-avg_binned_coverage = function(gpw, bin_size = 25) {
-	d = gpw
-	d = d[order(d$log10_length), ]
-	d$group = ceiling((1:dim(d)[1])/bin_size)
+avg_binned_coverage = function(gpw) {
+	bygroup = stats::aggregate(cbind(ratio, length) ~ group, gpw, mean)
+	bygroup$log_avg_length = log10(bygroup$length)
+	names(bygroup) = c("group", "ratio", "length", "log_avg_length")
 
-	bygroup = stats::aggregate(cbind(ratio, log10_length) ~ group, d, mean)
-	names(bygroup) = c("group", "ratio", "log_avg_length")
-	bygroup
+	return(bygroup)
 }
 
-#' Plot probability of peak being assigned to a gene vs. gene length
+#' Plot QC plot for Broad-Enrich
 #'
-#' Create a plot showing the probability of a gene being assigned a peak given
-#' its locus length. The plot shows an empirical fit to the data using a binomial
-#' smoothing spline.
+#' Create a plot showing the relationship between log10 locus length and the
+#' proportion of gene loci covered by peaks.
 #'
-#' @param peaks A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,
-#' broadPeak, etc) with the first three columns being chrom, start, and end. The
-#' data frame should have at least 3 columns: chrom, start, and end. Chrom
-#' should follow UCSC convention, e.g. "chrX".
-#' @param locusdef A string denoting the gene locus definition to be used, or
-#' the full path to a user-defined locus definition file. A gene locus definition
-#' controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}}
-#' for a list of supported definitions built-in. If using a user-specified file,
-#' the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.
-#' @param genome A string indicating the genome upon which the peaks file is
-#' based. Supported genomes are listed by the \code{\link{supported_genomes}} function.
+#' @param peaks Either a file path or a \code{data.frame} of peaks in BED-like
+#' format. If a file path, the following formats are fully supported via their
+#' file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
+#' or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
+#' without these extensions are supported under the conditions that the first 3
+#' columns correspond to 'chr', 'start', and 'end' and that there is either no
+#' header column, or it is commented out. If a \code{data.frame} A BEDX+Y style
+#' \code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame} for
+#' acceptable column names.
+#' @param locusdef One of 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
+#' '1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
+#' '10kb', '10kb_outside', '10kb_outside_upstream'. Alternately, a file path for
+#' a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
+#' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.
+#' @param genome One of the \code{supported_genomes()}.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
@@ -39,9 +40,11 @@ avg_binned_coverage = function(gpw, bin_size = 25) {
 #' @examples
 #'
 #' # Spline plot for E2F4 example peak dataset.
-#' data(peaks_E2F4, package = 'chipenrich.data')
-#' peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-#' plot_gene_coverage(peaks_E2F4, genome = 'hg19')
+#' data(peaks_H3K4me3_GM12878, package = 'chipenrich.data')
+#'
+#' # Create the plot for a different locus definition
+#' # to compare the effect.
+#' plot_gene_coverage(peaks_H3K4me3_GM12878, locusdef = 'nearest_gene', genome = 'hg19')
 #'
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
@@ -54,37 +57,70 @@ plot_gene_coverage = function(peaks, locusdef = "nearest_tss", genome = supporte
 
 	mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
 
-	# Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
 		peakobj = load_peaks(peaks, genome = genome)
 	} else if (class(peaks) == "character") {
 		peakobj = read_bed(peaks, genome = genome)
 	}
+	num_peaks = length(peakobj)
 
-	# Assign peaks to genes.
 	assigned_peaks = assign_peak_segments(peakobj, ldef)
-	peak_genes = unique(assigned_peaks$gene_id)
-
-	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa=NULL)
+	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
 	ppg = calc_peak_gene_overlap(assigned_peaks, ppg)
 
 	# Make plot.
-	plotobj = ..plot_gene_coverage(ppg)
+	plotobj = ..plot_gene_coverage(gpw = ppg, mappability = mappability, num_peaks = num_peaks, xlim = xlim)
 	return(plotobj)
 }
 
-..plot_gene_coverage = function(ppg) {
+..plot_gene_coverage = function(gpw, mappability, num_peaks, xlim = NULL) {
+	############################################################################
+	# Prepare the gpw table
+	gpw = gpw[order(gpw$log10_length), ]
+	gpw$group = ceiling((1:nrow(gpw)) / 25)
 
-	avg_bins = avg_binned_coverage(ppg, bin_size = 25)
+	############################################################################
+	# Quantities for the plot
 
-	plotobj = xyplot(
+	# Scatterplot stuff
+	avg_bins = avg_binned_coverage(gpw)
+
+	############################################################################
+	# Plotting parameters
+	if (is.null(mappability)) {
+		xlab = expression(paste(Log[10], " Locus Length"))
+	} else {
+		xlab = expression(paste(Log[10], " Mappable Locus Length"))
+	}
+
+	xmin_nopad = base::ifelse(is.null(xlim[1]), floor(min(gpw$log10_length)), floor(xlim[1]))
+	xmax_nopad = base::ifelse(is.null(xlim[2]), ceiling(max(gpw$log10_length)), ceiling(xlim[2]))
+
+	scales = list(
+		x = list(
+			axs = 'i',
+			at = seq(xmin_nopad, xmax_nopad, 1)
+		),
+		y = list(
+			axs = 'i',
+			at = seq(0, 1, 0.2)
+		)
+	)
+
+	############################################################################
+	# Plot
+	plotobj = lattice::xyplot(
 		ratio ~ log_avg_length,
 		avg_bins,
 		main = 'Binned Locus Length versus Peak Coverage',
-		xlab = 'log10(locus length)',
-		ylab = 'Proportion of locus covered by peak',
+		xlab = list(label = xlab, cex = 1.4),
+		ylab = list(label = "Proportion of Locus Covered by Peaks", cex = 1.4),
+		ylim = c(-0.05, 1.05),
+		xlim = c(xmin_nopad - 0.5, xmax_nopad + 0.5),
 		pch = 20,
-		col = 'black'
+		cex = 0.4,
+		col = 'black',
+		scales = list(cex = 1.4)
 	)
 
 	return(plotobj)

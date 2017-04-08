@@ -95,9 +95,13 @@ print(results.pe[1:5,1:5])
 # Output in chipenrich and polyenrich
 plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')
 
-## ---- fig.align='center', fig.cap='E2F4 spline without mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
+## ---- fig.align='center', fig.cap='E2F4 chipenrich spline without mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
 # Output in chipenrich
 plot_spline_length(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19')
+
+## ---- fig.align='center', fig.cap='E2F4 polyenrich spline without mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
+# Output in chipenrich
+plot_polyenrich_spline(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19')
 
 ## ---- fig.align='center', fig.cap='H3K4me3 gene coverage', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
 # Output in chipenrich

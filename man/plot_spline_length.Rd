@@ -2,26 +2,30 @@
 % Please edit documentation in R/plot_spline_length.R
 \name{plot_spline_length}
 \alias{plot_spline_length}
-\title{Plot probability of peak being assigned to a gene vs. gene length}
+\title{Plot QC plot for ChIP-Enrich}
 \usage{
 plot_spline_length(peaks, locusdef = "nearest_tss",
   genome = supported_genomes(), mappability = NULL, legend = TRUE,
   xlim = NULL)
 }
 \arguments{
-\item{peaks}{A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,
-broadPeak, etc) with the first three columns being chrom, start, and end. The
-data frame should have at least 3 columns: chrom, start, and end. Chrom
-should follow UCSC convention, e.g. "chrX".}
+\item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
+format. If a file path, the following formats are fully supported via their
+file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
+or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
+without these extensions are supported under the conditions that the first 3
+columns correspond to 'chr', 'start', and 'end' and that there is either no
+header column, or it is commented out. If a \code{data.frame} A BEDX+Y style
+\code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame} for
+acceptable column names.}
 
-\item{locusdef}{A string denoting the gene locus definition to be used, or
-the full path to a user-defined locus definition file. A gene locus definition
-controls how peaks are assigned to genes. See \code{\link{supported_locusdefs}}
-for a list of supported definitions built-in. If using a user-specified file,
-the file must have 4 columns: gene_id, chrom, start, end and be tab-delimited.}
+\item{locusdef}{One of 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
+'1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
+'10kb', '10kb_outside', '10kb_outside_upstream'. Alternately, a file path for
+a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
+must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.}
 
-\item{genome}{A string indicating the genome upon which the peaks file is
-based. Supported genomes are listed by the \code{\link{supported_genomes}} function.}
+\item{genome}{One of the \code{supported_genomes()}.}
 
 \item{mappability}{One of \code{NULL}, a file path to a custom mappability file,
 or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
@@ -45,9 +49,6 @@ smoothing spline.
 
 # Spline plot for E2F4 example peak dataset.
 data(peaks_E2F4, package = 'chipenrich.data')
-peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-
-plot_spline_length(peaks_E2F4, genome='hg19')
 
 # Create the plot for a different locus definition
 # to compare the effect.
