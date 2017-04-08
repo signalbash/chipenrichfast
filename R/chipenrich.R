@@ -169,7 +169,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_chipenrich_spline.R
-#' @include test_approx.R test_binomial.R test_fisher.R test_gam.R test_gam_fast.R
+#' @include test_approx.R test_binomial.R test_fisher.R test_chipenrich_slow.R test_chipenrich.R
 chipenrich = function(
 	peaks,
 	out_name = "chipenrich",
@@ -262,7 +262,7 @@ chipenrich = function(
 		message(sprintf("Test: %s",method_name))
 		message(sprintf("Genesets: %s",gobj@type))
 		message("Running tests..")
-		if (testf == "test_gam") {
+		if (testf == "test_chipenrich_slow") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
 		if (testf == "test_fisher_exact") {
@@ -274,7 +274,7 @@ chipenrich = function(
 		if (testf == "test_approx") {
 			rtemp = test_func(gobj,ppg,nwp=FALSE,n_cores)
 		}
-		if (testf == "test_gam_fast") {
+		if (testf == "test_chipenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
 

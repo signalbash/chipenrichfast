@@ -30,3 +30,27 @@ test_that('Filter genesets works for 5kb', {
 	expect_equal(min(sapply(as.list(filtered@set.gene), length)), 20)
 	expect_equal(max(sapply(as.list(filtered@set.gene), length)), 100)
 })
+
+test_that('Errors in setup_locusdef()', {
+	expect_error(setup_locusdef('blue', genome = 'hg19'), 'invalid genome / definition combination')
+	expect_error(setup_locusdef('nearest_tss', genome = 'hg19', randomization = 'blue'), 'Invalid randomization')
+})
+
+test_that('Errors in setup_genesets()', {
+	expect_error(setup_genesets(gs_codes = 'GOBP', ldef_obj = 'blue', genome = 'hg19', min_geneset_size = 15, max_geneset_size = 2000), 'ldef_obj not of class LocusDefinition')
+
+	ldef = setup_locusdef('nearest_tss', genome = 'hg19')$ldef
+	expect_error(setup_genesets(gs_codes = 'blue', ldef_obj = ldef, genome = 'hg19', min_geneset_size = 15, max_geneset_size = 2000), 'Invalid organism / geneset combination requested')
+})
+
+test_that('Errors in setup_mappa()', {
+	mappa_file = system.file('extdata', 'test_mappa_good.txt', package = 'chipenrich')
+	ldef_file = system.file('extdata', 'test_ldef_symbol.txt', package = 'chipenrich')
+	
+	ldef = setup_locusdef('nearest_tss', genome = 'hg19')$ldef
+	custom_ldef = setup_locusdef(ldef_file, genome = 'hg19')$ldef
+
+	expect_error(setup_mappa(mappa_code = '24', genome = 'hg19', ldef_code = 'blue', ldef_obj = 'blue'), 'ldef_obj not of class LocusDefinition')
+	expect_error(setup_mappa(mappa_code = mappa_file, genome = 'hg19', ldef_code = 'nearest_tss', ldef_obj = ldef), 'your mappability genes and locus definition genes overlap')
+	expect_error(setup_mappa(mappa_code = '24', genome = 'hg19', ldef_code = ldef_file, ldef_obj = custom_ldef), 'Built-in mappability cannot be used with a user-defined locus definition')
+})

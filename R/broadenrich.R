@@ -162,7 +162,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_gene_coverage.R
-#' @include test_gam.R
+#' @include test_broadenrich.R
 broadenrich = function(
 	peaks,
 	out_name = "broadenrich",
@@ -247,7 +247,7 @@ broadenrich = function(
 		message("Test: Broad-Enrich")
 		message(sprintf("Genesets: %s", gobj@type))
 		message("Running tests..")
-		rtemp = test_gam_ratio(gobj, ppg, n_cores)
+		rtemp = test_broadenrich(gobj, ppg, n_cores)
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

@@ -29,5 +29,5 @@ test_that('Supported methods works', {
 	supported = supported_methods()
 
 	expect_equal(class(supported), 'character')
-	expect_equal(supported, c('chipenrich', 'fet', 'broadenrich', 'polyenrich'))
+	expect_equal(supported, c('broadenrich', 'chipenrich', 'fet', 'polyenrich'))
 })
