@@ -1,4 +1,4 @@
-# Used in ..plot_spline_length(...)
+# Used in ..plot_chipenrich_spline(...)
 avg_binned_peak = function(gpw) {
 	bygroup = stats::aggregate(cbind(peak, length) ~ group, gpw, mean)
 	bygroup$log_avg_length = log10(bygroup$length)
@@ -7,8 +7,8 @@ avg_binned_peak = function(gpw) {
 	return(bygroup)
 }
 
-# Used in ..plot_spline_length(...)
-calc_weights_gam = function(gpw) {
+# Used in ..plot_chipenrich_spline(...)
+calc_weights_chipenrich = function(gpw) {
 	# Create model.
 	model = "peak ~ s(log10_length, bs = 'cr')"
 
@@ -69,12 +69,12 @@ calc_weights_gam = function(gpw) {
 #'
 #' # Create the plot for a different locus definition
 #' # to compare the effect.
-#' plot_spline_length(peaks_E2F4, locusdef = 'nearest_gene', genome = 'hg19')
+#' plot_chipenrich_spline(peaks_E2F4, locusdef = 'nearest_gene', genome = 'hg19')
 #'
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supported_genomes(), mappability = NULL, legend = TRUE, xlim = NULL) {
+plot_chipenrich_spline = function(peaks, locusdef = "nearest_tss", genome = supported_genomes(), mappability = NULL, legend = TRUE, xlim = NULL) {
 	genome = match.arg(genome)
 
 	ldef_list = setup_locusdef(locusdef, genome)
@@ -94,11 +94,11 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supporte
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
 
 	# Make plot.
-	plotobj = ..plot_spline_length(gpw = ppg, mappability = mappability, num_peaks = num_peaks, legend = legend, xlim = xlim)
+	plotobj = ..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks, legend = legend, xlim = xlim)
 	return(plotobj)
 }
 
-..plot_spline_length = function(gpw, mappability, num_peaks, legend = TRUE, xlim = NULL) {
+..plot_chipenrich_spline = function(gpw, mappability, num_peaks, legend = TRUE, xlim = NULL) {
 	############################################################################
 	# Prepare the gpw table
 	gpw = gpw[order(gpw$log10_length), ]
@@ -111,7 +111,7 @@ plot_spline_length = function(peaks, locusdef = "nearest_tss", genome = supporte
 	avg_bins = avg_binned_peak(gpw)
 
 	# Spline stuff
-	gpw = calc_weights_gam(gpw) # gpw = genes, peaks, weights
+	gpw = calc_weights_chipenrich(gpw) # gpw = genes, peaks, weights
 	genome_length = sum(as.numeric(gpw$length))
 	gpw$false_prob = 1 - (1 - (gpw$length / genome_length))^(num_peaks)
 

@@ -168,7 +168,7 @@
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-#' @include plot_dist_to_tss.R plot_spline_length.R
+#' @include plot_dist_to_tss.R plot_chipenrich_spline.R
 #' @include test_approx.R test_binomial.R test_fisher.R test_gam.R test_gam_fast.R
 chipenrich = function(
 	peaks,
@@ -314,7 +314,7 @@ chipenrich = function(
 		if (qc_plots) {
 			filename_qcplots = file.path(out_path, sprintf("%s_qcplots.pdf", out_name))
 			grDevices::pdf(filename_qcplots)
-				print(..plot_spline_length(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
+				print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
 				print(..plot_dist_to_tss(peakobj, tss))
 			grDevices::dev.off()
 			message("Wrote QC plots to: ",filename_qcplots)
