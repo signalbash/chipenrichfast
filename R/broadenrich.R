@@ -258,9 +258,9 @@ broadenrich = function(
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))
-		rtemp$"Geneset.Type" = gobj@type;
+		rtemp$"Geneset.Type" = gobj@type
 
-		results[[gobj@type]] = rtemp;
+		results[[gobj@type]] = rtemp
 	}
 	enrich = Reduce(rbind,results)
 

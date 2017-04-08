@@ -217,19 +217,8 @@ polyenrich = function(
 
 	############################################################################
 	# CHECK method and get() it if okay
-	get_test_method = function(x) {
-		if (method %in% names(SUPPORTED_METHODS)) {
-			return(SUPPORTED_METHODS[[method]])
-		} else if (method %in% names(HIDDEN_METHODS)) {
-			return(HIDDEN_METHODS[[method]])
-		} else {
-			stop(sprintf("Error: invalid enrichment test requested: %s, contact developer.",method))
-		}
-	}
 	testf = get_test_method(method)
 	test_func = get(testf)
-
-	# Test name.
 	method_name = METHOD_NAMES[[method]]
 
 	############################################################################
@@ -269,17 +258,17 @@ polyenrich = function(
 		message(sprintf("Genesets: %s",gobj@type))
 		message("Running tests..")
 		if (testf == "test_gam_nb") {
-			rtemp = test_func(gobj,ppg,n_cores);
+			rtemp = test_func(gobj,ppg,n_cores)
 		}
 		if (testf == "test_gam_nb_fast") {
-			rtemp = test_func(gobj,ppg,n_cores);
+			rtemp = test_func(gobj,ppg,n_cores)
 		}
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))
-		rtemp$"Geneset.Type" = gobj@type;
+		rtemp$"Geneset.Type" = gobj@type
 
-		results[[gobj@type]] = rtemp;
+		results[[gobj@type]] = rtemp
 	}
 	enrich = Reduce(rbind,results)
 
