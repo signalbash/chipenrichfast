@@ -1,4 +1,6 @@
 test_fisher_exact = function(geneset,gpw,alternative="two.sided") {
+	warning("Fisher's exact test should only be used with the 1kb or 5kb locus definition.")
+
 	# Restrict to only those genes in the genesets.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 

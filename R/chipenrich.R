@@ -168,8 +168,8 @@
 #' @export
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
-#' @include plot_dist_to_tss.R plot_gene_coverage.R plot_spline_length.R
-#' @include test_approx.R test_binomial.R test_fisher.R test_gam.R
+#' @include plot_dist_to_tss.R plot_spline_length.R
+#' @include test_approx.R test_binomial.R test_fisher.R test_gam.R test_gam_fast.R
 chipenrich = function(
 	peaks,
 	out_name = "chipenrich",
@@ -192,11 +192,7 @@ chipenrich = function(
 ) {
 	genome = match.arg(genome)
 
-	os = Sys.info()[1]
-	if(os == 'Windows') {
-		message('Setting n_cores = 1 because Windows detected as OS.')
-		n_cores = 1
-	}
+	n_cores = reset_ncores_for_windows(n_cores)
 
 	############################################################################
 	# Collect options for opts output
@@ -210,10 +206,7 @@ chipenrich = function(
 	)
 
 	############################################################################
-	############################################################################
-	# Checks and genome, locusdef, geneset, and mappa setup
-	############################################################################
-	############################################################################
+	# Setup locus definitions, genesets, and mappability
 
 	ldef_list = setup_locusdef(locusdef, genome, randomization)
 	ldef = ldef_list[['ldef']]
@@ -228,21 +221,6 @@ chipenrich = function(
 	testf = get_test_method(method)
 	test_func = get(testf)
 	method_name = METHOD_NAMES[[method]]
-
-	############################################################################
-	# Warn user if they are trying to use FET with a
-	# locus definition that might lead to biased results.
-	if (method == "fet") {
-		if (is.character(locusdef) && !locusdef %in% c("1kb","5kb")) {
-			message("Warning: Fisher's exact test should only be used with the 1kb or 5kb locus definition.")
-		}
-	}
-
-	# Warn user if they are using the binomial test.
-	if (method == "binomial") {
-		message("Warning: the binomial test is provided for comparison purposes only.")
-		message("This test will almost always give biased results favoring gene sets with short average locus length.")
-	}
 
 	############################################################################
 	############################################################################
@@ -272,8 +250,6 @@ chipenrich = function(
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
-	# This seems redundant given num_peaks_per_gene(...)
-	ppg$peak = recode_peaks(ppg$num_peaks, num_peak_threshold)
 
 	# Add relevant columns to ppg depending on the method
 	if(method == 'chipapprox') {
@@ -313,39 +289,10 @@ chipenrich = function(
 	enrich = Reduce(rbind,results)
 
 	######################################################
-	# Post-process enrichment with various orderings
-
-	# Re-order the columns to something sensible.
-	column_order = c(
-		"Geneset.Type",
-		"Geneset.ID",
-		"Description",
-		"P.value",
-		"FDR",
-		"Effect",
-		"Odds.Ratio",
-		"P.Success",
-		"Status",
-		"N.Geneset.Genes",
-		"N.Geneset.Peak.Genes",
-		"Geneset.Avg.Gene.Length",
-		"Geneset.Avg.Gene.Coverage",
-		"Geneset.Peak.Genes")
-	column_order = intersect(column_order, names(enrich))
-	enrich = enrich[, column_order]
-
-	# Order results by p-value.
-	enrich = enrich[order(enrich$P.value), ]
-
-	# If there is a status column, re-sort so enriched terms are on top.
-	if ("Status" %in% names(enrich)) {
-		enrich = enrich[order(enrich$Status, decreasing=TRUE), ]
-	}
-
-	# Pull out tests that failed.
-	bad_enrich = subset(enrich, is.na(enrich$P.value))
-	enrich = subset(enrich, !is.na(enrich$P.value))
-	rownames(enrich) = c(1:nrow(enrich))
+	# Post-process enrichment
+	# Order columns, add enriched/depleted column as needed, remove bad tests,
+	# sort by p-value, rename rownames to integers
+	enrich = post_process_enrichments(enrich)
 
 	######################################################
 	# Write result objects to files
