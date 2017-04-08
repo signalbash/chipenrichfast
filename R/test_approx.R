@@ -12,10 +12,6 @@ single_approx = function(go_id, geneset, gpw) {
 	# Genes in the geneset
 	go_genes = geneset@set.gene[[go_id]]
 
-	# Filter genes in the geneset to only those in the gpw table.
-	# The gpw table will be truncated depending on which geneset type we're in.
-	go_genes = go_genes[go_genes %in% gpw$gene_id]
-
 	# Background genes, the background presence of a peak, and the background
 	# weight of peaks
 	b_genes = gpw$gene_id %in% go_genes
