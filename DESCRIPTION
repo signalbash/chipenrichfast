@@ -1,8 +1,8 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 1.99.46
-Date: 2017-04-08
+Version: 1.99.47
+Date: 2017-04-09
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -55,7 +55,7 @@ LazyLoad: yes
 Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
-Collate: 
+Collate:
     'assign_peaks.R'
     'test_broadenrich.R'
     'peaks_per_gene.R'
