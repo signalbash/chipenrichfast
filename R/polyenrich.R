@@ -163,7 +163,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_polyenrich_spline.R
-#' @include test_polyenrich.R test_polyenrich_slow.R
+#' @include test_polyenrich.R test_polyenrich_slow.R test_polyenrich_weighted.R
 polyenrich = function(
 	peaks,
 	out_name = "polyenrich",

@@ -78,7 +78,7 @@ Collate:
     'chipenrich_package_doc.R'
     'peak_weights.R'
     'plot_polyenrich_spline.R'
+    'test_polyenrich_weighted.R'
     'test_polyenrich_slow.R'
     'test_polyenrich.R'
     'polyenrich.R'
-    'test_polyenrich_weighted.R'
