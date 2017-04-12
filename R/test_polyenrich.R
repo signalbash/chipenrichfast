@@ -2,7 +2,7 @@ test_polyenrich = function(geneset, gpw, n_cores) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	# Here, geneset is not all combined, but GOBP, GOCC, etc.
 	# i.e. A specific one.
-	gpw = subset(gpw,gene_id %in% geneset@all.genes)
+	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
 	fitspl = mgcv::gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
 	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))

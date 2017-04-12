@@ -21,10 +21,10 @@ NEW FEATURES
 
 IMPROVEMENTS
 
-    o Chris Lee figured out that spline calculations in chipenrich are not required
-      for each gene set. Now a spline is calculated as peak ~ s(log10_length)
-      and used for all gene sets. The correlation between the resulting p-values
-      is nearly always 1.0. This drastically speeds chipenrich() and polyenrich().
+    o The chipenrich method is now significantly faster. Chris Lee figured out
+      that spline calculations in chipenrich are not required for each gene set.
+      Now a spline is calculated as peak ~ s(log10_length) and used for all gene
+      sets. The correlation between the resulting p-values is nearly always 1.
       Unfortunately, this approach cannot be used for broadenrich().
 
         o The chipenrich(..., method='chipenrich', ...) function automatically
@@ -68,8 +68,6 @@ SIGNIFICANT USER-LEVEL CHANGES
       are also supported, but there can be no header, and the first three columns
       must be chr, start, and end.
 
-    o Refactor randomize_locusdef() to be much faster.
-
 SIGNIFICANT BACKEND CHANGES
 
     o Harmonize all code touching LocusDefinition and tss objects to reflect
@@ -100,6 +98,8 @@ SIGNIFICANT BACKEND CHANGES
 
     o Filtering gene sets is now based on the locus definition, and can be done
       from below (min) or above (max). Defaults are 15 and 2000, respectively.
+
+    o Randomizations are all done on the LocusDefinition object.
 
     o Added lots of unit tests to increase test coverage.
 
