@@ -1,11 +1,10 @@
-#' Run Poly-Enrich on a dataset of ChIP-seq peaks
+#' Run Poly-Enrich on narrow genomic regions
 #'
-#' Poly-Enrich is designed for narrow genomic regions, but where nearly
-#' every gene has an intersecting genomic region. ChIP-seq experiments
-#' for transcription factors with large numbers of peaks, and many peaks per gene
-#' are the intended use case. For more details, see the 'Poly-Enrich
-#' Method' section below. For help choosing a method, see the 'Choosing A Method'
-#' section below, or see the vignette.
+#' Poly-Enrich is designed for narrow peaks, but where there are
+#' 100,000s of peaks which results in nearly every gene locus containing a peak.
+#' For example, ChIP-seq experiments for transcription factors. For more details,
+#' see the 'Poly-Enrich Method' section below. For help choosing a method, see
+#' the 'Choosing A Method' section below, or see the vignette.
 #'
 #' @section Poly-Enrich Method:
 #' The Poly-Enrich method uses the number of peaks in genes in its model for
@@ -19,18 +18,15 @@
 #' @section Choosing A Method:
 #' The following guidelines are intended to help select an enrichment function:
 #' \describe{
-#'	\item{broadenrich():}{ is designed for use with broad genomic regions
-#' that cover greater than 5\% of the genome, and that intersect multiple genes.
-#' For example, ChIP-seq experiments for histone modifications are the intended
-#' use case.}
-#'	\item{chipenrich():}{ is designed for use with narrow genomic regions
-#' where fewer genes have an intersecting genomic region. ChIP-seq experiments
-#' for transcription factors with fewer peaks, and fewer peaks per gene are the
-#' intended use case.}
-#'	\item{polyenrich():}{ is also designed for narrow genomic regions, but
-#' where nearly every gene has an intersecting genomic region. ChIP-seq experiments
-#' for transcription factors with large numbers of peaks, and many peaks per gene
-#' are the intended use case.}
+#'	\item{broadenrich():}{ is designed for use with broad peaks that may intersect
+#' multiple gene loci, and cumulatively cover greater than 5\% of the genome. For
+#' example, ChIP-seq experiments for histone modifications.}
+#'	\item{chipenrich():}{ is designed for use with 1,000s or 10,000s of narrow
+#' peaks which results in fewer gene loci containing a peak overall. For example,
+#' ChIP-seq experiments for transcription factors.}
+#'	\item{polyenrich():}{ is also designed for narrow peaks, but where there are
+#' 100,000s of peaks which results in nearly every gene locus containing a peak.
+#' For example, ChIP-seq experiments for transcription factors.}
 #' }
 #'
 #' @section Randomizations:

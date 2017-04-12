@@ -1,7 +1,7 @@
 test_chipenrich = function(geneset,gpw,n_cores) {
     # Restrict our genes/weights/peaks to only those genes in the genesets.
     # Here, geneset is not all combined, but GOBP, GOCC, etc.
-    gpw = subset(gpw,gene_id %in% geneset@all.genes)
+    gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 
     # Making the first spline
     fitspl = mgcv::gam(peak~s(log10_length,bs='cr'),data=gpw,family="binomial")

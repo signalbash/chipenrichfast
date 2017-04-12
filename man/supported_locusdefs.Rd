@@ -43,7 +43,7 @@ tests. For example, if a TF is known to primarily regulate genes by binding
 around the promoter, then selecting the '1kb' locus definition can help to
 reduce the noise from TSS-distal peaks in the enrichment testing.
 
-The \code{\link{plot_dist_to_tss()}} QC plot displays
+The \code{\link{plot_dist_to_tss}} QC plot displays
 where genomic regions fall relative to TSSs genome-wide, and can help inform
 the choice of locus definition. For example, if many peaks fall far from the
 TSS, the 'nearest_tss' locus definition may be a good choice because it will

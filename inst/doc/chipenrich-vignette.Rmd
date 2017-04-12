@@ -12,13 +12,13 @@ vignette: >
 
 # Introduction
 
-Gene set enrichment (GSE) testing enables the interpretation of long lists of differentially expressed genes (e.g. from RNA-seq) or long lists of genomic regions (e.g. from ChIP-seq) in terms of pathways and other biologically meaningful sets of genes. The `chipenrich` package performs GSE on lists of genomic regions (initially conceived as coming from ChIP-seq experiments) while accounting for biases that are known to affect the Type I error of such testing. In particular, the length of a gene affects the probability that a peak will be assigned to it, the number of peaks that will be assigned to it, or the proportion of the gene covered by peaks.
+Gene set enrichment (GSE) testing enables the interpretation of lists of differentially expressed genes (e.g. from RNA-seq), or lists of peaks (e.g. from ChIP-seq), in terms of pathways and other biologically meaningful sets of genes. The `chipenrich` package was originally designed to perform GSE for ChIP-seq peaks, but it can also be used for genomic regions with different biological meaning. The primary innovation of `chipenrich` is its accounting for biases that are known to affect the Type I error of such testing. In particular, the length of a gene's regulatory region affects the probability that a peak will be assigned to it, the number of peaks that will be assigned to it, or the proportion of it covered by peaks.
 
-The `chipenrich` package includes three classes of methods:
+The `chipenrich` package includes different enrichment methods for different use cases:
 
-* `broadenrich()` is designed for use with broad genomic regions that cover greater than 5\% of the genome, and that intersect multiple genes. For example, ChIP-seq experiments for histone modifications are the intended use case.
-* `chipenrich()` is designed for use with narrow genomic regions where fewer genes have an intersecting genomic region. ChIP-seq experiments for transcription factors with fewer peaks, and fewer peaks per gene are the intended use case.
-* `polyenrich()` is also designed for narrow genomic regions, but where nearly every gene has an intersecting genomic region. ChIP-seq experiments for transcription factors with large numbers of peaks, and many peaks per gene are the intended use case.
+* `broadenrich()` is designed for use with broad peaks that may intersect multiple gene loci, and cumulatively cover greater than 5\% of the genome. For example, ChIP-seq experiments for histone modifications.
+* `chipenrich()` is designed for use with 1,000s or 10,000s of narrow peaks which results in fewer gene loci containing a peak overall. For example, ChIP-seq experiments for transcription factors.
+* `polyenrich()` is also designed for narrow peaks, but where there are 100,000s of peaks which results in nearly every gene locus containing a peak. For example, ChIP-seq experiments for transcription factors.
 
 # Concepts and Usage
 
@@ -30,11 +30,11 @@ library(chipenrich)
 
 A ChIP-seq peak is a genomic region that represents a transcription factor binding event or the presence of a histone complex with a particular histone modification. Typically peaks are called with a peak caller (such as [MACS2](https://github.com/taoliu/MACS) or [PePr](https://github.com/shawnzhangyx/PePr/)) and represent relative enrichment of reads in a sample where the antibody is present versus input. Typically, peaks are output by a peak caller in [`BED`-like](https://genome.ucsc.edu/FAQ/FAQformat.html) format.
 
-The primary user input for `chipenrich()`, `broadenrich()`, or `polyenrich()` are the genomic regions to be used for enrichment testing. Regions can be input as either a file path or a `data.frame`.
+The primary user input for `chipenrich()`, `broadenrich()`, or `polyenrich()` are the peaks called from reads in a ChIP-seq experiment. Lists of genomic regions having other biological meaning can be used, but we shall continue to refer to 'peaks'. Peaks can be input as either a file path or a `data.frame`.
 
 If a file path, the following formats are fully supported via their file extensions: `.bed`, `.broadPeak`, `.narrowPeak`, `.gff3`, `.gff2`, `.gff`, and `.bedGraph` or `.bdg`. BED3 through BED6 files are supported under the `.bed` extension ([BED specification](https://genome.ucsc.edu/FAQ/FAQformat.html)). Files without these extensions are supported under the conditions that the first 3 columns correspond to `chr`, `start`, and `end` and that there is either no header column, or it is commented out. Files may be compressed with `gzip`, and so might end in `.narrowPeak.gz`, for example. For files with extension support, the `rtracklayer::import()` function is used to read peaks, so adherence to the mentioned file formats is necessary.
 
-If genomic regions are already in the R environment as a `data.frame`, the `GenomicRanges::makeGRangesFromDataFrame()` function is used to convert to a `GRanges` object. For the acceptable column names needed for correct interpretation, see `?GenomicRanges::makeGRangesFromDataFrame`.
+If peaks are already in the R environment as a `data.frame`, the `GenomicRanges::makeGRangesFromDataFrame()` function is used to convert to a `GRanges` object. For the acceptable column names needed for correct interpretation, see `?GenomicRanges::makeGRangesFromDataFrame`.
 
 For the purpose of the vignette, we'll load some ChIP-seq peaks from the `chipenrich.data` companion package:
 
@@ -56,7 +56,7 @@ supported_genomes()
 
 ## Locus Definitions
 
-A locus definition is a way of assigning peaks to genes. A trivial locus definition might be the gene body from the transcription start site (TSS) to the transcript end site (TES). A locus definition can also express how one expects a transcription factor to regulate genes. For example, a locus definition defined as 1kb upstream and downstream of a TSS (the `1kb` definition) would capture TFs binding in proximal-promoter regions.
+A locus definition is a way of defining a gene regulatory region, and enables us to associate peaks with genes. The terms 'gene', 'gene regulatory region', and 'gene locus' are used interchangeably in the vignette. A trivial locus definition might be the gene bodies from the transcription start sites (TSS) to the transcript end sites (TES) for each gene. A locus definition can also express how one expects a transcription factor to regulate genes. For example, a locus definition defined as 1kb upstream and downstream of a TSS (the `1kb` definition) would capture TFs binding in proximal-promoter regions.
 
 ### Built-in locus definitions
 
@@ -102,7 +102,7 @@ For a transcription factor ChIP-seq experiment, selecting a particular locus def
 
 Selecting a locus definition can also help reduce the noise in the enrichment tests. For example, if a TF is known to primarily regulate genes by binding around the promoter, then selecting the `1kb` locus definition can help to reduce the noise from TSS-distal peaks in the enrichment testing.
 
-The [`plot_dist_to_tss()` QC plot](#peak-distance-to-tss-distribution) displays where genomic regions fall relative to TSSs genome-wide, and can help inform the choice of locus definition. For example, if many peaks fall far from the TSS, the `nearest_tss` locus definition may be a good choice because it will capture *all* input genomic regions, whereas the `1kb` locus definition may not capture many of the input genomic regions and adversely affect the enrichment testing.
+The [`plot_dist_to_tss()` QC plot](#peak-distance-to-tss-distribution) displays where peak midpoints fall relative to TSSs genome-wide, and can help inform the choice of locus definition. For example, if many peaks fall far from the TSS, the `nearest_tss` locus definition may be a good choice because it will capture *all* peaks, whereas the `1kb` locus definition may not capture many of the peaks and adversely affect the enrichment testing.
 
 ## Gene Sets
 
@@ -179,7 +179,7 @@ As stated in the introduction, the `chipenrich` package includes three classes o
 
 ### `broadenrich()`
 
-Broad-Enrich is designed for use with broad genomic regions that cover greater than 5\% of the genome, and that intersect multiple genes. ChIP-seq experiments on histone modifications is an example of such a dataset.
+Broad-Enrich is designed for use with broad peaks that may intersect multiple gene loci, and cumulatively cover greater than 5\% of the genome. For example, ChIP-seq experiments for histone modifications.
 
 The Broad-Enrich method uses the cumulative peak coverage of genes in its logistic regression model for enrichment: `GO ~ ratio + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `ratio` is a numeric vector indicating the ratio of the gene covered by peaks, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between gene coverage and locus length.
 
@@ -193,7 +193,7 @@ print(results.be[1:5,1:5])
 
 ### `chipenrich()`
 
-ChIP-Enrich is designed for use with narrow genomic regions where few genes have an intersecting genomic region, and there are few peaks per gene.
+ChIP-Enrich is designed for use with 1,000s or 10,000s of narrow peaks which results in fewer gene loci containing a peak overall. For example, ChIP-seq experiments for transcription factors.
 
 The ChIP-Enrich method uses the presence of a peak in its logistic regression model for enrichment: `peak ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `peak` is a binary vector indicating the presence of a peak in a gene, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between the presence of a peak and locus length.
 
@@ -218,7 +218,7 @@ print(results.cem[1:5,1:5])
 
 ### `polyenrich()`
 
-Poly-Enrich is also designed for narrow genomic regions, but where nearly every gene has an intersecting genomic region, and there are many peaks per gene.
+Poly-Enrich is also designed for narrow peaks, but where there are 100,000s of peaks which results in nearly every gene locus containing a peak. For example, ChIP-seq experiments for transcription factors.
 
 The Poly-Enrich method uses the number of peaks in genes in its logistic regression model for enrichment: `num_peaks ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `num_peaks` is a numeric vector indicating the number of peaks in each gene, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.
 
@@ -236,7 +236,7 @@ Each enrich function outputs QC plots if `qc_plots = TRUE`. There are also stand
 
 ### Peak distance to TSS distribution
 
-This plot gives a distribution of the distance of the genomic region midpoints to the TSSs. It can help in [selecting a locus definition](#selecting-a-locus-definition). For example, if genes are primarily within 5kb of TSSs, then the `5kb` locus definition may be a good choice. In contrast, if most genes fall far from TSSs, the `nearest_tss` locus definition may be a good choice.
+This plot gives a distribution of the distance of the peak midpoints to the TSSs. It can help in [selecting a locus definition](#selecting-a-locus-definition). For example, if genes are primarily within 5kb of TSSs, then the `5kb` locus definition may be a good choice. In contrast, if most genes fall far from TSSs, the `nearest_tss` locus definition may be a good choice.
 
 ```{r, fig.align='center', fig.cap='E2F4 peak distances to TSS', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 # Output in chipenrich and polyenrich
@@ -245,7 +245,7 @@ plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')
 
 ### Presence of peak versus locus length
 
-This plot visualizes the relationship between the probability of a locus being assigned a peak and the locus length (on the log10 scale). For clarity of visualization, each point represents 25 gene loci binned after sorting by locus length. The expected fit under the assumptions of Fisher's Exact Test (horizontal line), and a binomial-based test (gray curve) are displayed to indicate how the dataset being enriched conforms to the assumption of each. The empirical spline used in the `chipenrich` method is in orange.
+This plot visualizes the relationship between the presence of at least one peak in a gene locus and the locus length (on the log10 scale). For clarity of visualization, each point represents 25 gene loci binned after sorting by locus length. The expected fit under the assumptions of Fisher's Exact Test (horizontal line), and a binomial-based test (gray curve) are displayed to indicate how the dataset being enriched conforms to the assumption of each. The empirical spline used in the `chipenrich` method is in orange.
 
 ```{r, fig.align='center', fig.cap='E2F4 chipenrich spline without mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE}
 # Output in chipenrich
