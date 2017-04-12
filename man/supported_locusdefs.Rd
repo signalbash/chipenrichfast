@@ -10,7 +10,8 @@ supported_locusdefs()
 A \code{data.frame} with columns \code{genome, locusdef}.
 }
 \description{
-The locus definitions are defined as follows:
+The locus definitions are defined as below. For advice on selecting a locus
+definition, see the 'Selecting A Locus Definition' section below.
 \describe{
   \item{nearest_tss:}{The locus is the region spanning the midpoints between the TSSs of adjacent genes.}
   \item{nearest_gene:}{The locus is the region spanning the midpoints between the boundaries of each gene, where a gene is defined as the region between the furthest upstream TSS and furthest downstream TES for that gene. If two gene loci overlap each other, we take the midpoint of the overlap as the boundary between the two loci. When a gene locus is completely nested within another, we create a disjoint set of 3 intervals, where the outermost gene is separated into 2 intervals broken apart at the endpoints of the nested gene.}
@@ -27,6 +28,30 @@ The locus definitions are defined as follows:
   \item{intron:}{Each gene has multiple loci corresponding to its introns. Overlaps between different genes are allowed.}
 }
 }
+\section{Selecting A Locus Definition}{
+
+For a transcription factor ChIP-seq experiment, selecting a particular locus
+definition for use in enrichment testing can have implications relating to how
+the TF regulates genes. For example, selecting the '1kb' locus definition will
+imply that the biological processes found enriched are a result of TF regulation
+near the promoter. In contrast, selecting the '5kb_outside' locus definition
+will imply that the biological processes found enriched are a result of TF
+regulation distal from the promoter.
+
+Selecting a locus definition can also help reduce the noise in the enrichment
+tests. For example, if a TF is known to primarily regulate genes by binding
+around the promoter, then selecting the '1kb' locus definition can help to
+reduce the noise from TSS-distal peaks in the enrichment testing.
+
+The \code{\link{plot_dist_to_tss()}} QC plot displays
+where genomic regions fall relative to TSSs genome-wide, and can help inform
+the choice of locus definition. For example, if many peaks fall far from the
+TSS, the 'nearest_tss' locus definition may be a good choice because it will
+capture all input genomic regions, whereas the '1kb' locus definition may
+not capture many of the input genomic regions and adversely affect the
+enrichment testing.
+}
+
 \examples{
 
 supported_locusdefs()
