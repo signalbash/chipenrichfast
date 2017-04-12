@@ -8,10 +8,6 @@ data(peaks_H3K4me3_GM12878, package = 'chipenrich.data')
 head(peaks_E2F4)
 head(peaks_H3K4me3_GM12878)
 
-## ---- echo=FALSE---------------------------------------------------------
-#peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-#peaks_H3K4me3_GM12878 = subset(peaks_H3K4me3_GM12878, peaks_H3K4me3_GM12878$chrom == 'chr1')
-
 ## ------------------------------------------------------------------------
 supported_genomes()
 
@@ -100,11 +96,11 @@ plot_dist_to_tss(peaks = peaks_E2F4, genome = 'hg19')
 plot_chipenrich_spline(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19')
 
 ## ---- fig.align='center', fig.cap='E2F4 polyenrich spline without mappability', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
-# Output in chipenrich
+# Output in polyenrich
 plot_polyenrich_spline(peaks = peaks_E2F4, locusdef = 'nearest_tss', genome = 'hg19')
 
 ## ---- fig.align='center', fig.cap='H3K4me3 gene coverage', fig.height=6, fig.width=6, fig.show='hold', warning = FALSE, message = FALSE----
-# Output in chipenrich
+# Output in broadenrich
 plot_gene_coverage(peaks = peaks_H3K4me3_GM12878, locusdef = 'nearest_tss',  genome = 'hg19')
 
 ## ------------------------------------------------------------------------
@@ -123,5 +119,6 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 	locusdef = "nearest_tss", qc_plots = FALSE, randomization = 'complete',
     out_name = NULL, n_cores = 1)
 alpha = sum(results$results$P.value < 0.05) / nrow(results$results)
+# NOTE: This is for
 print(alpha)
 
