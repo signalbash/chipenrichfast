@@ -55,7 +55,7 @@ LazyLoad: yes
 Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
-Collate:
+Collate: 
     'assign_peaks.R'
     'test_broadenrich.R'
     'peaks_per_gene.R'
@@ -76,7 +76,9 @@ Collate:
     'plot_dist_to_tss.R'
     'chipenrich.R'
     'chipenrich_package_doc.R'
+    'peak_weights.R'
     'plot_polyenrich_spline.R'
     'test_polyenrich_slow.R'
     'test_polyenrich.R'
     'polyenrich.R'
+    'test_polyenrich_weighted.R'

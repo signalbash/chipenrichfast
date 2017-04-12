@@ -235,11 +235,17 @@ polyenrich = function(
 	######################################################
 	# Assign peaks to genes.
 	message("Assigning peaks to genes with assign_peaks(...) ..")
-	assigned_peaks = assign_peaks(peakobj, ldef, tss)
+	assigned_peaks = assign_peaks(peakobj, ldef, tss, method)
 
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
+    
+    ######################################################
+    # If using the weighted method, add the weights column
+    if (method == "polyenrich_weighted") {
+        ppg = calc_genes_peak_weight(assigned_peaks, ppg)
+    }
 
 	######################################################
 	# Enrichment
@@ -254,6 +260,9 @@ polyenrich = function(
 		if (testf == "test_polyenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
+        if (testf == "test_polyenrich_weighted") {
+            rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
+        }
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

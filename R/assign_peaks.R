@@ -24,7 +24,7 @@
 #' 	tss = tss.hg19)
 #'
 #' @export
-assign_peaks = function(peaks, locusdef, tss) {
+assign_peaks = function(peaks, locusdef, tss, method) {
 	# Extract GRanges of locusdef
 	# NOTE: locusdef is an environment, so uses @
 	ldef_gr = locusdef@granges
@@ -37,6 +37,13 @@ assign_peaks = function(peaks, locusdef, tss) {
 		ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
 		name = GenomicRanges::mcols(peaks)$name
 	)
+    if (method == "polyenrich_weighted") {
+        if (!("signalValue" %in% colnames(GenomicRanges::mcols(peaks)))) {
+            stop("No signalValue column!")
+        }
+        mids_gr$signalValue = GenomicRanges::mcols(peaks)$signalValue
+    }
+
 
 	# Determine overlaps of peak midpoints with locus definition
 	mid_ldef_overlaps = GenomicRanges::findOverlaps(mids_gr, ldef_gr)
@@ -77,6 +84,12 @@ assign_peaks = function(peaks, locusdef, tss) {
 		gene_symbol = GenomicRanges::mcols(ldef_gr)$symbol[ldef_indices],
 		stringsAsFactors = FALSE
 	)
+    
+    # Add the signalValue column if method == "polyenrich_weighted"
+    # Stops if there isn't one
+    if (method == "polyenrich_weighted") {
+        mid_ldef_df$signalValue = GenomicRanges::mcols(peaks)$signalValue[mid_indices]
+    }
 
 	mid_indices = S4Vectors::queryHits(mid_dist_to_ntss)
 	tss_indices = S4Vectors::subjectHits(mid_dist_to_ntss)
@@ -116,6 +129,9 @@ assign_peaks = function(peaks, locusdef, tss) {
 		"nearest_tss_symbol",
 		"nearest_tss_gene_strand"
 	)
+    if (method == "polyenrich_weighted") {
+        column_order = c(column_order, "signalValue")
+    }
 	d = d[, column_order]
 
 	return(d)
