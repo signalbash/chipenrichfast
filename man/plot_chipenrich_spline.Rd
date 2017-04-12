@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_chipenrich_spline.R
 \name{plot_chipenrich_spline}
 \alias{plot_chipenrich_spline}
-\title{Plot QC plot for ChIP-Enrich}
+\title{QC plot for ChIP-Enrich}
 \usage{
 plot_chipenrich_spline(peaks, locusdef = "nearest_tss",
   genome = supported_genomes(), mappability = NULL, legend = TRUE,
@@ -19,11 +19,13 @@ header column, or it is commented out. If a \code{data.frame} A BEDX+Y style
 \code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame} for
 acceptable column names.}
 
-\item{locusdef}{One of 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
+\item{locusdef}{One of: 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
 '1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
-'10kb', '10kb_outside', '10kb_outside_upstream'. Alternately, a file path for
+'10kb', '10kb_outside', '10kb_outside_upstream'. For a description of each,
+see the vignette or \code{\link{supported_locusdefs}}. Alternately, a file path for
 a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
-must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.}
+must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
+example custom locus definition file, see the vignette.}
 
 \item{genome}{One of the \code{supported_genomes()}.}
 
@@ -31,7 +33,7 @@ must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.}
 or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
 Gene IDs should be Entrez IDs, and mappability values should range from 0 and 1.
-Default value is NULL.}
+For an example custom mappability file, see the vignette. Default value is NULL.}
 
 \item{legend}{If true, a legend will be drawn on the plot.}
 
@@ -41,9 +43,12 @@ Default value is NULL.}
 A trellis plot object.
 }
 \description{
-Create a plot showing the probability of a gene being assigned a peak given
-its locus length. The plot shows an empirical fit to the data using a binomial
-smoothing spline.
+A plot showing an approximation of the empirical spline used to model the
+relationship between a gene having a peak and the locus length. For visual
+clarity, genes are binned into groups of 25 after sorting by locus length.
+Expected fits assuming independence of locus length and presence of a peak,
+and assuming proportionality of locus length and presence of a peak are given
+to demonstrate deviation from either for the dataset.
 }
 \examples{
 
