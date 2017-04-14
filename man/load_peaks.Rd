@@ -4,15 +4,11 @@
 \alias{load_peaks}
 \title{Convert a BEDX+Y data.frame and into GRanges}
 \usage{
-load_peaks(dframe, genome = NA, keep.extra.columns = TRUE)
+load_peaks(dframe, keep.extra.columns = TRUE)
 }
 \arguments{
 \item{dframe}{A BEDX+Y style \code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame}
 for acceptable column names for appropriate conversion to \code{GRanges}.}
-
-\item{genome}{The genome build used to get input regions. Usually inferred from
-\code{chipenrich()}. Default is NA, in which case no genome is assigned to the
-\code{GRanges} and the peaks cannot be sorted.}
 
 \item{keep.extra.columns}{Keep extra columns parameter from \code{GenomicRanges::makeGRangesFromDataFrame()}.}
 }
@@ -36,7 +32,7 @@ chr = c('chr1','chr2','chr3'),
 start = c(35,74,235),
 end = c(46,83,421),
 stringsAsFactors = FALSE)
-peaks = load_peaks(peaks_df, genome = 'hg19')
+peaks = load_peaks(peaks_df)
 
 # Example with extra columns
 peaks_df = data.frame(
@@ -46,6 +42,6 @@ end = c(46,83,421),
 strand = c('+','-','+'),
 score = c(36, 747, 13),
 stringsAsFactors = FALSE)
-peaks = load_peaks(peaks_df, genome = 'hg19', keep.extra.columns = TRUE)
+peaks = load_peaks(peaks_df, keep.extra.columns = TRUE)
 
 }

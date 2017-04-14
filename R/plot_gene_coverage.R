@@ -60,9 +60,9 @@ plot_gene_coverage = function(peaks, locusdef = "nearest_tss", genome = supporte
 	mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
 
 	if (class(peaks) == "data.frame") {
-		peakobj = load_peaks(peaks, genome = genome)
+		peakobj = load_peaks(peaks)
 	} else if (class(peaks) == "character") {
-		peakobj = read_bed(peaks, genome = genome)
+		peakobj = read_bed(peaks)
 	}
 	num_peaks = length(peakobj)
 

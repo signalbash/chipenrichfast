@@ -60,9 +60,9 @@ peak_nearest_tss = function(peaks, tss) {
 plot_dist_to_tss = function(peaks, genome = supported_genomes()) {
 	# Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
-		peakobj = load_peaks(peaks, genome = genome)
+		peakobj = load_peaks(peaks)
 	} else if (class(peaks) == "character") {
-		peakobj = read_bed(peaks, genome = genome)
+		peakobj = read_bed(peaks)
 	}
 
 	# Load TSS site info.
