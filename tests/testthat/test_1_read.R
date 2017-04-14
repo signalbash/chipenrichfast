@@ -119,14 +119,6 @@ test_that('Test names of genesets',{
 ################################################################################
 # read_bed()
 
-test_that('Uncompressed gff3 fly', {
-	peak_path = system.file('extdata', 'test.gff3', package='chipenrich')
-	peaks = read_bed(peak_path, genome = 'dm3')
-
-	expect_equal(length(peaks), 19)
-	expect_equal(unique(GenomeInfoDb::genome(peaks)), 'dm3')
-})
-
 test_that('Uncompressed gff3, no genome', {
 	peak_path = system.file('extdata', 'test.gff3', package='chipenrich')
 	peaks = read_bed(peak_path)
@@ -140,14 +132,6 @@ test_that('Compressed gff3, no genome', {
 	peaks = read_bed(peak_path)
 
 	expect_equal(length(peaks), 19)
-})
-
-test_that('bedGraph human', {
-	peak_path = system.file('extdata', 'test.bedGraph', package='chipenrich')
-	peaks = read_bed(peak_path, genome = 'hg19')
-
-	expect_equal(length(peaks), 4)
-	expect_equal(unique(GenomeInfoDb::genome(peaks)), 'hg19')
 })
 
 test_that('BED3 with commented header', {
@@ -175,7 +159,7 @@ test_that('Uncompressed narrowPeak', {
 
 test_that('Compressed broadPeak', {
 	peak_path = system.file('extdata', 'test.broadPeak.gz', package='chipenrich')
-	peaks = read_bed(peak_path, genome = 'hg19')
+	peaks = read_bed(peak_path)
 
 	expect_equal(length(peaks), 17)
 })
@@ -214,7 +198,7 @@ test_that('load_peaks() with and without genome', {
 		stringsAsFactors=F)
 
 	# With genome
-	peaks = load_peaks(peaks_df, genome = 'hg19')
+	peaks = load_peaks(peaks_df)
 	expect_equal(length(peaks), 3)
 
 	# Without genome
