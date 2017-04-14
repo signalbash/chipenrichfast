@@ -245,9 +245,9 @@ polyenrich = function(
 	# Read in and format peaks (from data.frame or file)
 	if (class(peaks) == "data.frame") {
 		message('Reading peaks from data.frame...')
-		peakobj = load_peaks(peaks, genome = genome)
+		peakobj = load_peaks(peaks)
 	} else if (class(peaks) == "character") {
-		peakobj = read_bed(peaks, genome = genome)
+		peakobj = read_bed(peaks)
 	}
 
 	# Number of peaks in data.
