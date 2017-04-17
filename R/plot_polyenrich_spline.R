@@ -30,10 +30,10 @@ calc_weights_polyenrich = function(gpw) {
 	return(gpw)
 }
 
-#' Plot QC plot for Poly-Enrich
+#' QC plot for Poly-Enrich
 #'
-#' Create a plot showing the probability of a gene being assigned a peak given
-#' its locus length. The plot shows an empirical fit to the data using a binomial
+#' Create a plot the relationship between number of peaks assigned to a gene and
+#' locus length. The plot shows an empirical fit to the data using a binomial
 #' smoothing spline.
 #'
 #' @param peaks Either a file path or a \code{data.frame} of peaks in BED-like
@@ -45,17 +45,19 @@ calc_weights_polyenrich = function(gpw) {
 #' header column, or it is commented out. If a \code{data.frame} A BEDX+Y style
 #' \code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame} for
 #' acceptable column names.
-#' @param locusdef One of 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
+#' @param locusdef One of: 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
 #' '1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
-#' '10kb', '10kb_outside', '10kb_outside_upstream'. Alternately, a file path for
+#' '10kb', '10kb_outside', '10kb_outside_upstream'. For a description of each,
+#' see the vignette or \code{\link{supported_locusdefs}}. Alternately, a file path for
 #' a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
-#' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.
+#' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
+#' example custom locus definition file, see the vignette.
 #' @param genome One of the \code{supported_genomes()}.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
 #' Gene IDs should be Entrez IDs, and mappability values should range from 0 and 1.
-#' Default value is NULL.
+#' For an example custom mappability file, see the vignette. Default value is NULL.
 #' @param legend If true, a legend will be drawn on the plot.
 #' @param xlim Set the x-axis limit. NULL means select x-lim automatically.
 #' @param ylim Set the y-axis limit. NULL means select y-lim automatically.
@@ -84,9 +86,9 @@ plot_polyenrich_spline = function(peaks, locusdef = "nearest_tss", genome = supp
 	mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
 
 	if (class(peaks) == "data.frame") {
-		peakobj = load_peaks(peaks, genome = genome)
+		peakobj = load_peaks(peaks)
 	} else if (class(peaks) == "character") {
-		peakobj = read_bed(peaks, genome = genome)
+		peakobj = read_bed(peaks)
 	}
 	num_peaks = length(peakobj)
 

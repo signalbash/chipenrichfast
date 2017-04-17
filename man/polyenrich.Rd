@@ -2,7 +2,7 @@
 % Please edit documentation in R/polyenrich.R
 \name{polyenrich}
 \alias{polyenrich}
-\title{Run Poly-Enrich on a dataset of ChIP-seq peaks}
+\title{Run Poly-Enrich on narrow genomic regions}
 \usage{
 polyenrich(peaks, out_name = "polyenrich", out_path = getwd(),
   genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
@@ -37,13 +37,16 @@ to the current working directory as returned by \code{\link{getwd}}.}
 \item{genesets}{A character vector of geneset databases to be tested for
 enrichment. See \code{supported_genesets()}. Alternately, a file path to a
 a tab-delimited text file with header and first column being the geneset ID
-or name, and the second column being Entrez Gene IDs.}
+or name, and the second column being Entrez Gene IDs. For an example custom
+gene set file, see the vignette.}
 
-\item{locusdef}{One of 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
+\item{locusdef}{One of: 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
 '1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
-'10kb', '10kb_outside', '10kb_outside_upstream'. Alternately, a file path for
+'10kb', '10kb_outside', '10kb_outside_upstream'. For a description of each,
+see the vignette or \code{\link{supported_locusdefs}}. Alternately, a file path for
 a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
-must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'.}
+must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
+example custom locus definition file, see the vignette.}
 
 \item{method}{A character string specifying the method to use for enrichment
 testing. Currently the only option is \code{polyenrich}, but future methods
@@ -53,7 +56,7 @@ are in development.}
 or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
 Gene IDs should be Entrez IDs, and mappability values should range from 0 and 1.
-Default value is NULL.}
+For an example custom mappability file, see the vignette. Default value is NULL.}
 
 \item{qc_plots}{A logical variable that enables the automatic generation of
 plots for quality control.}
@@ -132,9 +135,11 @@ frame.) The columns are:
 }}
 }
 \description{
-Run gene set enrichment testing with the Poly-Enrich method. Poly-Enrich is
-designed for datasets where multiple peaks in a gene should be taken into account.
-For more details, see the Poly-Enrich Method section below.
+Poly-Enrich is designed for narrow peaks, but where there are
+100,000s of peaks which results in nearly every gene locus containing a peak.
+For example, ChIP-seq experiments for transcription factors. For more details,
+see the 'Poly-Enrich Method' section below. For help choosing a method, see
+the 'Choosing A Method' section below, or see the vignette.
 }
 \section{Poly-Enrich Method}{
 
@@ -147,6 +152,22 @@ adjusts for the relationship between the number of peaks in a gene and locus
 length.
 }
 
+\section{Choosing A Method}{
+
+The following guidelines are intended to help select an enrichment function:
+\describe{
+\item{broadenrich():}{ is designed for use with broad peaks that may intersect
+multiple gene loci, and cumulatively cover greater than 5\% of the genome. For
+example, ChIP-seq experiments for histone modifications.}
+\item{chipenrich():}{ is designed for use with 1,000s or 10,000s of narrow
+peaks which results in fewer gene loci containing a peak overall. For example,
+ChIP-seq experiments for transcription factors.}
+\item{polyenrich():}{ is also designed for narrow peaks, but where there are
+100,000s of peaks which results in nearly every gene locus containing a peak.
+For example, ChIP-seq experiments for transcription factors.}
+}
+}
+
 \section{Randomizations}{
 
 Randomization of locus definitions allows for the assessment of Type I Error
@@ -154,20 +175,20 @@ under the null hypothesis. The randomization codes are:
 \describe{
 \item{\code{NULL}:}{ No randomizations, the default.}
 	\item{'complete':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
-\code{locusdef} without regard for the chromosome location, or locus length.
+\code{locusdef} together, without regard for the chromosome location, or locus length.
 The null hypothesis is that there is no true gene set enrichment.}
 	\item{'bylength':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
-\code{locusdef} within bins of 100 genes sorted by locus length. The null
+\code{locusdef} together within bins of 100 genes sorted by locus length. The null
 hypothesis is that there is no true gene set enrichment, but with preserved locus
 length relationship.}
 	\item{'bylocation':}{ Shuffle the \code{gene_id} and \code{symbol} columns of the
-\code{locusdef} within bins of 50 genes sorted by genomic location. The null
+\code{locusdef} together within bins of 50 genes sorted by genomic location. The null
 hypothesis is that there is no true gene set enrichment, but with preserved
 genomic location.}
 }
-The result of the function with a selected randomization is the same as without.
+The return value with a selected randomization is the same list as without.
 To assess the Type I error, the \code{alpha} level for the particular data set
-can be calculated by dividing the total number of gene sets with p-value < 0.05
+can be calculated by dividing the total number of gene sets with p-value < \code{alpha}
 by the total number of tests. Users may want to perform multiple randomizations
 for a set of peaks and take the median of the \code{alpha} values.
 }
@@ -188,4 +209,8 @@ assigned_peaks = results$peaks
 # Get the results of enrichment testing.
 enrich = results$results
 
+}
+\seealso{
+Other enrichment functions: \code{\link{broadenrich}},
+  \code{\link{chipenrich}}
 }

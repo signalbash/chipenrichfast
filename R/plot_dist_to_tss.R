@@ -34,10 +34,15 @@ peak_nearest_tss = function(peaks, tss) {
 #' Create a histogram of the distance from each peak to the nearest transcription
 #' start site (TSS) of any gene.
 #'
-#' @param peaks A \code{data.frame}, or tab-delimited text file (BED, narrowPeak,
-#' broadPeak, etc) with the first three columns being chrom, start, and end. The
-#' data frame should have at least 3 columns: chrom, start, and end. Chrom
-#' should follow UCSC convention, e.g. "chrX".
+#' @param peaks Either a file path or a \code{data.frame} of peaks in BED-like
+#' format. If a file path, the following formats are fully supported via their
+#' file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
+#' or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
+#' without these extensions are supported under the conditions that the first 3
+#' columns correspond to 'chr', 'start', and 'end' and that there is either no
+#' header column, or it is commented out. If a \code{data.frame} A BEDX+Y style
+#' \code{data.frame}. See \code{GenomicRanges::makeGRangesFromDataFrame} for
+#' acceptable column names.
 #' @param genome One of the \code{supported_genomes()}.
 #'
 #' @return A trellis plot object.
@@ -55,9 +60,9 @@ peak_nearest_tss = function(peaks, tss) {
 plot_dist_to_tss = function(peaks, genome = supported_genomes()) {
 	# Get peaks from user's file.
 	if (class(peaks) == "data.frame") {
-		peakobj = load_peaks(peaks, genome = genome)
+		peakobj = load_peaks(peaks)
 	} else if (class(peaks) == "character") {
-		peakobj = read_bed(peaks, genome = genome)
+		peakobj = read_bed(peaks)
 	}
 
 	# Load TSS site info.

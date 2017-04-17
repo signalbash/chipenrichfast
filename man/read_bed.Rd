@@ -4,15 +4,11 @@
 \alias{read_bed}
 \title{Read files containing peaks or genomic regions}
 \usage{
-read_bed(file_path, genome = NA)
+read_bed(file_path)
 }
 \arguments{
 \item{file_path}{A path to a file with input peaks/regions. See extended
 description above for details about file support.}
-
-\item{genome}{The genome build the input regions are with respect to.
-Usually inferred from \code{chipenrich()}. Default is NA, in which case no
-genome is assigned to the \code{GRanges} and the peaks cannot be sorted.}
 }
 \value{
 A \code{GRanges} with \code{mcols} matching any extra columns.
@@ -45,22 +41,18 @@ peaks = read_bed(file)
 
 # Example of BED3
 file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
-peaks = read_bed(file, genome = 'hg19')
-
-# Example of BED3 without genome
-file = system.file('extdata', 'test_assign.bed', package = 'chipenrich')
 peaks = read_bed(file)
 
-# Example of narrowPeak without genome
+# Example of narrowPeak
 file = system.file('extdata', 'test.narrowPeak', package = 'chipenrich')
 peaks = read_bed(file)
 
-# Example of gzipped broadPeak without genome
+# Example of gzipped broadPeak
 file = system.file('extdata', 'test.broadPeak.gz', package = 'chipenrich')
 peaks = read_bed(file)
 
 # Example of gzipped gff3 Fly peaks
 file = system.file('extdata', 'test.gff3.gz', package = 'chipenrich')
-peaks = read_bed(file, genome = 'dm3')
+peaks = read_bed(file)
 
 }
