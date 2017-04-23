@@ -24,7 +24,7 @@
 #' 	tss = tss.hg19)
 #'
 #' @export
-assign_peaks = function(peaks, locusdef, tss, method = NULL) {
+assign_peaks = function(peaks, locusdef, tss, weighting) {
 	# Extract GRanges of locusdef
 	# NOTE: locusdef is an environment, so uses @
 	ldef_gr = locusdef@granges
@@ -37,7 +37,7 @@ assign_peaks = function(peaks, locusdef, tss, method = NULL) {
 		ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
 		name = GenomicRanges::mcols(peaks)$name
 	)
-    if (!is.null(method) && method == "polyenrich_weighted") {
+    if ("signalValue" %in% weighting) {
         if (!("signalValue" %in% colnames(GenomicRanges::mcols(peaks)))) {
             stop("No signalValue column!")
         }
@@ -87,7 +87,7 @@ assign_peaks = function(peaks, locusdef, tss, method = NULL) {
     
     # Add the signalValue column if method == "polyenrich_weighted"
     # Stops if there isn't one
-    if (!is.null(method) && method == "polyenrich_weighted") {
+    if ("signalValue" %in% weighting) {
         mid_ldef_df$signalValue = GenomicRanges::mcols(peaks)$signalValue[mid_indices]
     }
 
@@ -129,7 +129,7 @@ assign_peaks = function(peaks, locusdef, tss, method = NULL) {
 		"nearest_tss_symbol",
 		"nearest_tss_gene_strand"
 	)
-    if (!is.null(method) && method == "polyenrich_weighted") {
+    if ("signalValue" %in% weighting) {
         column_order = c(column_order, "signalValue")
     }
 	d = d[, column_order]

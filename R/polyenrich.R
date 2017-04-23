@@ -11,9 +11,18 @@
 #' enrichment: \code{num_peaks ~ GO + s(log10_length)}. Here, \code{GO} is a
 #' binary vector indicating whether a gene is in the gene set being tested,
 #' \code{num_peaks} is a numeric vector indicating the number of peaks in each
-#' gene, and \code{s(log10_length)} is a binomial cubic smoothing spline which
-#' adjusts for the relationship between the number of peaks in a gene and locus
-#' length.
+#' gene, and \code{s(log10_length)} is a negative binomial cubic smoothing spline
+#' which adjusts for the relationship between the number of peaks in a gene and
+#' locus length.
+#'
+#' @section Poly-Enrich Weighting Options:
+#' Poly-Enrich also allows weighting of individual peaks. Currently the options are:
+#' \describe{
+#'  \item{'signalValue:'}{ weighs each peak based on the log Signal Value given in the
+#' narrowPeak format or a user-supplied column, normalized to have mean 1.}
+#'  \item{'multiplicity:'}{ weighs each peak by the inverse of the number of genes
+#' it is assigned to.}
+#'
 #'
 #' @section Choosing A Method:
 #' The following guidelines are intended to help select an enrichment function:
@@ -196,6 +205,7 @@ polyenrich = function(
 		'GOMF'),
 	locusdef = "nearest_tss",
 	method = 'polyenrich',
+    weighting = NULL,
 	mappability = NULL,
 	qc_plots = TRUE,
 	min_geneset_size = 15,
@@ -256,7 +266,7 @@ polyenrich = function(
 	######################################################
 	# Assign peaks to genes.
 	message("Assigning peaks to genes with assign_peaks(...) ..")
-	assigned_peaks = assign_peaks(peakobj, ldef, tss, method)
+	assigned_peaks = assign_peaks(peakobj, ldef, tss, weighting)
 
 	######################################################
 	# Compute peaks per gene table
@@ -265,6 +275,16 @@ polyenrich = function(
     ######################################################
     # If using the weighted method, add the weights column
     if (method == "polyenrich_weighted") {
+        if (is.null(weighting)) {
+            # No weights specified
+            stop("No weight options selected!")
+        } else if (!all(weighting %in% c("signalValue","multiplicity"))) {
+            # Unsupported weights
+            stop(sprintf("Unsupported weights: %s",
+                paste(weighting[which(!(weighting %in% c("signalValue","multiplicity")))],collapse=", ")))
+        }
+        
+        assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
         ppg = calc_genes_peak_weight(assigned_peaks, ppg)
     }
 

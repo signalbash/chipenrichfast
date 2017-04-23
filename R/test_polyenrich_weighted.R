@@ -1,3 +1,4 @@
+# Note: the counts input is to allow future methods to regress on other count data
 test_polyenrich_weighted = function(geneset,gpw,n_cores,counts) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	# Here, geneset is not all combined, but GOBP, GOCC, etc.
