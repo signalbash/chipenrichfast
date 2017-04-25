@@ -24,7 +24,7 @@
 #' 	tss = tss.hg19)
 #'
 #' @export
-assign_peaks = function(peaks, locusdef, tss, weighting) {
+assign_peaks = function(peaks, locusdef, tss, weighting=NULL) {
 	# Extract GRanges of locusdef
 	# NOTE: locusdef is an environment, so uses @
 	ldef_gr = locusdef@granges
