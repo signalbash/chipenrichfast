@@ -172,7 +172,7 @@ setup_mappa = function(mappa_code, genome, ldef_code, ldef_obj) {
 	# read_length		file			stop
 	# read_length		built-in		check valid mappa_code
 
-	user_defined_mappa = file.exists(mappa_code)
+	user_defined_mappa = file.exists(as.character(mappa_code))
 	user_defined_ldef = file.exists(ldef_code)
 
 	if(user_defined_mappa) {

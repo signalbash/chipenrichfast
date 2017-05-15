@@ -75,7 +75,7 @@ print(results.ce[1:5,1:5])
 # With mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-	locusdef = "nearest_tss", mappability='24', qc_plots = FALSE,
+	locusdef = "nearest_tss", mappability=24, qc_plots = FALSE,
 	out_name = NULL,n_cores=1)
 results.cem = results$results
 print(results.cem[1:5,1:5])

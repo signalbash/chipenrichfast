@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
-<meta name="date" content="2017-04-14" />
+<meta name="date" content="2017-05-15" />
 
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><code>chipenrich</code>: Gene Set Enrichment For ChIP-seq Peak Data</h1>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
-<h4 class="date"><em>2017-04-14</em></h4>
+<h4 class="date"><em>2017-05-15</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -299,7 +299,7 @@ print(results.ce[1:5,1:5])</code></pre>
 <pre class="r"><code># With mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-    locusdef = &quot;nearest_tss&quot;, mappability='24', qc_plots = FALSE,
+    locusdef = &quot;nearest_tss&quot;, mappability=24, qc_plots = FALSE,
     out_name = NULL,n_cores=1)
 results.cem = results$results
 print(results.cem[1:5,1:5])</code></pre>
@@ -475,7 +475,7 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 alpha = sum(results$results$P.value &lt; 0.05) / nrow(results$results)
 # NOTE: This is for
 print(alpha)</code></pre>
-<pre><code>## [1] 0.04</code></pre>
+<pre><code>## [1] 0.08</code></pre>
 </div>
 </div>
 <div id="references" class="section level1">
@@ -491,7 +491,7 @@ print(alpha)</code></pre>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
