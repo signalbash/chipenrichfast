@@ -60,7 +60,7 @@ test_that('Test chipenrich method with bylocation randomization', {
 
 test_that('Test chipenrich method with mappability', {
 	results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-		locusdef = "nearest_tss", mappability = '24', qc_plots = F,
+		locusdef = "nearest_tss", mappability = 24, qc_plots = F,
 		out_name = NULL,n_cores=1))
 
 	expect_equal(class(results), 'list')
