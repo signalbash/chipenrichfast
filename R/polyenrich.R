@@ -18,9 +18,11 @@
 #' @section Poly-Enrich Weighting Options:
 #' Poly-Enrich also allows weighting of individual peaks. Currently the options are:
 #' \describe{
-#'  \item{'signalValue:'}{ weighs each peak based on the log Signal Value given in the
+#'  \item{'signalValue:'}{ weighs each peak based on the Signal Value given in the
 #' narrowPeak format or a user-supplied column, normalized to have mean 1.}
-#'  \item{'multiplicity:'}{ weighs each peak by the inverse of the number of genes
+#'  \item{'logsignalValue:'}{ weighs each peak based on the log Signal Value given in the
+#' narrowPeak format or a user-supplied column, normalized to have mean 1.}
+#'  \item{'multiAssign:'}{ weighs each peak by the inverse of the number of genes
 #' it is assigned to.}
 #'
 #'
@@ -35,7 +37,8 @@
 #' ChIP-seq experiments for transcription factors.}
 #'	\item{polyenrich():}{ is also designed for narrow peaks, but where there are
 #' 100,000s of peaks which results in nearly every gene locus containing a peak.
-#' For example, ChIP-seq experiments for transcription factors.}
+#' For example, ChIP-seq experiments for transcription factors. Generally works better
+#' for experiments with more than 40,000 peaks.}
 #' }
 #'
 #' @section Randomizations:
@@ -93,8 +96,10 @@
 #' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
 #' example custom locus definition file, see the vignette.
 #' @param method A character string specifying the method to use for enrichment
-#' testing. Currently the only option is \code{polyenrich}, but future methods
-#' are in development.
+#' testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.
+#' @param weighting A character string specifying the weighting method if method is
+#' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue' and
+#' 'multiAssign'.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
@@ -278,10 +283,10 @@ polyenrich = function(
         if (is.null(weighting)) {
             # No weights specified
             stop("No weight options selected!")
-        } else if (!all(weighting %in% c("signalValue","multiplicity"))) {
+        } else if (!all(weighting %in% c("logsignalValue","signalValue","multiAssign"))) {
             # Unsupported weights
             stop(sprintf("Unsupported weights: %s",
-                paste(weighting[which(!(weighting %in% c("signalValue","multiplicity")))],collapse=", ")))
+                paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue","multiAssign")))],collapse=", ")))
         }
         
         assigned_peaks = calc_peak_weights(assigned_peaks, weighting)

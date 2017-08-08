@@ -37,7 +37,7 @@ assign_peaks = function(peaks, locusdef, tss, weighting=NULL) {
 		ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
 		name = GenomicRanges::mcols(peaks)$name
 	)
-    if ("signalValue" %in% weighting) {
+    if (any(c("signalValue", "logsignalValue") %in% weighting)) {
         if (!("signalValue" %in% colnames(GenomicRanges::mcols(peaks)))) {
             stop("No signalValue column!")
         }
@@ -87,7 +87,7 @@ assign_peaks = function(peaks, locusdef, tss, weighting=NULL) {
     
     # Add the signalValue column if method == "polyenrich_weighted"
     # Stops if there isn't one
-    if ("signalValue" %in% weighting) {
+    if (any(c("signalValue","logsignalValue") %in% weighting)) {
         mid_ldef_df$signalValue = GenomicRanges::mcols(peaks)$signalValue[mid_indices]
     }
 
@@ -129,7 +129,7 @@ assign_peaks = function(peaks, locusdef, tss, weighting=NULL) {
 		"nearest_tss_symbol",
 		"nearest_tss_gene_strand"
 	)
-    if ("signalValue" %in% weighting) {
+    if (any(c("signalValue","logsignalValue") %in% weighting)) {
         column_order = c(column_order, "signalValue")
     }
 	d = d[, column_order]

@@ -2,7 +2,7 @@
 # This function calculates a weight for each peak according to how many loci it intersects.
 calc_peak_weights = function(assigned_peaks, weighting) {
     assigned_peaks$peak_weights = 1
-    if ("multiplicity" %in% weighting) {
+    if ("multiAssign" %in% weighting) {
         peak_counts = table(assigned_peaks$peak_id)
         peak_weights = data.frame(
             'peak_id' = names(peak_counts),
@@ -10,10 +10,21 @@ calc_peak_weights = function(assigned_peaks, weighting) {
             stringsAsFactors=F)
 	
         assigned_peaks = merge(assigned_peaks, peak_weights, by='peak_id')
+        message("Assigning weights based on multiple peak assignments...")
+
     }
     
     if ("signalValue" %in% weighting) {
+        #assigned_peaks$peak_weights = assigned_peaks$peak_weights*log(assigned_peaks$signalValue)
+        assigned_peaks$peak_weights = assigned_peaks$peak_weights*assigned_peaks$signalValue
+        message("Assigning weights based on signalValue...")
+
+    }
+    if ("logsignalValue" %in% weighting) {
+        #assigned_peaks$peak_weights = assigned_peaks$peak_weights*log(assigned_peaks$signalValue)
         assigned_peaks$peak_weights = assigned_peaks$peak_weights*log(assigned_peaks$signalValue)
+        message("Assigning weights based on logsignalValue...")
+        
     }
 	return(assigned_peaks)
 }
@@ -23,10 +34,9 @@ calc_peak_weights = function(assigned_peaks, weighting) {
 # Currently the gene_weight is the sum of the peak weights overlapping the locus
 calc_genes_peak_weight = function(assigned_peaks, ppg) {
     message("Summing the peak weights...")
-	# Sum up the peak weights for each peak in a gene
-    logsignalValue = log(assigned_peaks$signalValue)
-    assigned_peaks$peak_weight = logsignalValue/mean(logsignalValue, na.rm=T)
-	rpg = stats::aggregate(peak_weight ~ gene_id, assigned_peaks, sum)
+	# Sum up the normalized peak weights for each peak in a gene
+    assigned_peaks$peak_weights = assigned_peaks$peak_weights/mean(assigned_peaks$peak_weights, na.rm=T)
+	rpg = stats::aggregate(peak_weights ~ gene_id, assigned_peaks, sum)
 	
 	d_rpg = data.frame(gene_id = rpg$gene_id, sum_peak_weight = rpg$peak_weight, stringsAsFactors=F)
 	
