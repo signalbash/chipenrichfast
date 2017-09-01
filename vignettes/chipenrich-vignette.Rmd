@@ -220,7 +220,7 @@ print(results.cem[1:5,1:5])
 
 Poly-Enrich is also designed for narrow peaks, but where there are 100,000s of peaks which results in nearly every gene locus containing a peak. For example, ChIP-seq experiments for transcription factors.
 
-The Poly-Enrich method uses the number of peaks in genes in its logistic regression model for enrichment: `num_peaks ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `num_peaks` is a numeric vector indicating the number of peaks in each gene, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.
+The Poly-Enrich method uses the number of peaks in genes in its negative binomial regression model for enrichment: `num_peaks ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `num_peaks` is a numeric vector indicating the number of peaks in each gene, and `s(log10_length)` is a negative binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.
 
 ```{r, warning = FALSE, message = FALSE}
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')

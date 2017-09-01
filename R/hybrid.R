@@ -27,6 +27,9 @@ hybrid.run <- function(	peaks,
 hybrid.join <- function(test1, test2) {
 	#Check if they inputed the test object or just the results file
 	NULL
+	
+	
+	
 	#If entire object, extract the results section
 	#    object$results
 	
