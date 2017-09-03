@@ -82,3 +82,6 @@ Collate:
     'test_polyenrich_slow.R'
     'test_polyenrich.R'
     'polyenrich.R'
+    'test_chipenrich_score.R'
+    'test_polyenrich_score.R'
+    'hybrid.R'
