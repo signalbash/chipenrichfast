@@ -310,7 +310,7 @@ polyenrich = function(
             rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
         }
         if (testf == "test_polyenrich_score") {
-            rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
+            rtemp = test_func(gobj,ppg,n_cores)
         }
 
 		# Annotate with geneset descriptions.
