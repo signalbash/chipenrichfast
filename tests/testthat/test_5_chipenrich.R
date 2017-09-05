@@ -73,6 +73,13 @@ test_that('Test chipenrich_slow method', {
 	expect_equal(class(results), 'list')
 })
 
+test_that('Test chipenrich_score method', {
+    results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, method = 'chipenrich_score',
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
+    
+    expect_equal(class(results), 'list')
+})
+
 test_that('Test chipapprox method', {
 	results = suppressWarnings(chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, method = 'chipapprox',
 		locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
@@ -92,6 +99,13 @@ test_that('Test polyenrich_slow method', {
 		locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
 
 	expect_equal(class(results), 'list')
+})
+
+test_that('Test polyenrich_score method', {
+    results = suppressWarnings(polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, method = 'polyenrich_score',
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
+    
+    expect_equal(class(results), 'list')
 })
 
 test_that('Test broadenrich method', {

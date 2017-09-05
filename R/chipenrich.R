@@ -298,6 +298,9 @@ chipenrich = function(
 		if (testf == "test_chipenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
+        if (testf == "test_chipenrich_score") {
+            rtemp = test_func(gobj,ppg,n_cores)
+        }
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

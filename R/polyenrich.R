@@ -309,6 +309,9 @@ polyenrich = function(
         if (testf == "test_polyenrich_weighted") {
             rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
         }
+        if (testf == "test_polyenrich_score") {
+            rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
+        }
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

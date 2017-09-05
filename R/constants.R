@@ -12,6 +12,8 @@ HIDDEN_METHODS = list(
     'chipapprox' = 'test_approx',
     'polyenrich_slow' = 'test_polyenrich_slow',
     'polyenrich_weighted' = 'test_polyenrich_weighted'
+    'chipenrich_score' = 'test_chipenrich_score',
+    'polyenrich_score' = 'test_polyenrich_score'
 )
 
 METHOD_NAMES = list(
