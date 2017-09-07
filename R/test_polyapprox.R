@@ -13,7 +13,7 @@ test_polyapprox = function(geneset, gpw, n_cores) {
 	
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
 	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-		single_polyenrich_score(go_id, geneset, gpw, fitspl, 'polyenrich')
+		single_polyapprox(go_id, geneset, gpw, fitspl, 'polyenrich')
 	}, mc.cores = n_cores)
 	
 	# Collapse results into one table
