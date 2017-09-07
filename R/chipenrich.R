@@ -298,7 +298,7 @@ chipenrich = function(
 		if (testf == "test_chipenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
-        if (testf == "test_chipenrich_score") {
+        if (testf == "test_chipapprox") {
             rtemp = test_func(gobj,ppg,n_cores)
         }
 

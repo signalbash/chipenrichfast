@@ -309,7 +309,7 @@ polyenrich = function(
         if (testf == "test_polyenrich_weighted") {
             rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
         }
-        if (testf == "test_polyenrich_score") {
+        if (testf == "test_polyapprox") {
             rtemp = test_func(gobj,ppg,n_cores)
         }
 
