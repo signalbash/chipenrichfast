@@ -37,6 +37,10 @@ assign_peaks = function(peaks, locusdef, tss, weighting=NULL) {
 		ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
 		name = GenomicRanges::mcols(peaks)$name
 	)
+    if (all(c("signalValue", "logsignalValue") %in% weighting)) {
+        stop("You can only choose one of signalValue and logsignalValue!")
+    }
+
     if (any(c("signalValue", "logsignalValue") %in% weighting)) {
         if (!("signalValue" %in% colnames(GenomicRanges::mcols(peaks)))) {
             stop("No signalValue column!")
