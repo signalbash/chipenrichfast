@@ -190,7 +190,7 @@ test_that('Test binomial method', {
 
 test_that('Test hybrid from scratch', {
     resultsH = suppressWarnings(hybridenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
     
     expect_equal(class(results), 'list')
 })
