@@ -1,6 +1,10 @@
 #User gives method names, and then all of them are run
-hybrid.enrich <- function(	peaks,
-						out_name = "polyenrich",
+
+#This repeats the peak reading and assigning portions. This can be made much less
+# redundant by making a separate first half to assign peaks and a second half
+# to do enrichment testing
+hybridenrich <- function(	peaks,
+						out_name = "hybridenrich",
 						out_path = getwd(),
 						genome = supported_genomes(),
 						genesets = c(
@@ -18,7 +22,41 @@ hybrid.enrich <- function(	peaks,
 						randomization = NULL,
 						n_cores = 1
 ) {
-	NULL
+	chip = chipenrich(
+        peaks = peaks,
+        out_name = sprintf("%s_chip",out_name),
+        out_path = out_path,
+        genome = genome,
+        genesets = genesets,
+        locusdef = locusdef,
+        method = 'chipenrich',
+        mappability = mappability,
+        qc_plots = qc_plots,
+        min_geneset_size = min_geneset_size,
+        max_geneset_size = max_geneset_size,
+        num_peak_threshold = num_peak_threshold,
+        randomization = randomization,
+        n_cores = n_cores)
+        
+    poly = polyenrich(
+        peaks = peals,
+        out_name = sprintf("%s_poly",out_name),
+        out_path = out_path,
+        genome = genome,
+        genesets = genesets,
+        locusdef = locusdef,
+        method = 'polyenrich',
+        weighting = weighting,
+        mappability = mappability,
+        qc_plots = qc_plots,
+        min_geneset_size = min_geneset_size,
+        max_geneset_size = max_geneset_size,
+        randomization = randomization,
+        n_cores = n_cores)
+        
+    hybrid = hybrid.join(chip,poly)
+    
+    return(hybrid)
 }
 
 
@@ -46,25 +84,54 @@ hybrid.join <- function(test1, test2) {
     }
     
     #Check for Geneset.ID column
+    if (!("Geneset.ID" %in% names(results1))) {
+        stop("First object does not have Geneset.ID column")
+    }
+    if (!("Geneset.ID" %in% names(results2))) {
+        stop("Second object does not have Geneset.ID column")
+    }
+    
+    
+    
+
     
     #Separate tree if the data does not have Status column
-        
-	#Extract p-value of both tests and calculate hybrid
-	Pvals1 = results1[,c("Geneset.ID","P.value","Status")]
-    Pvals2 = results2[,c("Geneset.ID","P.value","Status")]
+    if ("Status" %in% names(results1) & "Status" %in% names(results2)) {
+        #Extract p-value and status of both tests
+        Pvals1 = results1[,c("Geneset.ID","P.value","Status")]
+        Pvals2 = results2[,c("Geneset.ID","P.value","Status")]
     
+    } else {
+        #Extract p-value only
+        Pvals1 = results1[,c("Geneset.ID","P.value")]
+        Pvals2 = results2[,c("Geneset.ID","P.value")]
+
+    }
+
+    #Merge by Geneset.ID
     PvalsH = merge(Pvals1, Pvals2, by="Geneset.ID")
-    
+    #If 0 remain, stop.
+    if (nrow(PvalsH) == 0) {
+        stop("No common genesets in two datasets!")
+    }
+    message(sprintf("Total of %s common Geneset.IDs", nrow(PvalsH)))
+
+
     PvalsH$P.value.Hybrid = 2*pmin(PvalsH$P.value.x, PvalsH$P.value.y)
 	
 	#Run B-H to adjust for FDR for hybrid p-values
     PvalsH$FDR.Hybrid = stats::p.adjust(PvalsH$P.value.Hybrid, method = "BH")
     
-    #Include enrich/depleted status
-    PvalsH$Status.Hybrid = ifelse(PvalsH$Status.x == PvalsH$Status.y, PvalsH$Status.x, "Inconsistent")
-	
-	#Combine both results files together and append hybrid p-value and FDR
-	merge(results1)
+    
+    #Include enrich/depleted status if available and combine
+    if ("Status" %in% names(results1) & "Status" %in% names(results2)) {
+        PvalsH$Status.Hybrid = ifelse(PvalsH$Status.x == PvalsH$Status.y, PvalsH$Status.x, "Inconsistent")
+        #Combine both results files together and append hybrid p-value and FDR
+        merge(results1[,-c("P.value","Status")], PvalsH, by = "Geneset.ID")
+    } else {
+        merge(results1[,-c("P.value")], PvalsH, by = "Geneset.ID")
+    }
+    
 	
 	#Output final results
 	return(out)

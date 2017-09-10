@@ -187,3 +187,44 @@ test_that('Test binomial method', {
 
 	expect_equal(class(results), 'list')
 })
+
+test_that('Test hybrid from scratch', {
+    resultsH = suppressWarnings(hybridenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+    
+    expect_equal(class(results), 'list')
+})
+
+test_that('Test hybrid from inputting two different types of results', {
+    resultsC = suppressWarnings(chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
+    
+    resultsP = suppressWarnings(polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, method = 'polyenrich',
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
+    
+    
+    resultsH1 = suppressWarnings(hybrid.join(resultsC, resultsP$results))
+    resultsH2 = suppressWarnings(hybrid.join(resultsC$results, resultsP))
+
+})
+
+test_that('Test hybrid from inputting invalid results', {
+    dummyresults = data.frame('P.value' = 1:5/10, 'Geneset.ID' = 5:9)
+
+    expect_error(
+        resultsH1 = suppressWarnings(hybrid.join(1:5, 2:6)),
+        'First object is not a valid output or does not have P.value column'
+    )
+    
+    expect_error(
+        resultsH1 = suppressWarnings(hybrid.join(dummyresults$P.value, dummyresults)),
+        'First object does not have Geneset.ID column'
+    )
+    
+    expect_error(
+    resultsH1 = suppressWarnings(hybrid.join(dummyresults[1:2,], dummyresults[3:5,])),
+        'No common genesets in two datasets!'
+    )
+    
+    
+})
