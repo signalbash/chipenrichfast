@@ -12,6 +12,8 @@ assign_peaks(peaks, locusdef, tss, weighting = NULL)
 \item{locusdef}{A locus definition object from \code{chipenrich.data}.}
 
 \item{tss}{A \code{GRanges} object representing the TSSs for the genome build. Includes \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}.}
+
+\item{weighting}{A string defining what weighting option they want. Current options are 'multiAssign', 'signalValue', and 'logSignal Value'. Default is NULL.}
 }
 \value{
 A \code{data.frame} with columns for \code{peak_id, chr, peak_start, peak_end, gene_locus_start, gene_locus_end, gene_id, nearest_tss, nearest_tss_gene, dist_to_tss, nearest_tss_gene_strand}. The result is used in \code{num_peaks_per_gene()}.

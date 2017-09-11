@@ -190,7 +190,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_chipenrich_spline.R
-#' @include test_approx.R test_binomial.R test_fisher.R test_chipenrich_slow.R test_chipenrich.R
+#' @include test_approx.R test_binomial.R test_fisher.R test_chipenrich_slow.R test_chipenrich.R test_chipapprox.R
 chipenrich = function(
 	peaks,
 	out_name = "chipenrich",

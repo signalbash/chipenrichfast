@@ -2,7 +2,7 @@ Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
 Version: 2.1.2
-Date: 2017-04-14
+Date: 2017-09-11
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -67,6 +67,7 @@ Collate:
     'constants.R'
     'plot_gene_coverage.R'
     'broadenrich.R'
+    'test_chipapprox.R'
     'test_chipenrich.R'
     'test_chipenrich_slow.R'
     'test_fisher.R'
@@ -79,9 +80,8 @@ Collate:
     'hybrid.R'
     'peak_weights.R'
     'plot_polyenrich_spline.R'
+    'test_polyapprox.R'
     'test_polyenrich_weighted.R'
     'test_polyenrich_slow.R'
     'test_polyenrich.R'
     'polyenrich.R'
-    'test_chipapprox.R'
-    'test_polyapprox.R'

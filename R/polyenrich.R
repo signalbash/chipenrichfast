@@ -24,7 +24,7 @@
 #' narrowPeak format or a user-supplied column, normalized to have mean 1.}
 #'  \item{'multiAssign:'}{ weighs each peak by the inverse of the number of genes
 #' it is assigned to.}
-#'
+#' }
 #'
 #' @section Choosing A Method:
 #' The following guidelines are intended to help select an enrichment function:
@@ -198,7 +198,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_polyenrich_spline.R
-#' @include test_polyenrich.R test_polyenrich_slow.R test_polyenrich_weighted.R
+#' @include test_polyenrich.R test_polyenrich_slow.R test_polyenrich_weighted.R test_polyapprox.R
 polyenrich = function(
 	peaks,
 	out_name = "polyenrich",
@@ -276,6 +276,12 @@ polyenrich = function(
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
+    
+    ######################################################
+    # If using weights but not polyenrich_weighted, stop
+    if (!is.null(weighting) & method != "polyenrich_weighted") {
+        stop("You need to use method = polyenrich_weighted if choosing weighting!")
+    }
     
     ######################################################
     # If using the weighted method, add the weights column

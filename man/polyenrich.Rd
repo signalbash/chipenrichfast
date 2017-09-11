@@ -155,6 +155,19 @@ which adjusts for the relationship between the number of peaks in a gene and
 locus length.
 }
 
+\section{Poly-Enrich Weighting Options}{
+
+Poly-Enrich also allows weighting of individual peaks. Currently the options are:
+\describe{
+ \item{'signalValue:'}{ weighs each peak based on the Signal Value given in the
+narrowPeak format or a user-supplied column, normalized to have mean 1.}
+ \item{'logsignalValue:'}{ weighs each peak based on the log Signal Value given in the
+narrowPeak format or a user-supplied column, normalized to have mean 1.}
+ \item{'multiAssign:'}{ weighs each peak by the inverse of the number of genes
+it is assigned to.}
+}
+}
+
 \section{Choosing A Method}{
 
 The following guidelines are intended to help select an enrichment function:

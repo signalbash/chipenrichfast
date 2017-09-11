@@ -118,6 +118,13 @@ test_that('Error from polyenrich weighted method without a signalValue column', 
     'No signalValue column!')
 })
 
+test_that('Error from choosing weights but not polyenrich_weighted', {
+    expect_error(
+    suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path,  method = 'polyenrich', weighting = 'signalValue',
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)),
+    'You need to use method = polyenrich_weighted if choosing weighting!')
+})
+
 test_that('Error from polyenrich weighted picking both signalValue and logsignalValue', {
     expect_error(
     suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path,  method = 'polyenrich_weighted', weighting = c('signalValue','logsignalValue'),
@@ -140,28 +147,28 @@ test_that('Error from polyenrich weighted picking unsupported weights', {
 })
 
 test_that('Test polyenrich weighted method with signalValue', {
-    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyapprox', weighting = 'signalValue',
+    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = 'signalValue',
     locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
     
     expect_equal(class(results), 'list')
 })
 
 test_that('Test polyenrich weighted method with logsignalValue', {
-    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyapprox', weighting = 'logsignalValue',
+    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = 'logsignalValue',
     locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
     
     expect_equal(class(results), 'list')
 })
 
 test_that('Test polyenrich weighted method with multiAssign', {
-    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyapprox', weighting = 'multiAssign',
+    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = 'multiAssign',
     locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
     
     expect_equal(class(results), 'list')
 })
 
 test_that('Test polyenrich weighted method with signalValue AND multiAssign', {
-    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyapprox', weighting = c('signalValue','multiAssign'),
+    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = c('signalValue','multiAssign'),
     locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
     
     expect_equal(class(results), 'list')
@@ -192,7 +199,7 @@ test_that('Test hybrid from scratch', {
     resultsH = suppressWarnings(hybridenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
     locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
     
-    expect_equal(class(results), 'list')
+    expect_equal(class(resultsH), 'data.frame')
 })
 
 test_that('Test hybrid from inputting two different types of results', {
@@ -205,24 +212,23 @@ test_that('Test hybrid from inputting two different types of results', {
     
     resultsH1 = suppressWarnings(hybrid.join(resultsC, resultsP$results))
     resultsH2 = suppressWarnings(hybrid.join(resultsC$results, resultsP))
-
 })
 
 test_that('Test hybrid.join from inputting invalid results', {
     dummyresults = data.frame('P.value' = 1:5/10, 'Geneset.ID' = 5:9, 'foo' = 5:1)
 
     expect_error(
-        resultsH1 = suppressWarnings(hybrid.join(1:5, 2:6)),
+        suppressWarnings(hybrid.join(1:5, 2:6)),
         'First object is not a valid output or does not have P.value column'
     )
     
     expect_error(
-        resultsH1 = suppressWarnings(hybrid.join(dummyresults[,-2], dummyresults)),
+        suppressWarnings(hybrid.join(dummyresults[,-2], dummyresults)),
         'First object does not have Geneset.ID column'
     )
     
     expect_error(
-    resultsH1 = suppressWarnings(hybrid.join(dummyresults[1:2,], dummyresults[3:5,])),
+        suppressWarnings(hybrid.join(dummyresults[1:2,], dummyresults[3:5,])),
         'No common genesets in the two datasets!'
     )
     
