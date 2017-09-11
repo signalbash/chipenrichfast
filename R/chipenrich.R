@@ -271,7 +271,7 @@ chipenrich = function(
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
 
 	# Add relevant columns to ppg depending on the method
-	if(method == 'chipapprox') {
+	if(method == 'chipapprox_old') {
 		message("Calculating weights for approximate method..")
 		ppg = calc_approx_weights(ppg,mappa)
 	}
@@ -298,6 +298,9 @@ chipenrich = function(
 		if (testf == "test_chipenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
+        if (testf == "test_chipapprox") {
+            rtemp = test_func(gobj,ppg,n_cores)
+        }
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

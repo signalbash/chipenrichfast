@@ -11,9 +11,20 @@
 #' enrichment: \code{num_peaks ~ GO + s(log10_length)}. Here, \code{GO} is a
 #' binary vector indicating whether a gene is in the gene set being tested,
 #' \code{num_peaks} is a numeric vector indicating the number of peaks in each
-#' gene, and \code{s(log10_length)} is a binomial cubic smoothing spline which
-#' adjusts for the relationship between the number of peaks in a gene and locus
-#' length.
+#' gene, and \code{s(log10_length)} is a negative binomial cubic smoothing spline
+#' which adjusts for the relationship between the number of peaks in a gene and
+#' locus length.
+#'
+#' @section Poly-Enrich Weighting Options:
+#' Poly-Enrich also allows weighting of individual peaks. Currently the options are:
+#' \describe{
+#'  \item{'signalValue:'}{ weighs each peak based on the Signal Value given in the
+#' narrowPeak format or a user-supplied column, normalized to have mean 1.}
+#'  \item{'logsignalValue:'}{ weighs each peak based on the log Signal Value given in the
+#' narrowPeak format or a user-supplied column, normalized to have mean 1.}
+#'  \item{'multiAssign:'}{ weighs each peak by the inverse of the number of genes
+#' it is assigned to.}
+#'
 #'
 #' @section Choosing A Method:
 #' The following guidelines are intended to help select an enrichment function:
@@ -26,7 +37,8 @@
 #' ChIP-seq experiments for transcription factors.}
 #'	\item{polyenrich():}{ is also designed for narrow peaks, but where there are
 #' 100,000s of peaks which results in nearly every gene locus containing a peak.
-#' For example, ChIP-seq experiments for transcription factors.}
+#' For example, ChIP-seq experiments for transcription factors. Generally works better
+#' for experiments with more than 40,000 peaks.}
 #' }
 #'
 #' @section Randomizations:
@@ -84,8 +96,10 @@
 #' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
 #' example custom locus definition file, see the vignette.
 #' @param method A character string specifying the method to use for enrichment
-#' testing. Currently the only option is \code{polyenrich}, but future methods
-#' are in development.
+#' testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.
+#' @param weighting A character string specifying the weighting method if method is
+#' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue',
+#' 'logsignalValue', and 'multiAssign'.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
@@ -184,7 +198,7 @@
 #' @include constants.R utils.R supported.R setup.R randomize.R
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_polyenrich_spline.R
-#' @include test_polyenrich.R test_polyenrich_slow.R
+#' @include test_polyenrich.R test_polyenrich_slow.R test_polyenrich_weighted.R
 polyenrich = function(
 	peaks,
 	out_name = "polyenrich",
@@ -196,6 +210,7 @@ polyenrich = function(
 		'GOMF'),
 	locusdef = "nearest_tss",
 	method = 'polyenrich',
+    weighting = NULL,
 	mappability = NULL,
 	qc_plots = TRUE,
 	min_geneset_size = 15,
@@ -256,11 +271,27 @@ polyenrich = function(
 	######################################################
 	# Assign peaks to genes.
 	message("Assigning peaks to genes with assign_peaks(...) ..")
-	assigned_peaks = assign_peaks(peakobj, ldef, tss)
+	assigned_peaks = assign_peaks(peakobj, ldef, tss, weighting)
 
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
+    
+    ######################################################
+    # If using the weighted method, add the weights column
+    if (method == "polyenrich_weighted") {
+        if (is.null(weighting)) {
+            # No weights specified
+            stop("No weight options selected!")
+        } else if (!all(weighting %in% c("logsignalValue","signalValue","multiAssign"))) {
+            # Unsupported weights
+            stop(sprintf("Unsupported weights: %s",
+                paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue","multiAssign")))],collapse=", ")))
+        }
+        
+        assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
+        ppg = calc_genes_peak_weight(assigned_peaks, ppg)
+    }
 
 	######################################################
 	# Enrichment
@@ -275,6 +306,12 @@ polyenrich = function(
 		if (testf == "test_polyenrich") {
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
+        if (testf == "test_polyenrich_weighted") {
+            rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
+        }
+        if (testf == "test_polyapprox") {
+            rtemp = test_func(gobj,ppg,n_cores)
+        }
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

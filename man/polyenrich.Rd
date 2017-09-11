@@ -6,9 +6,9 @@
 \usage{
 polyenrich(peaks, out_name = "polyenrich", out_path = getwd(),
   genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
-  locusdef = "nearest_tss", method = "polyenrich", mappability = NULL,
-  qc_plots = TRUE, min_geneset_size = 15, max_geneset_size = 2000,
-  randomization = NULL, n_cores = 1)
+  locusdef = "nearest_tss", method = "polyenrich", weighting = NULL,
+  mappability = NULL, qc_plots = TRUE, min_geneset_size = 15,
+  max_geneset_size = 2000, randomization = NULL, n_cores = 1)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
@@ -49,8 +49,11 @@ must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
 example custom locus definition file, see the vignette.}
 
 \item{method}{A character string specifying the method to use for enrichment
-testing. Currently the only option is \code{polyenrich}, but future methods
-are in development.}
+testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.}
+
+\item{weighting}{A character string specifying the weighting method if method is
+chosen to be 'polyenrich_weighted'. Current options are: 'signalValue',
+'logsignalValue', and 'multiAssign'.}
 
 \item{mappability}{One of \code{NULL}, a file path to a custom mappability file,
 or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
@@ -147,9 +150,9 @@ The Poly-Enrich method uses the number of peaks in genes in its model for
 enrichment: \code{num_peaks ~ GO + s(log10_length)}. Here, \code{GO} is a
 binary vector indicating whether a gene is in the gene set being tested,
 \code{num_peaks} is a numeric vector indicating the number of peaks in each
-gene, and \code{s(log10_length)} is a binomial cubic smoothing spline which
-adjusts for the relationship between the number of peaks in a gene and locus
-length.
+gene, and \code{s(log10_length)} is a negative binomial cubic smoothing spline
+which adjusts for the relationship between the number of peaks in a gene and
+locus length.
 }
 
 \section{Choosing A Method}{
@@ -164,7 +167,8 @@ peaks which results in fewer gene loci containing a peak overall. For example,
 ChIP-seq experiments for transcription factors.}
 \item{polyenrich():}{ is also designed for narrow peaks, but where there are
 100,000s of peaks which results in nearly every gene locus containing a peak.
-For example, ChIP-seq experiments for transcription factors.}
+For example, ChIP-seq experiments for transcription factors. Generally works better
+for experiments with more than 40,000 peaks.}
 }
 }
 
