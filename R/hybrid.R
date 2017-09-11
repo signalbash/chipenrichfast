@@ -47,7 +47,7 @@ hybridenrich <- function(	peaks,
         n_cores = n_cores)
         
     poly = polyenrich(
-        peaks = peals,
+        peaks = peaks,
         out_name = out_poly,
         out_path = out_path,
         genome = genome,
