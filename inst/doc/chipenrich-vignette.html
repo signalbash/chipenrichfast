@@ -11,8 +11,6 @@
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
 <meta name="date" content="2017-05-15" />
-<meta name="date" content="2017-04-14" />
-
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
 <link href="data:text/css;charset=utf-8,pre%20%2Eoperator%2C%0Apre%20%2Eparen%20%7B%0Acolor%3A%20rgb%28104%2C%20118%2C%20135%29%0A%7D%0Apre%20%2Eliteral%20%7B%0Acolor%3A%20%23990073%0A%7D%0Apre%20%2Enumber%20%7B%0Acolor%3A%20%23099%3B%0A%7D%0Apre%20%2Ecomment%20%7B%0Acolor%3A%20%23998%3B%0Afont%2Dstyle%3A%20italic%0A%7D%0Apre%20%2Ekeyword%20%7B%0Acolor%3A%20%23900%3B%0Afont%2Dweight%3A%20bold%0A%7D%0Apre%20%2Eidentifier%20%7B%0Acolor%3A%20rgb%280%2C%200%2C%200%29%3B%0A%7D%0Apre%20%2Estring%20%7B%0Acolor%3A%20%23d14%3B%0A%7D%0A" rel="stylesheet" />
@@ -55,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <h4 class="date"><em>2017-05-15</em></h4>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
 <h4 class="date"><em>2017-04-14</em></h4>
+
 </div>
 
 <h1>Contents</h1>
@@ -302,7 +301,7 @@ print(results.ce[1:5,1:5])</code></pre>
 <pre class="r"><code># With mappability
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-    locusdef = &quot;nearest_tss&quot;, mappability='24', qc_plots = FALSE,
+    locusdef = &quot;nearest_tss&quot;, mappability=24, qc_plots = FALSE,
     out_name = NULL,n_cores=1)
 results.cem = results$results
 print(results.cem[1:5,1:5])</code></pre>
@@ -478,7 +477,7 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 alpha = sum(results$results$P.value &lt; 0.05) / nrow(results$results)
 # NOTE: This is for
 print(alpha)</code></pre>
-<pre><code>## [1] 0.04</code></pre>
+<pre><code>## [1] 0.08</code></pre>
 </div>
 </div>
 <div id="references" class="section level1">
