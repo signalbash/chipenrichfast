@@ -46,11 +46,26 @@ test_that('Errors in setup_genesets()', {
 test_that('Errors in setup_mappa()', {
 	mappa_file = system.file('extdata', 'test_mappa_good.txt', package = 'chipenrich')
 	ldef_file = system.file('extdata', 'test_ldef_symbol.txt', package = 'chipenrich')
-	
+
 	ldef = setup_locusdef('nearest_tss', genome = 'hg19')$ldef
 	custom_ldef = setup_locusdef(ldef_file, genome = 'hg19')$ldef
 
-	expect_error(setup_mappa(mappa_code = '24', genome = 'hg19', ldef_code = 'blue', ldef_obj = 'blue'), 'ldef_obj not of class LocusDefinition')
+	expect_error(setup_mappa(mappa_code = 24, genome = 'hg19', ldef_code = 'blue', ldef_obj = 'blue'), 'ldef_obj not of class LocusDefinition')
 	expect_error(setup_mappa(mappa_code = mappa_file, genome = 'hg19', ldef_code = 'nearest_tss', ldef_obj = ldef), 'your mappability genes and locus definition genes overlap')
-	expect_error(setup_mappa(mappa_code = '24', genome = 'hg19', ldef_code = ldef_file, ldef_obj = custom_ldef), 'Built-in mappability cannot be used with a user-defined locus definition')
+	expect_error(setup_mappa(mappa_code = 24, genome = 'hg19', ldef_code = ldef_file, ldef_obj = custom_ldef), 'Built-in mappability cannot be used with a user-defined locus definition')
+})
+
+test_that('setup_mappa() works with two customs', {
+	mappa_file = system.file('extdata', 'test_mappa_good.txt', package = 'chipenrich')
+	ldef_file = system.file('extdata', 'test_ldef_symbol.txt', package = 'chipenrich')
+
+	custom_ldef = setup_locusdef(ldef_file, genome = 'hg19')$ldef
+
+	expect_true(all(setup_mappa(mappa_code = mappa_file, genome = 'hg19', ldef_code = ldef_file, ldef_obj = custom_ldef)$mappa == c(0.8,0.1,0.008)))
+})
+
+test_that('setup_mappa() works with built-ins', {
+	ldef = setup_locusdef('nearest_tss', genome = 'hg19')$ldef
+
+	expect_equal(nrow(setup_mappa(mappa_code = 24, genome = 'hg19', ldef_code = 'nearest_tss', ldef_obj = ldef)), 19051)
 })
