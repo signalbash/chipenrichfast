@@ -98,8 +98,8 @@
 #' @param method A character string specifying the method to use for enrichment
 #' testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.
 #' @param weighting A character string specifying the weighting method if method is
-#' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue' and
-#' 'multiAssign'.
+#' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue',
+#' 'logsignalValue', and 'multiAssign'.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.

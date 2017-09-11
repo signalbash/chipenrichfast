@@ -4,7 +4,7 @@
 \alias{assign_peaks}
 \title{Assign peak midpoints to defined gene loci.}
 \usage{
-assign_peaks(peaks, locusdef, tss, method)
+assign_peaks(peaks, locusdef, tss, weighting = NULL)
 }
 \arguments{
 \item{peaks}{A \code{GRanges} object representing regions to be used for enrichment.}
