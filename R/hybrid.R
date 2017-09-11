@@ -22,9 +22,17 @@ hybridenrich <- function(	peaks,
 						randomization = NULL,
 						n_cores = 1
 ) {
+    if (!is.null(out_name)) {
+        out_chip = sprintf("%s_chip",out_name)
+        out_poly = sprintf("%s_poly",out_name)
+    } else {
+        out_chip = NULL
+        out_poly = NULL
+    }
+    
 	chip = chipenrich(
         peaks = peaks,
-        out_name = sprintf("%s_chip",out_name),
+        out_name = out_chip,
         out_path = out_path,
         genome = genome,
         genesets = genesets,
@@ -40,7 +48,7 @@ hybridenrich <- function(	peaks,
         
     poly = polyenrich(
         peaks = peals,
-        out_name = sprintf("%s_poly",out_name),
+        out_name = out_poly,
         out_path = out_path,
         genome = genome,
         genesets = genesets,
@@ -112,7 +120,7 @@ hybrid.join <- function(test1, test2) {
     PvalsH = merge(Pvals1, Pvals2, by="Geneset.ID")
     #If 0 remain, stop.
     if (nrow(PvalsH) == 0) {
-        stop("No common genesets in two datasets!")
+        stop("No common genesets in the two datasets!")
     }
     message(sprintf("Total of %s common Geneset.IDs", nrow(PvalsH)))
 
@@ -127,13 +135,15 @@ hybrid.join <- function(test1, test2) {
     if ("Status" %in% names(results1) & "Status" %in% names(results2)) {
         PvalsH$Status.Hybrid = ifelse(PvalsH$Status.x == PvalsH$Status.y, PvalsH$Status.x, "Inconsistent")
         #Combine both results files together and append hybrid p-value and FDR
-        merge(results1[,-c("P.value","Status")], PvalsH, by = "Geneset.ID")
+        resultsH = merge(results1[,-which(colnames(results1) %in% c("P.value","Status"))], PvalsH, by = "Geneset.ID")
     } else {
-        merge(results1[,-c("P.value")], PvalsH, by = "Geneset.ID")
+        resultsH = merge(results1[,-which(colnames(results1) %in% c("P.value"))], PvalsH, by = "Geneset.ID")
     }
     
+    
+    #Reorder columns?????
 	
 	#Output final results
-	return(out)
+	return(resultsH)
 	
 }
