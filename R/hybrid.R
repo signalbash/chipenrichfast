@@ -1,8 +1,32 @@
-#User gives method names, and then all of them are run
+#' Running Hybrid test, either from scratch or using two results files
+#'
+#' Hybrid test is designed for people unsure of which test between ChIP-Enrich
+#' and Poly-Enrich to use, so it takes information of both and gives adjusted
+#' P-values. For more about ChIP- and Poly-Enrich, consult their corresponding
+#' documentation.
+#'
+#' @section Hybrid p-values:
+#' Given n tests that test for the same hypothesis, same Type I error rate, and
+#' converted to p-values: \code{p_1, ..., p_n}, the Hybrid p-value is computed as:
+#' \code{n*min(p_1, ..., p_n)}. This hybrid test will have at most the same
+#' Type I error as any individual test, and if any of the tests have 100% power as
+#' sample size goes to infinity, then so will the hybrid test.
+#'
+#' @section Function inputs:
+#' Every input in hybridenrich is the same as in chipenrich and polyenrich. Inputs
+#' unique to chipenrich are: num_peak_threshold; and inputs unique to polyenrich are:
+#' weighting. Currently the test only supports running chipenrich and polyenrich, but
+#' future plans will allow you to run any number of different support tests.
+#'
+#' @section Joining two results files
+#' Combines two existing results files and returns one results file with hybrid
+#' p-values and FDR included. Current allowed inputs are objects from any of
+#' the supplied enrichment tests or a dataframe with at least the following columns:
+#' \code{P.value, Geneset.ID}. Optional columns include: \code{Status}. Currently
+#' we only allow for joining two results files, but future plans will allow you to join
+#' any number of results files.
 
-#This repeats the peak reading and assigning portions. This can be made much less
-# redundant by making a separate first half to assign peaks and a second half
-# to do enrichment testing
+
 hybridenrich <- function(	peaks,
 						out_name = "hybridenrich",
 						out_path = getwd(),
