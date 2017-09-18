@@ -313,6 +313,9 @@ polyenrich = function(
 			rtemp = test_func(gobj,ppg,n_cores)
 		}
         if (testf == "test_polyenrich_weighted") {
+            # Note that there is an extra input for the name of the count column
+            # In the future when we make a function purely for enrichment, this will be where you
+            # give the name of the count column.
             rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
         }
         if (testf == "test_polyapprox") {

@@ -83,7 +83,7 @@ single_polyenrich_weighted = function(go_id, geneset, gpw, fitspl, method, model
 		"Effect"=r_effect,
 		"Odds.Ratio"=exp(r_effect),
 		"Geneset Avg Gene Length"=r_go_genes_avg_length,
-		stringsAsFactors=F);
+		stringsAsFactors=FALSE);
 	
 	return(out);
 }

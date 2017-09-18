@@ -51,7 +51,7 @@ single_polyapprox = function(go_id, geneset, gpw, fitspl, method) {
 	data=cbind(gpw,goterm=as.numeric(b_genes))
 	
 	r_effect = sum(data$goterm*(data$num_peaks-data$fit))
-	r_pval = pchisq(r_effect^2/sum(data$goterm*var(data$fit-data$num_peaks)),1,lower.tail=F)
+    r_pval = pchisq(r_effect^2/sum(data$goterm*stats::var(data$fit-data$num_peaks)),1,lower.tail=FALSE)
 	
 	
 	out = data.frame(

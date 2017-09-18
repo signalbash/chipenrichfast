@@ -10,7 +10,7 @@
 
 <meta name="author" content="Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor" />
 
-<meta name="date" content="2017-09-13" />
+<meta name="date" content="2017-09-18" />
 
 <title>chipenrich: Gene Set Enrichment For ChIP-seq Peak Data</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title"><code>chipenrich</code>: Gene Set Enrichment For ChIP-seq Peak Data</h1>
 <h4 class="author"><em>Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor</em></h4>
-<h4 class="date"><em>2017-09-13</em></h4>
+<h4 class="date"><em>2017-09-18</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -475,7 +475,7 @@ results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
 alpha = sum(results$results$P.value &lt; 0.05) / nrow(results$results)
 # NOTE: This is for
 print(alpha)</code></pre>
-<pre><code>## [1] 0</code></pre>
+<pre><code>## [1] 0.12</code></pre>
 </div>
 </div>
 <div id="references" class="section level1">

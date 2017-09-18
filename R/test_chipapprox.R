@@ -74,7 +74,7 @@ single_chipapprox = function(go_id, geneset, gpw, fitspl, method) {
 	data=cbind(gpw,goterm=as.numeric(b_genes))
 	
 	r_effect = sum(data$goterm*(data$peak-data$fit))
-	r_pval = pchisq(r_effect^2/sum(data$goterm*data$fit*(1-data$fit)),1,lower.tail=F)
+	r_pval = pchisq(r_effect^2/sum(data$goterm*data$fit*(1-data$fit)),1,lower.tail=FALSE)
 	
 	
 	out = data.frame(
