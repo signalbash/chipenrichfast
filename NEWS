@@ -1,3 +1,25 @@
+CHANGES IN VERSION 2.2.0
+
+-------------------------
+
+NEW FEATURES
+
+    o polyenrich now supports weighting peaks by signal value
+
+    o A hybrid test, hybridenrich() is available for those unsure of which test,
+      between chipenrich() and polyenrich() to use. 
+
+    o A function to join two different results files, hybrid.join(), and it will
+      give an adjusted set of p-values and FDR-adjusted p-values using the two.
+
+    o A new approximation method using the Score test is available for 
+      quick results for chipenrich and polyenrich. Only recommended for 
+      significantly enriched results, and not depleted results. ~30x faster.
+
+IMPROVEMENTS
+
+    o Several updates to the vignette
+
 CHANGES IN VERSION 2.0.0
 -------------------------
 

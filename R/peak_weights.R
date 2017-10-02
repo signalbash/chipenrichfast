@@ -14,6 +14,15 @@ calc_peak_weights = function(assigned_peaks, weighting) {
 
     }
     
+    if (any(c("signalValue", "logsignalValue") %in% weighting)) {
+        if (!all(is.numeric(assigned_peaks$signalValue))) {
+            stop("signalValue column is not all numeric!")
+        } else if (any(assigned_peaks$signalValue<=0)) {
+            stop("signalValue column should be all positive!")
+        }
+    }
+    
+    
     if ("signalValue" %in% weighting) {
         #assigned_peaks$peak_weights = assigned_peaks$peak_weights*log(assigned_peaks$signalValue)
         assigned_peaks$peak_weights = assigned_peaks$peak_weights*assigned_peaks$signalValue
