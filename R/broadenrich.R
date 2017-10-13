@@ -199,8 +199,7 @@ broadenrich = function(
 	min_geneset_size = 15,
 	max_geneset_size = 2000,
 	randomization = NULL,
-	n_cores = 1,
-    godebug = FALSE
+	n_cores = 1
 ) {
 	genome = match.arg(genome)
 
@@ -269,7 +268,7 @@ broadenrich = function(
 		message("Test: Broad-Enrich")
 		message(sprintf("Genesets: %s", gobj@type))
 		message("Running tests..")
-		rtemp = test_broadenrich(gobj, ppg, n_cores, godebug)
+		rtemp = test_broadenrich(gobj, ppg, n_cores)
 
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))

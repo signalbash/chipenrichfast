@@ -1,4 +1,4 @@
-test_broadenrich = function(geneset, gpw, n_cores, godebug = F) {
+test_broadenrich = function(geneset, gpw, n_cores) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	# Here, geneset is not all combined, but GOBP, GOCC, etc.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
@@ -8,7 +8,7 @@ test_broadenrich = function(geneset, gpw, n_cores, godebug = F) {
 
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
 	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-		single_broadenrich(go_id, geneset, gpw, 'broadenrich', model, godebug)
+		single_broadenrich(go_id, geneset, gpw, 'broadenrich', model)
 	}, mc.cores = n_cores)
 
 	# Collapse results into one table
@@ -36,7 +36,7 @@ test_broadenrich_splineless = function(geneset, gpw, n_cores) {
 
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
 	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-		single_broadenrich(go_id, geneset, gpw, 'broadenrich_splineless', model, FALSE)
+		single_broadenrich(go_id, geneset, gpw, 'broadenrich_splineless', model)
 	}, mc.cores = n_cores)
 
 	# Collapse results into one table
@@ -53,12 +53,8 @@ test_broadenrich_splineless = function(geneset, gpw, n_cores) {
 	return(results)
 }
 
-single_broadenrich = function(go_id, geneset, gpw, method, model, godebug) {
+single_broadenrich = function(go_id, geneset, gpw, method, model) {
 	final_model = as.formula(model)
-
-    if (godebug) {
-        print(go_id)
-    }
 
 	# Genes in the geneset
 	go_genes = geneset@set.gene[[go_id]]
