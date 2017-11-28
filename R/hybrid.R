@@ -104,6 +104,228 @@
 #' @include chipenrich.R polyenrich.R
 
 hybridenrich <- function(	peaks,
+    out_name = "hybridenrich",
+    out_path = getwd(),
+    genome = supported_genomes(),
+    genesets = c('GOBP','GOCC','GOMF'),
+    locusdef = "nearest_tss",
+    methods = c('chipenrich','polyenrich'),
+    weighting = NULL,
+    mappability = NULL,
+    qc_plots = TRUE,
+    min_geneset_size = 15,
+    max_geneset_size = 2000,
+    num_peak_threshold = 1,
+    randomization = NULL,
+    n_cores = 1
+) {
+    genome = match.arg(genome)
+    
+    n_cores = reset_ncores_for_windows(n_cores)
+    
+    ############################################################################
+    # Collect options for opts output
+    opts_list = as.list(sys.call())
+    opts_list = opts_list[2:length(opts_list)]
+    
+    opts = data.frame(
+        parameters = names(opts_list),
+        values = as.character(opts_list),
+        stringsAsFactors = FALSE
+    )
+    
+    ############################################################################
+    # Setup locus definitions, genesets, and mappability
+    
+    ldef_list = setup_locusdef(locusdef, genome, randomization)
+    ldef = ldef_list[['ldef']]
+    tss = ldef_list[['tss']]
+    
+    geneset_list = setup_genesets(gs_codes = genesets, ldef_obj = ldef, genome = genome, min_geneset_size = min_geneset_size, max_geneset_size = max_geneset_size)
+    
+    mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
+
+    
+    ############################################################################
+    ############################################################################
+    # Start enrichment process
+    ############################################################################
+    ############################################################################
+    
+    ######################################################
+    # Read in and format peaks (from data.frame or file)
+    if (class(peaks) == "data.frame") {
+        message('Reading peaks from data.frame...')
+        peakobj = load_peaks(peaks)
+    } else if (class(peaks) == "character") {
+        peakobj = read_bed(peaks)
+    }
+    
+    # Number of peaks in data.
+    num_peaks = length(peakobj)
+    
+    ######################################################
+    # Assign peaks to genes.
+    message("Assigning peaks to genes with assign_peaks(...) ..")
+    assigned_peaks = assign_peaks(peakobj, ldef, tss)
+    
+    ######################################################
+    # Compute peaks per gene table
+    ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
+    
+    if (!is.null(weighting)) {
+        if (!all(weighting %in% c("logsignalValue","signalValue","multiAssign"))) {
+            # Unsupported weights
+            stop(sprintf("Unsupported weights: %s",
+            paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue","multiAssign")))],collapse=", ")))
+        }
+        assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
+        ppg = calc_genes_peak_weight(assigned_peaks, ppg)
+
+    }
+    # There is a for loop here to run through more than two tests, but later code only supports CE and PE for now. You need
+    # to change the hybrid.join lines before deciding to add hybrid functionality to more than 2 methods!
+    methodindex = 0
+    
+    # Initializing to be a list later.
+    enrich = NULL
+    for (method in methods) {
+        methodindex = methodindex+1
+        if (!is.null(weighting) & method=="polyenrich") {
+            method = "polyenrich_weighted"
+        } # This isn't exactly the best workaround, as it forces weighted even if you don't want to. We need to change this
+        ### if we want to hybrid between weighted and non-weighted. We also cannot hybrid two different types of weighting.
+   
+        ############################################################################
+        # CHECK method and get() it if okay
+        testf = get_test_method(method)
+        test_func = get(testf)
+        method_name = METHOD_NAMES[[method]]
+
+        ######################################################
+        # Enrichment
+        results = list()
+        for (gobj in geneset_list) {
+            message(sprintf("Test: %s",method_name))
+            message(sprintf("Genesets: %s",gobj@type))
+            message("Running tests..")
+            if (testf == "test_chipenrich_slow") {
+                rtemp = test_func(gobj,ppg,n_cores)
+            }
+            if (testf == "test_fisher_exact") {
+                rtemp = test_func(gobj,ppg,alternative=fisher_alt)
+            }
+            if (testf == "test_binomial") {
+                rtemp = test_func(gobj,ppg)
+            }
+            if (testf == "test_approx") {
+                rtemp = test_func(gobj,ppg,nwp=FALSE,n_cores)
+            }
+            if (testf == "test_chipenrich") {
+                rtemp = test_func(gobj,ppg,n_cores)
+            }
+            if (testf == "test_chipapprox") {
+                rtemp = test_func(gobj,ppg,n_cores)
+            }
+            if (testf == "test_polyenrich_slow") {
+                rtemp = test_func(gobj,ppg,n_cores)
+            }
+            if (testf == "test_polyenrich") {
+                rtemp = test_func(gobj,ppg,n_cores)
+            }
+            if (testf == "test_polyenrich_weighted") {
+                # Note that there is an extra input for the name of the count column
+                # In the future when we make a function purely for enrichment, this will be where you
+                # give the name of the count column.
+                rtemp = test_func(gobj,ppg,n_cores, "sum_peak_weight")
+            }
+            if (testf == "test_polyapprox") {
+                rtemp = test_func(gobj,ppg,n_cores)
+            }
+
+            
+            # Annotate with geneset descriptions.
+            rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))
+            rtemp$"Geneset.Type" = gobj@type
+            
+            results[[gobj@type]] = rtemp
+        }
+        enrich[[methodindex]] = Reduce(rbind,results)
+        
+        ######################################################
+        # Post-process enrichment
+        # Order columns, add enriched/depleted column as needed, remove bad tests,
+        # sort by p-value, rename rownames to integers
+        enrich[[methodindex]] = post_process_enrichments(enrich[[methodindex]])
+    
+    }
+    
+    #Temporary only 2 tests hybridenrich solution:
+    message("Combining tests..")
+    hybrid = hybrid.join(enrich[[1]],enrich[[2]])
+    
+    
+    ######################################################
+    # Write result objects to files
+    if (!is.null(out_name)) {
+        filename_analysis = file.path(out_path, sprintf("%s_results.tab", out_name))
+        write.table(hybrid, file = filename_analysis, row.names = FALSE, quote = FALSE, sep = "\t")
+        message("Wrote results to: ", filename_analysis)
+        
+        filename_peaks = file.path(out_path, sprintf("%s_peaks.tab", out_name))
+        write.table(assigned_peaks, file = filename_peaks, row.names = FALSE, quote = FALSE, sep = "\t")
+        message("Wrote peak-to-gene assignments to: ", filename_peaks)
+        
+        filename_opts = file.path(out_path, sprintf("%s_opts.tab", out_name))
+        write.table(opts, file = filename_opts, row.names = FALSE, quote = FALSE, sep = "\t")
+        message("Wrote run options/arguments to: ", filename_opts)
+        
+        filename_ppg = file.path(out_path, sprintf("%s_peaks-per-gene.tab", out_name))
+        write.table(ppg, file = filename_ppg, row.names = FALSE, quote = FALSE, sep = "\t")
+        message("Wrote count of peaks per gene to: ", filename_ppg)
+        
+        if (qc_plots) {
+            #filename_qcplots = file.path(out_path, sprintf("%s_qcplots.png", out_name))
+            #grDevices::png(filename_qcplots)
+            #print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
+            #print(..plot_dist_to_tss(peakobj, tss))
+            #grDevices::dev.off()
+            
+            
+            filename_qcplots_chip = file.path(out_path, sprintf("%s_qcplots_chip.png", out_name))
+            filename_qcplots_poly = file.path(out_path, sprintf("%s_qcplots_poly.png", out_name))
+            filename_disttotss = file.path(out_path,sprintf("%s_locuslength.jpeg",out_name));
+            
+            
+            grDevices::png(filename_qcplots_chip)
+            print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))				
+            grDevices::dev.off()
+            
+            grDevices::png(filename_qcplots_poly)
+            print(..plot_polyenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
+            grDevices::dev.off()
+            
+            grDevices::png(filename_disttotss)
+            print(..plot_dist_to_tss(peakobj, tss))
+            grDevices::dev.off()
+            
+            
+            message("Wrote QC plots to: ",filename_qcplots)
+        }
+    }
+    
+    ######################################################
+    # Return objects as list
+    return(list(
+    peaks = assigned_peaks,
+    results = hybrid,
+    opts = opts,
+    peaks_per_gene = ppg
+    ))
+}
+
+
+hybridenrich.old <- function(	peaks,
 						out_name = "hybridenrich",
 						out_path = getwd(),
 						genome = supported_genomes(),
