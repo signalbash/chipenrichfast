@@ -459,7 +459,7 @@ hybrid.join <- function(test1, test2) {
     message(sprintf("Total of %s common Geneset.IDs", nrow(PvalsH)))
 
 
-    PvalsH$P.value.Hybrid = 2*pmin(PvalsH$P.value.x, PvalsH$P.value.y)
+    PvalsH$P.value.Hybrid = 2*pmin(PvalsH$P.value.x, PvalsH$P.value.y, 0.5)
 	
 	#Run B-H to adjust for FDR for hybrid p-values
     PvalsH$FDR.Hybrid = stats::p.adjust(PvalsH$P.value.Hybrid, method = "BH")
