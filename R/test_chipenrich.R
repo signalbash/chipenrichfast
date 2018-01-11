@@ -72,11 +72,19 @@ single_chipenrich = function(go_id, geneset, gpw, fitspl, method, model) {
         message(sprintf("Applying correction for geneset %s with %i genes...",go_id,length(go_genes)))
     }
 
-    fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="binomial")
-
-    # Results from the logistic regression
-    r_effect = coef(fit)[2]
-    r_pval = summary(fit)$p.table[2,4]
+    r_effect = NA
+    r_pval = NA
+    
+    tryCatch(
+    {fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="binomial")
+        # Results from the logistic regression
+        r_effect = coef(fit)[2];
+        r_pval = summary(fit)$p.table[2, 4]
+    },
+    error = {function(e) {warning(
+        sprintf("Error in geneset: %s. NAs given", go_id))
+    }}
+    )
 
     out = data.frame(
         "P.value"=r_pval,

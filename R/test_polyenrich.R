@@ -49,11 +49,19 @@ single_polyenrich = function(go_id, geneset, gpw, fitspl, method, model) {
 	r_go_genes_peak = paste(go_genes_peak,collapse=", ")
 	r_go_genes_peak_num = length(go_genes_peak)
 
-	fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="nb")
+    r_effect = NA
+    r_pval = NA
 
-	# Results from the logistic regression
-	r_effect = coef(fit)[2]
-	r_pval = summary(fit)$p.table[2,4]
+    tryCatch(
+    {fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="nb")
+        # Results from the logistic regression
+        r_effect = coef(fit)[2];
+        r_pval = summary(fit)$p.table[2, 4]
+    },
+    error = {function(e) {warning(
+        sprintf("Error in geneset: %s. NAs given", go_id))
+    }}
+    )
 
 	out = data.frame(
 		"P.value"=r_pval,
