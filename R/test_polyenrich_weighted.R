@@ -3,7 +3,7 @@ test_polyenrich_weighted = function(geneset,gpw,n_cores,counts) {
 	# Restrict our genes/weights/peaks to only those genes in the genesets.
 	# Here, geneset is not all combined, but GOBP, GOCC, etc.
 	# i.e. A specific one.
-	gpw = subset(gpw,gene_id %in% geneset@all.genes);
+	gpw = subset(gpw,gpw$gene_id %in% geneset@all.genes);
 	
 	if (sum(gpw$peak) == 0) {
 		stop("Error: no peaks in your data!");
