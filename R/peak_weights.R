@@ -6,7 +6,7 @@ calc_peak_weights = function(assigned_peaks, weighting) {
         peak_counts = table(assigned_peaks$peak_id)
         peak_weights = data.frame(
             'peak_id' = names(peak_counts),
-            'peak_weight' = as.numeric(1 / peak_counts),
+            'peak_weights' = as.numeric(1 / peak_counts),
             stringsAsFactors=FALSE)
 	
         assigned_peaks = merge(assigned_peaks, peak_weights, by='peak_id')
