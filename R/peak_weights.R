@@ -1,7 +1,6 @@
 
 # This function calculates a weight for each peak according to how many loci it intersects.
 calc_peak_weights = function(assigned_peaks, weighting) {
-    assigned_peaks$peak_weights = 1
     if ("multiAssign" %in% weighting) {
         peak_counts = table(assigned_peaks$peak_id)
         peak_weights = data.frame(
@@ -12,6 +11,8 @@ calc_peak_weights = function(assigned_peaks, weighting) {
         assigned_peaks = merge(assigned_peaks, peak_weights, by='peak_id')
         message("Assigning weights based on multiple peak assignments...")
 
+    } else {
+        assigned_peaks$peak_weights = 1
     }
     
     if (any(c("signalValue", "logsignalValue") %in% weighting)) {
