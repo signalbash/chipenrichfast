@@ -47,7 +47,7 @@ calc_genes_peak_weight = function(assigned_peaks, ppg) {
     assigned_peaks$peak_weights = assigned_peaks$peak_weights/mean(assigned_peaks$peak_weights, na.rm=TRUE)
 	rpg = stats::aggregate(peak_weights ~ gene_id, assigned_peaks, sum)
 	
-	d_rpg = data.frame(gene_id = rpg$gene_id, sum_peak_weight = rpg$peak_weight, stringsAsFactors=FALSE)
+	d_rpg = data.frame(gene_id = rpg$gene_id, sum_peak_weight = rpg$peak_weights, stringsAsFactors=FALSE)
 	
 	result = merge(ppg, d_rpg, by='gene_id', all.x=TRUE)
 	result$sum_peak_weight[is.na(result$sum_peak_weight)] = 0
