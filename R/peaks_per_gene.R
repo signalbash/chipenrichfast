@@ -41,7 +41,7 @@ num_peaks_per_gene = function(assigned_peaks, locusdef, mappa=NULL) {
 
 	# Sum up lengths for each gene.
 	d = stats::aggregate(length ~ gene_id, d, sum)
-	d$log10_length = log10(d$length)
+	d$log10_length = log10(d$length+1)
 
 	# Compute the total number of peaks assigned to each gene.
 	ppg = table(assigned_peaks$gene_id)
