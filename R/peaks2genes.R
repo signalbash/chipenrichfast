@@ -9,7 +9,7 @@
 #' @include read.R assign_peaks.R peaks_per_gene.R
 #' @include plot_dist_to_tss.R plot_chipenrich_spline.R
 
-allbutenrich <- function(	peaks,
+peaks2genes <- function(peaks,
                         out_name = "readyToEnrich",
                         out_path = getwd(),
                         genome = supported_genomes(),
