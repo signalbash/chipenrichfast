@@ -56,7 +56,6 @@ Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
 Collate: 
-    'allbutenrich.R'
     'assign_peaks.R'
     'test_broadenrich.R'
     'peaks_per_gene.R'
@@ -86,3 +85,4 @@ Collate:
     'polyenrich.R'
     'hybrid.R'
     'peak_weights.R'
+    'peaks2genes.R'
