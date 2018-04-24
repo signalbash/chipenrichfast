@@ -214,7 +214,7 @@ hybridenrich <- function(	peaks,
                 rtemp = test_func(gobj,ppg,n_cores)
             }
             if (testf == "test_fisher_exact") {
-                rtemp = test_func(gobj,ppg,alternative=fisher_alt)
+                rtemp = test_func(gobj,ppg,alternative="two.sided")
             }
             if (testf == "test_binomial") {
                 rtemp = test_func(gobj,ppg)
@@ -286,7 +286,7 @@ hybridenrich <- function(	peaks,
         message("Wrote count of peaks per gene to: ", filename_ppg)
         
         if (qc_plots) {
-            #filename_qcplots = file.path(out_path, sprintf("%s_qcplots.png", out_name))
+            filename_qcplots = file.path(out_path, sprintf("%s_qcplots.png", out_name))
             #grDevices::png(filename_qcplots)
             #print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
             #print(..plot_dist_to_tss(peakobj, tss))
