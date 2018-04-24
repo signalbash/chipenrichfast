@@ -1,3 +1,21 @@
+CHANGES IN VERSION 2.4.0
+-------------------------
+
+NEW FEATURES
+
+    o A new function, peaks2genes(), to run the analysis up to, but not including,
+      the enrichment testing. Useful for checking QC plots, check qualities of 
+      peak-to-gene assignments, and easier custom tests.
+
+SIGNIFICANT USER-LEVEL CHANGES
+
+    o The hybridenrich() method now returns the same format as chipenrich() and 
+      polyenrich()
+
+BUG FIXES
+
+    o Fixed multiAssign weighting method to use the correct weights.
+
 CHANGES IN VERSION 2.2.0
 -------------------------
 

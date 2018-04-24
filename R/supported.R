@@ -132,5 +132,5 @@ supported_genomes = function() {
 #'
 #' @export
 supported_methods = function() {
-	return(names(SUPPORTED_METHODS))
+	return(SUPPORTED_COMBOS)
 }

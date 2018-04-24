@@ -106,7 +106,7 @@ The [`plot_dist_to_tss()` QC plot](#peak-distance-to-tss-distribution) displays 
 
 ## Gene Sets
 
-Gene sets are sets of genes that represent a particular biological function. Popular gene sets used by `chipenrich` include: [KEGG Pathways](http://www.kegg.jp), [Gene Ontology](http://geneontology.org), and [Reactome Pathways](http://www.reactome.org).
+Gene sets are sets of genes that represent a particular biological function. Popular gene sets used by `chipenrich` include: [KEGG Pathways](http://www.kegg.jp), [Gene Ontology](http://geneontology.org), and [Reactome Pathways](http://www.reactome.org). For a complete list of available gene sets, check `supported_genesets()`
 
 ### Built-in gene sets
 
@@ -119,7 +119,7 @@ head(supported_genesets())
 
 ### Custom gene sets
 
-Users can perform GSE on custom gene sets for any supported organism by passing the file path as the value of `genesets` parameter in `broadenrich()`, `chipenrich()`, or `polyenrich()`. Custom gene set definitions should be defined in a tab-delimited text file with a header. The first column should be the geneset ID or name, and the second column should be the Entrez IDs belonging to the geneset. For example:
+Users can perform GSE on custom gene sets for any supported organism by passing the file path as the value of `genesets` parameter in `broadenrich()`, `chipenrich()`, `polyenrich()`, or `hybridenrich()`. Custom gene set definitions should be defined in a tab-delimited text file with a header. The first column should be the geneset ID or name, and the second column should be the Entrez IDs belonging to the geneset. For example:
 
 ```{r, eval=FALSE}
 gs_id	gene_id
@@ -218,7 +218,7 @@ print(results.cem[1:5,1:5])
 
 ### `polyenrich()`
 
-Poly-Enrich is also designed for narrow peaks, but where there are 100,000s of peaks which results in nearly every gene locus containing a peak. For example, ChIP-seq experiments for transcription factors.
+Poly-Enrich is also designed for narrow peaks, but where there are tens of thousands of peaks which results in nearly every gene locus containing a peak. For example, ChIP-seq experiments for transcription factors or repeated elements.
 
 The Poly-Enrich method uses the number of peaks in genes in its negative binomial regression model for enrichment: `num_peaks ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `num_peaks` is a numeric vector indicating the number of peaks in each gene, and `s(log10_length)` is a negative binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.
 
@@ -228,6 +228,20 @@ results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  m
 	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.pe = results$results
 print(results.pe[1:5,1:5])
+```
+
+### `hybridenrich()`
+
+The hybrid method is used when one is unsure of which method, between ChIP-Enrich or Poly-Enrich, is the optimal method. It will be more conservative than either test individually, but also much more powerful than using the wrong test. 
+
+The hybrid p-value is given as `2*min(chipenrich_pvalue, polyenrich_pvalue)`. This test will retain the same Type 1 level and will be a consistent test if one of chipenrich or polyenrich is consistent. This can be extended to any number of tests, but currently we only allow a hybrid test for chipenrich and polyenrich. For more information about chipenrich or polyenrich, see their respective sections.
+
+```{r, warning = FALSE, message = FALSE}
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = hybridenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+results.hybrid = results$results
+print(results.hybrid[1:5,1:5])
 ```
 
 ## QC Plots
@@ -331,3 +345,5 @@ print(alpha)
 R.P. Welch^, C. Lee^, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor. "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. [doi:10.1093/nar/gku463](https://academic.oup.com/nar/article-lookup/doi/10.1093/nar/gku463)
 
 R.G. Cavalcante, C. Lee, R.P. Welch, S. Patil, T. Weymouth, L.J. Scott, and M.A. Sartor. "Broad-Enrich: functional interpretation of large sets of broad genomic regions." Bioinformatics (2014) 30(17):i393-i400 [doi:10.1093/bioinformatics/btu444](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu444)
+
+C.T. Lee , R.G. Cavalcante, T. Qin, S. Patil, S. Wang, C. Lee, M.A. Sartor. “Poly-Enrich: Extensions to the ChIPEnrich method and updates to tools.” In preparation.

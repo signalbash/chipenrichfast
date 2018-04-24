@@ -26,6 +26,8 @@
 #'	\item{polyenrich():}{ is also designed for narrow peaks, but where there are
 #' 100,000s of peaks which results in nearly every gene locus containing a peak.
 #' For example, ChIP-seq experiments for transcription factors.}
+#'  \item{hybridenrich():}{ is a combination of chipenrich and polyenrich, to be
+#' used when one is unsure which is the optimal method. }
 #' }
 #'
 #' @section Randomizations:

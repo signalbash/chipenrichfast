@@ -39,6 +39,8 @@
 #' 100,000s of peaks which results in nearly every gene locus containing a peak.
 #' For example, ChIP-seq experiments for transcription factors. Generally works better
 #' for experiments with more than 40,000 peaks.}
+#'  \item{hybridenrich():}{ is a combination of chipenrich and polyenrich, to be
+#' used when one is unsure which is the optimal method. }
 #' }
 #'
 #' @section Randomizations:

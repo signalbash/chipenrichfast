@@ -30,3 +30,8 @@ METHOD_NAMES = list(
     'polyapprox' = "Poly-Enrich Approximate"
 
 )
+
+SUPPORTED_COMBOS = data.frame(
+    'function' = c("broadenrich","chipenrich","chipenrich","polyenrich","polyenrich","hybridenrich"),
+    'method' = c(NA,"chipenrich","fet","polyenrich","polyenrich_weighted",NA)
+)
