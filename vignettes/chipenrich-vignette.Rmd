@@ -116,10 +116,6 @@ Gene sets for fly, human, mouse, rat, and zebrafish are built in to `chipenrich`
 # Take head because it's long
 head(supported_genesets())
 ```
-```{r}
-# For a specific organism e.g. hsa:
-head(supported_genesets("hsa"))
-```
 
 A description of our built-in gene sets:
 
