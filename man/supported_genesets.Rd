@@ -4,7 +4,7 @@
 \alias{supported_genesets}
 \title{Display supported genesets for gene set enrichment.}
 \usage{
-supported_genesets()
+supported_genesets(organism = NULL)
 }
 \value{
 A \code{data.frame} with columns \code{geneset, organism}.
