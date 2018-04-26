@@ -139,7 +139,7 @@
 #' data(peaks_E2F4, package = 'chipenrich.data')
 #' peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
 #' gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-#' results = peaks2genes(peaks_E2F4, method='chipenrich', locusdef='nearest_tss',
+#' results = peaks2genes(peaks_E2F4, locusdef='nearest_tss',
 #' 			genome = 'hg19', genesets=gs_path, out_name=NULL)
 #'
 #' # Get the list of peaks that were assigned to genes.
