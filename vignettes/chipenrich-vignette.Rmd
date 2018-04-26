@@ -117,7 +117,7 @@ Gene sets for fly, human, mouse, rat, and zebrafish are built in to `chipenrich`
 head(supported_genesets())
 ```
 
-A description of our built-in gene sets:
+Descriptions of our built-in gene sets:
 
 * `GOBP`: Gene Ontology-Biological Processes, Bioconductor ver. 3.4.2. (geneontology.org)
 

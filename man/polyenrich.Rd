@@ -205,7 +205,6 @@ length relationship.}
 hypothesis is that there is no true gene set enrichment, but with preserved
 genomic location.}
 }
-
 The return value with a selected randomization is the same list as without.
 To assess the Type I error, the \code{alpha} level for the particular data set
 can be calculated by dividing the total number of gene sets with p-value < \code{alpha}

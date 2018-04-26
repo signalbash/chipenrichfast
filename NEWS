@@ -12,6 +12,11 @@ SIGNIFICANT USER-LEVEL CHANGES
     o The hybridenrich() method now returns the same format as chipenrich() and 
       polyenrich()
 
+IMPROVEMENTS
+
+    o Vignette now describes all available gene sets
+
+
 BUG FIXES
 
     o Fixed multiAssign weighting method to use the correct weights.
