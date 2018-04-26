@@ -94,11 +94,11 @@ frame.) The columns are:
 \describe{
   \item{Geneset.ID}{ is the identifier for a given gene set from the selected database.  For example, GO:0000003. }
   \item{P.Value.x}{ is the probability of observing the degree of enrichment of the gene set given the null hypothesis
-                    that peaks are not associated with any gene sets, for the first test..}
+                    that peaks are not associated with any gene sets, for the first test.}
   \item{P.Value.y}{ is the same as above except for the second test.}
   \item{P.Value.Hybrid}{ The calculated Hybrid p-value from the two tests}
   \item{FDR.Hybrid}{ is the false discovery rate proposed by Bejamini \& Hochberg for adjusting the p-value to control for family-wise error rate.}
-
+ Other variables given will also be included, see the corresponding methods' documentation for their details.
 }}
 }
 \description{
@@ -112,7 +112,7 @@ documentation.
 Given n tests that test for the same hypothesis, same Type I error rate, and
 converted to p-values: \code{p_1, ..., p_n}, the Hybrid p-value is computed as:
 \code{n*min(p_1, ..., p_n)}. This hybrid test will have at most the same
-Type I error as any individual test, and if any of the tests have 100% power as
+Type I error as any individual test, and if any of the tests have 100\% power as
 sample size goes to infinity, then so will the hybrid test.
 }
 
