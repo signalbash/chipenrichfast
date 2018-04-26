@@ -125,7 +125,7 @@ Descriptions of our built-in gene sets:
 
 * `GOMF`: Gene Ontology-Molecular Function, Bioconductor ver 3.4.2. (geneontology.org)
 
-* `biocarta_pathway`: BioCarta Pathway, Ver 6.0. (biocarta.com)
+* `biocarta_pathway`: BioCarta Pathway, Ver 6.0. (cgap.nci.nih.gov/Pathways/BioCarta_Pathways)
 
 * `ctd`: Comparative Toxicogenomics Database, Last updated June 06, 2017. Groups of genes that interact with specific chemicals to help understand enviromental exposures that affect human health. (ctdbase.org)
 
@@ -139,9 +139,9 @@ Descriptions of our built-in gene sets:
 
 * `kegg_pathway`: Kyoto Encyclopedia of Genes and Genomes. Ver 3.2.3. (genome.jp/kegg)
 
-* `mesh`: Gene Annotation with MeSH, the National Library of Medicine's controlled vocabulary for biology and medicine. Last updated ~2013. (gene2mesh.ncibi.org)
+* `mesh`: Gene Annotation with MeSH, the National Library of Medicine's controlled vocabulary for biology and medicine. Useful for testing hypotheses related to diseases, processes, other genes, confounders such as populations and experimental techniques, etc. based on knowledge from the literature that may not yet be formally described in any other gene sets. Last updated ~2013. (gene2mesh.ncibi.org)
 
-* `metabolite`: Metabolite (NCIBI) (ncibi.org)
+* `metabolite`: Metabolite concepts, defined from Edinburgh Human Metabolic Network database (Ma, et al., 2007) Contains gene sets coding for metabolic enzymes. 
 
 * `microrna`: microRNA targets (MSigDB). Ver 6.0. Gene sets containing genes with putative target sites of human mature miRNA. (software.broadinstitute.org/gsea/msigdb/collections.jsp)
 
