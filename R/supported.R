@@ -92,7 +92,7 @@ supported_read_lengths = function() {
 #' supported_genesets()
 #'
 #' @export
-supported_genesets = function(organism=NULL) {
+supported_genesets = function() {
 	piqr = data(package = "chipenrich.data")
 	data_files = piqr$results[,3]
 
@@ -103,11 +103,7 @@ supported_genesets = function(organism=NULL) {
 		'organism' = combos[,2],
 		stringsAsFactors = FALSE)
 	df = df[order(df$organism), ]
-    
-    if (!is.null(organism)){
-        df = df[df$organism==organism,]
-    }
-    
+
 	return(df)
 }
 
