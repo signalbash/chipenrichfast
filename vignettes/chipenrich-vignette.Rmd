@@ -106,7 +106,7 @@ The [`plot_dist_to_tss()` QC plot](#peak-distance-to-tss-distribution) displays 
 
 ## Gene Sets
 
-Gene sets are sets of genes that represent a particular biological function. Popular gene sets used by `chipenrich` include: [KEGG Pathways](http://www.kegg.jp), [Gene Ontology](http://geneontology.org), and [Reactome Pathways](http://www.reactome.org). For a complete list of available gene sets, check `supported_genesets()`
+Gene sets are sets of genes that represent a particular biological function. 
 
 ### Built-in gene sets
 
@@ -116,6 +116,50 @@ Gene sets for fly, human, mouse, rat, and zebrafish are built in to `chipenrich`
 # Take head because it's long
 head(supported_genesets())
 ```
+```{r}
+# For a specific organism e.g. hsa:
+head(supported_genesets("hsa"))
+```
+
+A description of our built-in gene sets:
+
+* `GOBP`: Gene Ontology-Biological Processes, Bioconductor ver. 3.4.2. (geneontology.org)
+
+* `GOCC`: Gene Ontology-Cell Component, Bioconductor ver. 3.4.2. (geneontology.org)
+
+* `GOMF`: Gene Ontology-Molecular Function, Bioconductor ver 3.4.2. (geneontology.org)
+
+* `biocarta_pathway`: BioCarta Pathway, Ver 6.0. (biocarta.com)
+
+* `ctd`: Comparative Toxicogenomics Database, Last updated June 06, 2017. Groups of genes that interact with specific chemicals to help understand enviromental exposures that affect human health. (ctdbase.org)
+
+* `cytoband`: Cytobands (NCBI). Groups of genes that reside in the same area of a chromosome. 
+
+* `drug_bank`: Sets of gene that are targeted by a specific drug. Ver 5.0.7. (www.drugbank.ca)
+
+* `hallmark`: Hallmark gene sets (MSigDB). Ver 6.0. Specific biological states or processes that display coherent expression. (software.broadinstitute.org/gsea/msigdb/collections.jsp)
+
+* `immunologic`: Immunologic signatures (MSigDB). Ver 6.0. Gene sets that represent cell states within the immune system. (software.broadinstitute.org/gsea/msigdb/collections.jsp)
+
+* `kegg_pathway`: Kyoto Encyclopedia of Genes and Genomes. Ver 3.2.3. (genome.jp/kegg)
+
+* `mesh`: Gene Annotation with MeSH, the National Library of Medicine's controlled vocabulary for biology and medicine. Last updated ~2013. (gene2mesh.ncibi.org)
+
+* `metabolite`: Metabolite (NCIBI) (ncibi.org)
+
+* `microrna`: microRNA targets (MSigDB). Ver 6.0. Gene sets containing genes with putative target sites of human mature miRNA. (software.broadinstitute.org/gsea/msigdb/collections.jsp)
+
+* `oncogenic`: Oncogenic signatures (MSigDB). Ver 6.0. Gene sets that represent signatures of pathways often disregulated in cancer. (software.broadinstitute.org/gsea/msigdb/collections.jsp)
+
+* `panther_pathway`: PANTHER Pathway. Ver 3.5. Contains primarily signaling pathways with subfamilies. (pantherdb.org/pathway)
+
+* `pfam`: Pfam. A large collection of protein families. (pfam.xfam.org)
+
+* `protein_interaction_biogrid`: Protein Interaction from Biological General Repository for Interaction Datasets. Ver 3.4.151. (thebiogrid.org)
+
+* `reactome`: Reactome Pathway Database. Ver 61. (reactome.org)
+
+* `transcription_factors`: Transcription Factors (MSigDB). Ver 6.0. Gene sets that share upstream cis-regulatory motifs which can function as potential transcription factor binding sites. (software.broadinstitute.org/gsea/msigdb/collections.jsp)
 
 ### Custom gene sets
 
