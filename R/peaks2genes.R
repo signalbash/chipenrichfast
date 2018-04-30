@@ -48,11 +48,6 @@
 #' @param out_path Directory to which results files will be written out. Defaults
 #' to the current working directory as returned by \code{\link{getwd}}.
 #' @param genome One of the \code{supported_genomes()}.
-#' @param genesets A character vector of geneset databases to be tested for
-#' enrichment. See \code{supported_genesets()}. Alternately, a file path to a
-#' a tab-delimited text file with header and first column being the geneset ID
-#' or name, and the second column being Entrez Gene IDs. For an example custom
-#' gene set file, see the vignette.
 #' @param locusdef One of: 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
 #' '1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
 #' '10kb', '10kb_outside', '10kb_outside_upstream'. For a description of each,
@@ -60,8 +55,6 @@
 #' a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
 #' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
 #' example custom locus definition file, see the vignette.
-#' @param method A character string specifying the method to use for enrichment
-#' testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.
 #' @param weighting (Poly-Enrich only) character string specifying the weighting method if method is
 #' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue',
 #' 'logsignalValue', and 'multiAssign'.
@@ -72,10 +65,6 @@
 #' For an example custom mappability file, see the vignette. Default value is NULL.
 #' @param qc_plots A logical variable that enables the automatic generation of
 #' plots for quality control.
-#' @param min_geneset_size Sets the minimum number of genes a gene set may have
-#' to be considered for enrichment testing.
-#' @param max_geneset_size Sets the maximum number of genes a gene set may have
-#' to be considered for enrichment testing.
 #' @param num_peak_threshold (ChIP-Enrich only) Sets the threshold for how many peaks a gene must
 #' have to be considered as having a peak. Defaults to 1. Only relevant for
 #' Fisher's exact test and ChIP-Enrich methods.
@@ -134,13 +123,12 @@
 #'
 #' @examples
 #'
-#' # Run peaks2genes using an example dataset, assigning peaks to the nearest TSS,
-#' # and on a small custom geneset
+#' # Run peaks2genes using an example dataset, assigning peaks to the nearest TSS
 #' data(peaks_E2F4, package = 'chipenrich.data')
 #' peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-#' gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+#' gs_path = system.file('extdata', package='chipenrich')
 #' results = peaks2genes(peaks_E2F4, locusdef='nearest_tss',
-#' 			genome = 'hg19', genesets=gs_path, out_name=NULL)
+#' 			genome = 'hg19', out_name=NULL)
 #'
 #' # Get the list of peaks that were assigned to genes.
 #' assigned_peaks = results$peaks
@@ -154,50 +142,42 @@ peaks2genes <- function(peaks,
                         out_name = "readyToEnrich",
                         out_path = getwd(),
                         genome = supported_genomes(),
-                        genesets = c(
-                            'GOBP',
-                            'GOCC',
-                            'GOMF'),
                         locusdef = "nearest_tss",
                         weighting = NULL,
                         mappability = NULL,
                         qc_plots = TRUE,
-                        min_geneset_size = 15,
-                        max_geneset_size = 2000,
                         num_peak_threshold = 1,
                         randomization = NULL
 ) {
     genome = match.arg(genome)
-    
+
     ############################################################################
     # Collect options for opts output
     opts_list = as.list(sys.call())
     opts_list = opts_list[2:length(opts_list)]
-    
+
     opts = data.frame(
     parameters = names(opts_list),
     values = as.character(opts_list),
     stringsAsFactors = FALSE
     )
-    
+
     ############################################################################
-    # Setup locus definitions, genesets, and mappability
-    
+    # Setup locus definitions, and mappability
+
     ldef_list = setup_locusdef(locusdef, genome, randomization)
     ldef = ldef_list[['ldef']]
     tss = ldef_list[['tss']]
-    
-    geneset_list = setup_genesets(gs_codes = genesets, ldef_obj = ldef, genome = genome, min_geneset_size = min_geneset_size, max_geneset_size = max_geneset_size)
-    
+
     mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
-    
-    
+
+
     ############################################################################
     ############################################################################
     # Start enrichment process
     ############################################################################
     ############################################################################
-    
+
     ######################################################
     # Read in and format peaks (from data.frame or file)
     if (class(peaks) == "data.frame") {
@@ -206,19 +186,19 @@ peaks2genes <- function(peaks,
     } else if (class(peaks) == "character") {
         peakobj = read_bed(peaks)
     }
-    
+
     # Number of peaks in data.
     num_peaks = length(peakobj)
-    
+
     ######################################################
     # Assign peaks to genes.
     message("Assigning peaks to genes with assign_peaks(...) ..")
     assigned_peaks = assign_peaks(peakobj, ldef, tss)
-    
+
     ######################################################
     # Compute peaks per gene table
     ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
-    
+
     if (!is.null(weighting)) {
         if (!all(weighting %in% c("logsignalValue","signalValue","multiAssign"))) {
             # Unsupported weights
@@ -227,54 +207,54 @@ peaks2genes <- function(peaks,
         }
         assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
         ppg = calc_genes_peak_weight(assigned_peaks, ppg)
-        
+
     }
-    
+
     ######################################################
     # Write result objects to files
     if (!is.null(out_name)) {
         filename_peaks = file.path(out_path, sprintf("%s_peaks.tab", out_name))
         write.table(assigned_peaks, file = filename_peaks, row.names = FALSE, quote = FALSE, sep = "\t")
         message("Wrote peak-to-gene assignments to: ", filename_peaks)
-        
+
         filename_opts = file.path(out_path, sprintf("%s_opts.tab", out_name))
         write.table(opts, file = filename_opts, row.names = FALSE, quote = FALSE, sep = "\t")
         message("Wrote run options/arguments to: ", filename_opts)
-        
+
         filename_ppg = file.path(out_path, sprintf("%s_peaks-per-gene.tab", out_name))
         write.table(ppg, file = filename_ppg, row.names = FALSE, quote = FALSE, sep = "\t")
         message("Wrote count of peaks per gene to: ", filename_ppg)
-        
+
         if (qc_plots) {
             #filename_qcplots = file.path(out_path, sprintf("%s_qcplots.png", out_name))
             #grDevices::png(filename_qcplots)
             #print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
             #print(..plot_dist_to_tss(peakobj, tss))
             #grDevices::dev.off()
-            
-            
+
+
             filename_qcplots_chip = file.path(out_path, sprintf("%s_qcplots_chip.png", out_name))
             filename_qcplots_poly = file.path(out_path, sprintf("%s_qcplots_poly.png", out_name))
             filename_disttotss = file.path(out_path,sprintf("%s_locuslength.png",out_name));
-            
-            
+
+
             grDevices::png(filename_qcplots_chip)
             print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
             grDevices::dev.off()
-            
+
             grDevices::png(filename_qcplots_poly)
             print(..plot_polyenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
             grDevices::dev.off()
-            
+
             grDevices::png(filename_disttotss)
             print(..plot_dist_to_tss(peakobj, tss))
             grDevices::dev.off()
-            
-            
+
+
             message("Wrote QC plots to: ",filename_qcplots_poly)
         }
     }
-    
+
     ######################################################
     # Return objects as list
     return(list(

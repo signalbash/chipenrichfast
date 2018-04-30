@@ -5,9 +5,8 @@
 \title{Run the test process up to, but not including the enrichment tests.}
 \usage{
 peaks2genes(peaks, out_name = "readyToEnrich", out_path = getwd(),
-  genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
-  locusdef = "nearest_tss", weighting = NULL, mappability = NULL,
-  qc_plots = TRUE, min_geneset_size = 15, max_geneset_size = 2000,
+  genome = supported_genomes(), locusdef = "nearest_tss",
+  weighting = NULL, mappability = NULL, qc_plots = TRUE,
   num_peak_threshold = 1, randomization = NULL)
 }
 \arguments{
@@ -34,12 +33,6 @@ to the current working directory as returned by \code{\link{getwd}}.}
 
 \item{genome}{One of the \code{supported_genomes()}.}
 
-\item{genesets}{A character vector of geneset databases to be tested for
-enrichment. See \code{supported_genesets()}. Alternately, a file path to a
-a tab-delimited text file with header and first column being the geneset ID
-or name, and the second column being Entrez Gene IDs. For an example custom
-gene set file, see the vignette.}
-
 \item{locusdef}{One of: 'nearest_tss', 'nearest_gene', 'exon', 'intron', '1kb',
 '1kb_outside', '1kb_outside_upstream', '5kb', '5kb_outside', '5kb_outside_upstream',
 '10kb', '10kb_outside', '10kb_outside_upstream'. For a description of each,
@@ -61,21 +54,12 @@ For an example custom mappability file, see the vignette. Default value is NULL.
 \item{qc_plots}{A logical variable that enables the automatic generation of
 plots for quality control.}
 
-\item{min_geneset_size}{Sets the minimum number of genes a gene set may have
-to be considered for enrichment testing.}
-
-\item{max_geneset_size}{Sets the maximum number of genes a gene set may have
-to be considered for enrichment testing.}
-
 \item{num_peak_threshold}{(ChIP-Enrich only) Sets the threshold for how many peaks a gene must
 have to be considered as having a peak. Defaults to 1. Only relevant for
 Fisher's exact test and ChIP-Enrich methods.}
 
 \item{randomization}{One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
 See the Randomizations section below.}
-
-\item{method}{A character string specifying the method to use for enrichment
-testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.}
 }
 \value{
 A list, containing the following items:
@@ -163,13 +147,12 @@ it is assigned to.}
 
 \examples{
 
-# Run peaks2genes using an example dataset, assigning peaks to the nearest TSS,
-# and on a small custom geneset
+# Run peaks2genes using an example dataset, assigning peaks to the nearest TSS
 data(peaks_E2F4, package = 'chipenrich.data')
 peaks_E2F4 = subset(peaks_E2F4, peaks_E2F4$chrom == 'chr1')
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+gs_path = system.file('extdata', package='chipenrich')
 results = peaks2genes(peaks_E2F4, locusdef='nearest_tss',
-			genome = 'hg19', genesets=gs_path, out_name=NULL)
+			genome = 'hg19', out_name=NULL)
 
 # Get the list of peaks that were assigned to genes.
 assigned_peaks = results$peaks
