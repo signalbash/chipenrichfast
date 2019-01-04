@@ -1,7 +1,7 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 2.7.0
+Version: 2.7.1
 Date: 2018-04-30
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
@@ -14,7 +14,7 @@ Description: ChIP-Enrich performs gene set enrichment testing
     using peaks called from a ChIP-seq experiment. The method empirically
     corrects for confounding factors such as the length of genes,
     and the mappability of the sequence surrounding genes.
-biocViews: ChIPSeq, Epigenetics, FunctionalGenomics, GeneSetEnrichment, HistoneModification, Regression
+biocViews: ImmunoOncology, ChIPSeq, Epigenetics, FunctionalGenomics, GeneSetEnrichment, HistoneModification, Regression
 License: GPL-3
 Imports:
 	AnnotationDbi,
