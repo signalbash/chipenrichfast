@@ -1,8 +1,8 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 2.9.0
-Date: 2018-04-30
+Version: 2.9.1
+Date: 2019-06-08
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -38,7 +38,7 @@ Imports:
 	plyr,
 	rms,
 	rtracklayer,
-	S4Vectors,
+	S4Vectors (>= 0.23.10),
 	stats,
 	stringr,
 	utils

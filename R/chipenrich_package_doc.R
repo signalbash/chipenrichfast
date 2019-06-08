@@ -26,7 +26,7 @@
 #' @importFrom plyr rbind.fill
 #' @import rms
 #' @import rtracklayer
-#' @importFrom S4Vectors queryHits subjectHits
+#' @importFrom S4Vectors queryHits subjectHits splitAsList
 #' @importFrom stats as.formula binom.test coef complete.cases fisher.test fitted na.omit p.adjust pchisq predict qpois quantile resid
 #' @importFrom stringr str_match str_sub
 #' @importFrom utils data read.table tail write.table
