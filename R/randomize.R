@@ -17,7 +17,7 @@ randomize_ldef_bylocation = function(ldef, resolution=50) {
 			# Create groups within the chromosome
 			group = floor( (seq_along(gr) + (resolution - 1)) / resolution )
 			# Split by the group
-			grl = IRanges::splitAsList(gr, group)
+			grl = S4Vectors::splitAsList(gr, group)
 			# Rearrange mcols within each group
 			re_grl = S4Vectors::endoapply(grl, function(grg){
 				GenomicRanges::mcols(grg) = GenomicRanges::mcols(grg)[sample(seq_along(grg), length(grg)),]
