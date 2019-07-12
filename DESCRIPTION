@@ -86,3 +86,5 @@ Collate:
     'hybrid.R'
     'peak_weights.R'
     'peaks2genes.R'
+    'proxReg.R'
+    'test_proxReg.R'
