@@ -97,11 +97,13 @@ proxReg = function(
 	# Creating a column for enhancer distances
 	if ("enhancer" %in% reglocation) {
 		enhancers = chipenrich.data::enhancer.dnase_thurman.0
-		peak_mids = IRanges::mid(GenomicRanges::ranges(peakobj))
+		peakobj2 = GenomicRanges::makeGRangesFromDataFrame(assigned_peaks,
+					seqnames.field = "chr", start.field = "peak_start",end.field = "peak_end")
+		peak_mids = IRanges::mid(GenomicRanges::ranges(peakobj2))
 		mids_gr = GenomicRanges::GRanges(
-			seqnames = GenomeInfoDb::seqnames(peakobj),
+			seqnames = GenomeInfoDb::seqnames(peakobj2),
 			ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
-			name = GenomicRanges::mcols(peakobj)$name
+			name = GenomicRanges::mcols(peakobj2)$name
 		)
 		enhancer_mids = IRanges::mid(GenomicRanges::ranges(enhancers))
 		enhancer_mids_gr = GenomicRanges::GRanges(
