@@ -114,7 +114,7 @@
 #' @param max_geneset_size Sets the maximum number of genes a gene set may have
 #' to be considered for enrichment testing.
 #' @param randomization One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
-#' See the Randomizations section below.
+#' See the Randomizations section above.
 #' @param n_cores The number of cores to use for enrichment testing. We recommend
 #' using only up to the maximum number of \emph{physical} cores present, as
 #' virtual cores do not significantly decrease runtime. Default number of cores
@@ -177,8 +177,6 @@
 #'   \item{Geneset.Peak.Genes}{ is the list of genes from the gene set that had at least one peak assigned.}
 #'
 #' }}
-#'
-#' @family enrichment functions
 #'
 #' @examples
 #'
