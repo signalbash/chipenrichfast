@@ -195,8 +195,8 @@ proxReg = function(
 	# Creating a column for adjusted DTSS
 	if ("tss" %in% reglocation) {
 		assigned_peaks$log_dtss = log(abs(assigned_peaks$dist_to_tss)+1)
-		log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
-		pred_log_dtss = as.numeric(fitted(chipenrich.data::spline.log_dtss.90ENCODE, peaks, type="terms"))
+		assigned_peaks$log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
+		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
 		assigned_peaks$scaled_dtss = assigned_peaks$log_dtss-pred_log_dtss
 	}
 	
