@@ -129,6 +129,7 @@ proxReg = function(
 		'GOBP',
 		'GOCC',
 		'GOMF'),
+	randomization = NULL,
 	qc_plots = TRUE,
 	min_geneset_size = 15,
 	max_geneset_size = 2000,
@@ -191,6 +192,32 @@ proxReg = function(
 	# Assign peaks to genes.
 	message("Assigning peaks to genes with assign_peaks(...) ..")
 	assigned_peaks = assign_peaks(peakobj, ldef, tss)
+	
+	if (!is.null(randomization)){
+		if (randomization == "shuffle") { #Just shuffle gene ids
+			message("Randomizing by shuffling gene ids...")
+			assigned_peaks$gene_id = sample(assigned_peaks$gene_id)
+		} else if (randomization == "unif") { #Uniformly pick from random available genes
+			message("Randomizing by uniformly picking gene ids...")
+			assigned_peaks$gene_id = as.integer(sample(names(table(assigned_peaks$gene_id)), nrow(assigned_peaks), replace = T))
+		} else if (randomization == "bylength") { #bins of locus length, style of unif
+			message("Randomizing by picking gene ids by locus length...")
+			peakstemp = assigned_peaks[,c("peak_id","gene_id","gene_locus_start","gene_locus_end")]
+			peakstemp$gene_locus_length = peakstemp$gene_locus_end-peakstemp$gene_locus_start
+			peakstemp$dupe_genes = duplicated(peakstemp$gene_id)
+			peakstemp = peakstemp[sample(1:nrow(peakstemp)),]
+			peakstemp2 = peakstemp[!peakstemp$dupe_genes,]
+			peakstemp2 = peakstemp2[order(peakstemp2$gene_locus_length),]
+			rownames(peakstemp2) = 1:nrow(peakstemp2)
+			peakstemp2$group = floor((as.numeric(rownames(peakstemp2))+99)/100)
+			peakstemp$group = sapply(peakstemp$gene_id, function(x){peakstemp2$group[peakstemp2$gene_id==x]})
+			peakstemp$gene_id = sapply(peakstemp$group, function(x){sample(peakstemp2$gene_id[peakstemp2$group==x],1)})
+			assigned_peaks$gene_id_pre = assigned_peaks$gene_id
+			assigned_peaks = merge(assigned_peaks[,-5], peakstemp[,c("peak_id","gene_id")], by = "peak_id")
+		} else {
+			stop("Unsupported randomization!")
+		}
+	}
 	
 	# Creating a column for adjusted DTSS
 	if ("tss" %in% reglocation) {

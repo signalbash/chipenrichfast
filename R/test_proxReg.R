@@ -15,7 +15,7 @@ test_proxReg = function(geneset, peaks, regloc, n_cores) {
 	results$FDR = p.adjust(results$P.value, method="BH")
 	
 	# Create enriched/depleted status column
-	results$Status = ifelse(results$Effect > 0, 'enriched', 'depleted')
+	results$Status = ifelse(results$Effect > 0, 'closer', 'farther')
 	
 	results = results[order(results$P.value),]
 	
