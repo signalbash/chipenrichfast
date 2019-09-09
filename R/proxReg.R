@@ -193,6 +193,43 @@ proxReg = function(
 	message("Assigning peaks to genes with assign_peaks(...) ..")
 	assigned_peaks = assign_peaks(peakobj, ldef, tss)
 	
+	# Creating a column for adjusted DTSS
+	if ("tss" %in% reglocation) {
+		assigned_peaks$log_dtss = log(abs(assigned_peaks$dist_to_tss)+1)
+		assigned_peaks$log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
+		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
+		assigned_peaks$scaled_dtss = assigned_peaks$log_dtss-pred_log_dtss
+	}
+	
+	# Creating a column for enhancer distances
+	if ("enhancer" %in% reglocation) {
+		enhancers = chipenrich.data::enhancer.dnase_thurman.0
+		gene.enh.desc = chipenrich.data::gene.enh.desc
+		peakobj2 = GenomicRanges::makeGRangesFromDataFrame(assigned_peaks,
+					seqnames.field = "chr", start.field = "peak_start",end.field = "peak_end")
+		peak_mids = IRanges::mid(GenomicRanges::ranges(peakobj2))
+		mids_gr = GenomicRanges::GRanges(
+			seqnames = GenomeInfoDb::seqnames(peakobj2),
+			ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
+			name = GenomicRanges::mcols(peakobj2)$name
+		)
+		enhancer_mids = IRanges::mid(GenomicRanges::ranges(enhancers))
+		enhancer_mids_gr = GenomicRanges::GRanges(
+			seqnames = GenomeInfoDb::seqnames(enhancers),
+			ranges = IRanges::IRanges(start = enhancer_mids, end = enhancer_mids),
+			name = GenomicRanges::mcols(enhancers)$name
+		)
+		dist_to_enh = GenomicRanges::distanceToNearest(mids_gr, enhancer_mids_gr)
+		assigned_peaks$dist_to_enh = dist_to_enh@elementMetadata$distance
+		assigned_peaks$log_dtss = log(abs(assigned_peaks$dist_to_tss)+1)
+		assigned_peaks$log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
+		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
+		assigned_peaks$avgdenh = sapply(assigned_peaks$gene_id, 
+										function(x) {gene.enh.desc$avgdenh[gene.enh.desc$gene_id == x]})
+		assigned_peaks$scaled_denh = log(abs(assigned_peaks$dist_to_enh)+1) - log(assigned_peaks$avgdenh+1)
+	}
+	
+	#Randomizations
 	if (!is.null(randomization)){
 		if (randomization == "shuffle") { #Just shuffle gene ids
 			message("Randomizing by shuffling gene ids...")
@@ -214,38 +251,23 @@ proxReg = function(
 			peakstemp$gene_id = sapply(peakstemp$group, function(x){sample(peakstemp2$gene_id[peakstemp2$group==x],1)})
 			assigned_peaks$gene_id_pre = assigned_peaks$gene_id
 			assigned_peaks = merge(assigned_peaks[,-5], peakstemp[,c("peak_id","gene_id")], by = "peak_id")
+		} else if (randomization == "byenh"){
+			message("Randomizing by picking gene ids by enhancer dist...")
+			peakstemp = assigned_peaks[,c("peak_id","gene_id","avgdenh")]
+			peakstemp$dupe_genes = duplicated(peakstemp$gene_id)
+			peakstemp = peakstemp[sample(1:nrow(peakstemp)),]
+			peakstemp2 = peakstemp[!peakstemp$dupe_genes,]
+			peakstemp2 = peakstemp2[order(peakstemp2$avgdenh),]
+			rownames(peakstemp2) = 1:nrow(peakstemp2)
+			peakstemp2$group = floor((as.numeric(rownames(peakstemp2))+99)/100)
+			peakstemp$group = sapply(peakstemp$gene_id, function(x){peakstemp2$group[peakstemp2$gene_id==x]})
+			peakstemp$gene_id = sapply(peakstemp$group, function(x){sample(peakstemp2$gene_id[peakstemp2$group==x],1)})
+			assigned_peaks$gene_id_pre = assigned_peaks$gene_id
+			assigned_peaks = merge(assigned_peaks[,-5], peakstemp[,c("peak_id","gene_id")], by = "peak_id")
+			
 		} else {
 			stop("Unsupported randomization!")
 		}
-	}
-	
-	# Creating a column for adjusted DTSS
-	if ("tss" %in% reglocation) {
-		assigned_peaks$log_dtss = log(abs(assigned_peaks$dist_to_tss)+1)
-		assigned_peaks$log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
-		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
-		assigned_peaks$scaled_dtss = assigned_peaks$log_dtss-pred_log_dtss
-	}
-	
-	# Creating a column for enhancer distances
-	if ("enhancer" %in% reglocation) {
-		enhancers = chipenrich.data::enhancer.dnase_thurman.0
-		peakobj2 = GenomicRanges::makeGRangesFromDataFrame(assigned_peaks,
-					seqnames.field = "chr", start.field = "peak_start",end.field = "peak_end")
-		peak_mids = IRanges::mid(GenomicRanges::ranges(peakobj2))
-		mids_gr = GenomicRanges::GRanges(
-			seqnames = GenomeInfoDb::seqnames(peakobj2),
-			ranges = IRanges::IRanges(start = peak_mids, end = peak_mids),
-			name = GenomicRanges::mcols(peakobj2)$name
-		)
-		enhancer_mids = IRanges::mid(GenomicRanges::ranges(enhancers))
-		enhancer_mids_gr = GenomicRanges::GRanges(
-			seqnames = GenomeInfoDb::seqnames(enhancers),
-			ranges = IRanges::IRanges(start = enhancer_mids, end = enhancer_mids),
-			name = GenomicRanges::mcols(enhancers)$name
-		)
-		dist_to_enh = GenomicRanges::distanceToNearest(mids_gr, enhancer_mids_gr)
-		assigned_peaks$dist_to_enh = dist_to_enh@elementMetadata$distance
 	}
 	
 	######################################################

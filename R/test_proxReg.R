@@ -34,8 +34,8 @@ single_proxReg = function(go_id, geneset, peaks, regloc) {
 		y = peaks$scaled_dtss[!b_genes]
 	}
 	if (regloc == "enhancer"){
-		x = peaks$dist_to_enh[b_genes]
-		y = peaks$dist_to_enh[!b_genes]
+		x = peaks$scaled_denh[b_genes]
+		y = peaks$scaled_denh[!b_genes]
 	}
 	x <- x[is.finite(x)]
 	y <- y[is.finite(y)]
