@@ -38,7 +38,7 @@ Imports:
 	plyr,
 	rms,
 	rtracklayer,
-	S4Vectors (>= 0.23.10),
+	S4Vectors (>= 0.20.1),
 	stats,
 	stringr,
 	utils
