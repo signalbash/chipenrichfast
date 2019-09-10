@@ -119,6 +119,9 @@
 #' 
 #' @export
 #' @include constants.R utils.R supported.R setup.R
+#' @include read.R assign_peaks.R 
+#' @include plot_dist_to_tss.R
+#' @include test_proxReg.R
 proxReg = function(
 	peaks,
 	out_name = "proxReg",
