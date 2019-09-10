@@ -103,9 +103,8 @@ A data frame of the count of peaks per gene. The columns are:
 }
 \description{
 This function is used to create the *_peaks and *_peaks-per-gene files
-in case only the enrichment step has a problem. This way one does not
-need to rerun the making of these files whenever one just wants to test
-a new enrichment method.
+This way one does not need to remake these files whenever one just wants
+to test enrichment methods.
 }
 \section{Randomizations}{
 

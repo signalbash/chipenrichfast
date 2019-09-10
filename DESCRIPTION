@@ -38,7 +38,7 @@ Imports:
 	plyr,
 	rms,
 	rtracklayer,
-	S4Vectors (>= 0.20.1),
+	S4Vectors (>= 0.23.10),
 	stats,
 	stringr,
 	utils
@@ -53,7 +53,7 @@ Depends:
 	R (>= 3.4.0)
 LazyLoad: yes
 Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Collate:
     'assign_peaks.R'
@@ -86,5 +86,5 @@ Collate:
     'hybrid.R'
     'peak_weights.R'
     'peaks2genes.R'
-    'proxReg.R'
     'test_proxReg.R'
+    'proxReg.R'

@@ -6,10 +6,10 @@
 \usage{
 chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
   genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
-  locusdef = "nearest_tss", method = "chipenrich", mappability = NULL,
-  fisher_alt = "two.sided", qc_plots = TRUE, min_geneset_size = 15,
-  max_geneset_size = 2000, num_peak_threshold = 1, randomization = NULL,
-  n_cores = 1)
+  locusdef = "nearest_tss", method = "chipenrich",
+  mappability = NULL, fisher_alt = "two.sided", qc_plots = TRUE,
+  min_geneset_size = 15, max_geneset_size = 2000,
+  num_peak_threshold = 1, randomization = NULL, n_cores = 1)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
@@ -170,9 +170,10 @@ example, ChIP-seq experiments for histone modifications.}
 \item{chipenrich():}{ is designed for use with 1,000s or 10,000s of narrow
 peaks which results in fewer gene loci containing a peak overall. For example,
 ChIP-seq experiments for transcription factors.}
-\item{polyenrich():}{ is also designed for narrow peaks, but where there are
-100,000s of peaks which results in nearly every gene locus containing a peak.
-For example, ChIP-seq experiments for transcription factors.}
+\item{polyenrich():}{ is also designed for narrow peaks, for experiments with
+100,000s of peaks, or in cases where the number of binding sites per gene affects
+its regulation. If unsure whether to use chipenrich or polyenrich, then we recommend
+hybridenrich.}
  \item{hybridenrich():}{ is a combination of chipenrich and polyenrich, to be
 used when one is unsure which is the optimal method. }
 }
@@ -221,6 +222,6 @@ enrich = results$results
 
 }
 \seealso{
-Other enrichment functions: \code{\link{broadenrich}},
-  \code{\link{polyenrich}}
+Other enrichment functions: \code{\link{broadenrich}}
 }
+\concept{enrichment functions}
