@@ -66,7 +66,7 @@
 #' @param out_name Prefix string to use for naming output files. This should not
 #' contain any characters that would be illegal for the system being used (Unix,
 #' Windows, etc.) The default value is "broadenrich", and a file "broadenrich_results.tab"
-#' is produced. If \code{qc_plots} is set, then a file "broadenrich_qcplots.pdf"
+#' is produced. If \code{qc_plots} is set, then a file "broadenrich_qcplots.png"
 #' is produced containing a number of quality control plots. If \code{out_name}
 #' is set to NULL, no files are written, and results then must be retrieved from
 #' the list returned by \code{broadenrich}.
@@ -307,8 +307,8 @@ broadenrich = function(
 		message("Wrote count of peaks per gene to: ", filename_ppg)
 
 		if (qc_plots) {
-			filename_qcplots = file.path(out_path, sprintf("%s_qcplots.pdf", out_name))
-			grDevices::pdf(filename_qcplots)
+			filename_qcplots = file.path(out_path, sprintf("%s_qcplots.png", out_name))
+			grDevices::png(filename_qcplots)
 				print(..plot_gene_coverage(ppg))
 			grDevices::dev.off()
 			message("Wrote QC plots to: ",filename_qcplots)
