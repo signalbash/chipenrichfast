@@ -10,9 +10,11 @@ test_polyenrich = function(geneset, gpw, n_cores) {
 	# Construct model formula.
 	model = "num_peaks ~ goterm + spline"
 
+    nullfit = mgcv::gam(num_peaks~spline,data=gpw, family= "nb")
+
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
 	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-		single_polyenrich(go_id, geneset, gpw, fitspl, 'polyenrich', model)
+		single_polyenrich(go_id, geneset, gpw, fitspl, 'polyenrich', model, nullLR = mgcv::logLik.gam(nullfit))
 	}, mc.cores = n_cores)
 
 	# Collapse results into one table
@@ -29,7 +31,7 @@ test_polyenrich = function(geneset, gpw, n_cores) {
 	return(results)
 }
 
-single_polyenrich = function(go_id, geneset, gpw, fitspl, method, model) {
+single_polyenrich = function(go_id, geneset, gpw, fitspl, method, model, nullLR) {
 	final_model = as.formula(model)
 
 	# Genes in the geneset
@@ -56,7 +58,7 @@ single_polyenrich = function(go_id, geneset, gpw, fitspl, method, model) {
     {fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="nb")
         # Results from the logistic regression
         r_effect = coef(fit)[2];
-        r_pval = summary(fit)$p.table[2, 4]
+        r_pval = pchisq(2*(mgcv::logLik.gam(fit)-nullLR),1,lower.tail = F)
     },
     error = {function(e) {warning(
         sprintf("Error in geneset: %s. NAs given", go_id))

@@ -10,7 +10,7 @@ Authors@R: c(
 	person("Chris","Lee",role = c("aut"),email = "leetaiyi@umich.edu"),
 	person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
 	person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
-Description: ChIP-Enrich performs gene set enrichment testing
+Description: ChIP-Enrich and Poly-Enrich perform gene set enrichment testing
     using peaks called from a ChIP-seq experiment. The method empirically
     corrects for confounding factors such as the length of genes,
     and the mappability of the sequence surrounding genes.
