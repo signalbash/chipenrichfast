@@ -234,3 +234,11 @@ test_that('Test hybrid.join from inputting invalid results', {
 
 
 })
+
+test_that('Test proxReg tss method', {
+    results = suppressWarnings(proxReg(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, reglocation = "tss", qc_plots = F, out_name = NULL))
+})
+
+test_that('Test proxReg enhancer method', {
+    results = suppressWarnings(proxReg(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, reglocation = "enhancer", qc_plots = F, out_name = NULL))
+})

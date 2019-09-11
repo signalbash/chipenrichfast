@@ -71,7 +71,7 @@ to be considered for enrichment testing.}
 to be considered for enrichment testing.}
 
 \item{randomization}{One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
-See the Randomizations section below.}
+See the Randomizations section above.}
 
 \item{n_cores}{The number of cores to use for enrichment testing. We recommend
 using only up to the maximum number of \emph{physical} cores present, as
@@ -138,11 +138,11 @@ frame.) The columns are:
 }}
 }
 \description{
-Poly-Enrich is designed for narrow peaks, but where there are
-100,000s of peaks which results in nearly every gene locus containing a peak.
-For example, ChIP-seq experiments for transcription factors. For more details,
-see the 'Poly-Enrich Method' section below. For help choosing a method, see
-the 'Choosing A Method' section below, or see the vignette.
+Poly-Enrich is also designed for narrow peaks, for experiments with 100,000s of
+peaks, or in cases where the number of binding sites per gene affects its regulation.
+If unsure whether to use chipenrich or polyenrich, then we recommend hybridenrich.
+For more details, see the 'Poly-Enrich Method' section below. For help choosing a method,
+see the 'Choosing A Method' section below, or see the vignette.
 }
 \section{Poly-Enrich Method}{
 
@@ -178,10 +178,10 @@ example, ChIP-seq experiments for histone modifications.}
 \item{chipenrich():}{ is designed for use with 1,000s or 10,000s of narrow
 peaks which results in fewer gene loci containing a peak overall. For example,
 ChIP-seq experiments for transcription factors.}
-\item{polyenrich():}{ is also designed for narrow peaks, but where there are
-100,000s of peaks which results in nearly every gene locus containing a peak.
-For example, ChIP-seq experiments for transcription factors. Generally works better
-for experiments with more than 40,000 peaks.}
+\item{polyenrich():}{ is also designed for narrow peaks, for experiments with
+100,000s of peaks, or in cases where the number of binding sites per gene affects
+its regulation. If unsure whether to use chipenrich or polyenrich, then we recommend
+hybridenrich.}
  \item{hybridenrich():}{ is a combination of chipenrich and polyenrich, to be
 used when one is unsure which is the optimal method. }
 }
@@ -228,8 +228,4 @@ assigned_peaks = results$peaks
 # Get the results of enrichment testing.
 enrich = results$results
 
-}
-\seealso{
-Other enrichment functions: \code{\link{broadenrich}},
-  \code{\link{chipenrich}}
 }

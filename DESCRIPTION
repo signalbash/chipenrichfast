@@ -1,7 +1,7 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 2.9.1
+Version: 2.9.2
 Date: 2019-06-08
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
@@ -53,7 +53,7 @@ Depends:
 	R (>= 3.4.0)
 LazyLoad: yes
 Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Collate:
     'assign_peaks.R'
@@ -86,3 +86,5 @@ Collate:
     'hybrid.R'
     'peak_weights.R'
     'peaks2genes.R'
+    'test_proxReg.R'
+    'proxReg.R'

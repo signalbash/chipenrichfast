@@ -8,8 +8,8 @@ hybridenrich(peaks, out_name = "hybridenrich", out_path = getwd(),
   genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
   locusdef = "nearest_tss", methods = c("chipenrich", "polyenrich"),
   weighting = NULL, mappability = NULL, qc_plots = TRUE,
-  min_geneset_size = 15, max_geneset_size = 2000, num_peak_threshold = 1,
-  randomization = NULL, n_cores = 1)
+  min_geneset_size = 15, max_geneset_size = 2000,
+  num_peak_threshold = 1, randomization = NULL, n_cores = 1)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like

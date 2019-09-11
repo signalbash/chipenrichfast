@@ -6,14 +6,16 @@ test_polyapprox = function(geneset, gpw, n_cores) {
 	
 	fitspl = mgcv::gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
 	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
-	gpw$fit = as.numeric(fitted(fitspl, gpw, type="terms"))
-	
+
+    #Need to use glm.nb to be able to use glm.scoretest later
+    nullfit = MASS::glm.nb(num_peaks~spline,data=gpw)
+
 	# Model formula not needed
 	#model = "num_peaks ~ goterm + spline"
 	
 	# Run tests. NOTE: If os == 'Windows', n_cores is reset to 1 for this to work
 	results_list = parallel::mclapply(as.list(ls(geneset@set.gene)), function(go_id) {
-		single_polyapprox(go_id, geneset, gpw, fitspl, 'polyenrich')
+		single_polyapprox(go_id, geneset, gpw, 'polyenrich', nullmodel = nullfit)
 	}, mc.cores = n_cores)
 	
 	# Collapse results into one table
@@ -30,7 +32,7 @@ test_polyapprox = function(geneset, gpw, n_cores) {
 	return(results)
 }
 
-single_polyapprox = function(go_id, geneset, gpw, fitspl, method) {
+single_polyapprox = function(go_id, geneset, gpw, method, nullmodel) {
 	# Genes in the geneset
 	go_genes = geneset@set.gene[[go_id]]
 	
@@ -48,10 +50,17 @@ single_polyapprox = function(go_id, geneset, gpw, fitspl, method) {
 	r_go_genes_peak = paste(go_genes_peak,collapse=", ")
 	r_go_genes_peak_num = length(go_genes_peak)
 	
-	data=cbind(gpw,goterm=as.numeric(b_genes))
-	
-	r_effect = sum(data$goterm*(data$num_peaks-data$fit))
-    r_pval = pchisq(r_effect^2/sum(data$goterm*stats::var(data$fit-data$num_peaks)),1,lower.tail=FALSE)
+    r_effect = NA
+    r_pval = NA
+    
+    tryCatch(
+    {r_effect = statmod::glm.scoretest(nullmodel, as.numeric(b_genes));
+        r_pval = 2*pnorm(abs(r_effect),lower.tail = F)
+    },
+    error = {function(e) {warning(
+        sprintf("Error in geneset: %s. NAs given", go_id))
+    }}
+    )
 	
 	
 	out = data.frame(
