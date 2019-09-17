@@ -228,7 +228,7 @@ proxReg = function(
 		assigned_peaks$log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
 		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
 		assigned_peaks$avgdenh = sapply(assigned_peaks$gene_id, 
-										function(x) {gene.enh.desc$avgdenh[gene.enh.desc$gene_id == x]})
+										function(x) {gene.enh.desc$avg_denh_emp[gene.enh.desc$gene_id == x]})
 		assigned_peaks$scaled_denh = log(abs(assigned_peaks$dist_to_enh)+1) - log(assigned_peaks$avgdenh+1)
 	}
 	
@@ -260,9 +260,10 @@ proxReg = function(
 			peakstemp$dupe_genes = duplicated(peakstemp$gene_id)
 			peakstemp = peakstemp[sample(1:nrow(peakstemp)),]
 			peakstemp2 = peakstemp[!peakstemp$dupe_genes,]
+			peakstemp2 = peakstemp2[sample(1:nrow(peakstemp2)),]
 			peakstemp2 = peakstemp2[order(peakstemp2$avgdenh),]
 			rownames(peakstemp2) = 1:nrow(peakstemp2)
-			peakstemp2$group = floor((as.numeric(rownames(peakstemp2))+99)/100)
+			peakstemp2$group = floor((as.numeric(rownames(peakstemp2))+499)/500)
 			peakstemp$group = sapply(peakstemp$gene_id, function(x){peakstemp2$group[peakstemp2$gene_id==x]})
 			peakstemp$gene_id = sapply(peakstemp$group, function(x){sample(peakstemp2$gene_id[peakstemp2$group==x],1)})
 			assigned_peaks$gene_id_pre = assigned_peaks$gene_id
