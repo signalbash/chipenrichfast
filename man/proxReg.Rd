@@ -32,7 +32,8 @@ the list returned by \code{polyenrich}.}
 \item{out_path}{Directory to which results files will be written out. Defaults
 to the current working directory as returned by \code{\link{getwd}}.}
 
-\item{genome}{One of the \code{supported_genomes()}.}
+\item{genome}{One of the \code{supported_genomes()}. If reglocation = enhancer,
+genome MUST be hg19.}
 
 \item{reglocation}{One of: 'tss', 'enhancer'. Details in the "Regulatory locations" section}
 
@@ -75,14 +76,20 @@ The columns are:
   \item{chr}{ is the chromosome the peak originated from. }
   \item{peak_start}{ is start position of the peak. }
   \item{peak_end}{ is end position of the peak. }
-  \item{peak_midpoint}{ is the midpoint of the peak. }
   \item{gene_id}{ is the Entrez ID of the gene to which the peak was assigned. }
   \item{gene_symbol}{ is the official gene symbol for the gene_id (above). }
   \item{gene_locus_start}{ is the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
   \item{gene_locus_end}{ is the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
   \item{nearest_tss}{ is the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
+  \item{dist_to_tss}{ is the distance in bp to the closest TSS to this peak. }
   \item{nearest_tss_gene}{ is the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
   \item{nearest_tss_gene_strand}{ is the strand of the gene with the closest TSS. }
+  \item{log_dtss}{ log of dist_to_tss}
+  \item{log_gene_ll}{ is the log of length of the gene locus in bp }
+  \item{scaled_dtss}{ is the adjusted distance to TSS, used in the calcuations. Shown if reglocation = "tss" }
+  \item{dist_to_enh}{ is the distance to the nearest enhancer. Shown if reglocation = "enhancer" }
+  \item{avg_denh}{ is the empirical average for distance to the nearest enhancer for the gene the peak is assigned to. Shown if reglocation = enhancer }
+  \item{scaled_denh}{ is the adjusted distance to the nearest enhancer. Shown if reglocation = enhancer }
 }}
 
 \item{results }{
@@ -96,6 +103,8 @@ frame.) The columns are:
   \item{Description}{ gives a definition of the geneset. For example, "reproduction."}
   \item{P.Value}{ is the probability of observing the degree of enrichment of the gene set given the null hypothesis that peaks are not closer or farther in the gene set.}
   \item{FDR}{ is the false discovery rate proposed by Bejamini \& Hochberg for adjusting the p-value to control for family-wise error rate.}
+  \item{Effect}{ is the signed Wilcoxon statistic, positive meaning the gene set has peaks with closer binding.}
+  \item{Status}{ says if the peaks in the gene set tend to be closer or farther than those not in the gene set.}
   \item{Odds.Ratio}{ is the estimated odds that peaks are associated with a given gene set compared to the odds that peaks are associated with other gene sets, after controlling for locus length and/or mappability.  An odds ratio greater than 1 indicates enrichment, and less than 1 indicates depletion.}
   \item{N.Geneset.Genes}{ is the number of genes in the gene set.}
   \item{N.Geneset.Peak.Genes}{ is the number of genes in the genes set that were assigned at least one peak.}
@@ -120,7 +129,9 @@ regulatory location in base pairs. For gene transcription start sites,
 since parts of the chromosome may be more sparse, some genes will 
 have a larger bias for farther peaks, when using tss as the regulatory 
 location, the peak distances are adjusted based on an average of 90 
-ChIP-seq experiments (details in citation pending). 
+ChIP-seq experiments (details in citation pending). For enhancers, 
+distances are adjusted by an empirical average of 90 ChIP-seq ENCODE
+experiments instead.
 
 For each gene set of interest, the peaks are divided into two groups indiciating
 if their nearest gene tss is in the gene set or not. A Wilcoxon Rank-Sum test is 

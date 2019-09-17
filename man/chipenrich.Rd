@@ -25,7 +25,7 @@ acceptable column names.}
 \item{out_name}{Prefix string to use for naming output files. This should not
 contain any characters that would be illegal for the system being used (Unix,
 Windows, etc.) The default value is "chipenrich", and a file "chipenrich_results.tab"
-is produced. If \code{qc_plots} is set, then a file "chipenrich_qcplots.pdf"
+is produced. If \code{qc_plots} is set, then a file "chipenrich_qcplots.png"
 is produced containing a number of quality control plots. If \code{out_name}
 is set to NULL, no files are written, and results then must be retrieved from
 the list returned by \code{chipenrich}.}
