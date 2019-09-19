@@ -56,6 +56,10 @@ to be considered for enrichment testing.}
 using only up to the maximum number of \emph{physical} cores present, as
 virtual cores do not significantly decrease runtime. Default number of cores
 is set to 1. NOTE: Windows does not support multicore enrichment.}
+
+\item{randomizations}{One of: 'shuffle', 'unif', 'bylength', 'byenh'. These were used to
+test for Type I error under the null hypothesis. A general user will never have to
+use these.}
 }
 \value{
 A list, containing the following items:
@@ -148,7 +152,7 @@ results = proxReg(peaks_E2F4, reglocation = 'tss',
 			genome = 'hg19', genesets=gs_path, out_name=NULL)
 
 # Get the list of peaks that were assigned to genes and their distances to 
-regulatory regions.
+# regulatory regions.
 assigned_peaks = results$peaks
 
 # Get the results of enrichment testing.
