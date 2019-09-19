@@ -245,7 +245,12 @@ proxReg = function(
 		assigned_peaks$log_gene_ll = log(assigned_peaks$gene_locus_end-assigned_peaks$gene_locus_start)
 		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
 		assigned_peaks$avgdenh = sapply(assigned_peaks$gene_id, 
-										function(x) {gene.enh.desc$avg_denh_emp[gene.enh.desc$gene_id == x]})
+										function(x) {a = gene.enh.desc$avg_denh_emp[gene.enh.desc$gene_id == x]
+                                            return(ifelse(length(a)==0,NA,a))
+                                        })
+        if (any(is.na(assigned_peaks$avgdenh))) { #Impute the missing genes as average of the others
+            assigned_peaks$avgdenh[is.na(assigned_peaks$avgdenh)] = mean(assigned_peaks$avgdenh, na.rm = T)
+        }
 		assigned_peaks$scaled_denh = log(abs(assigned_peaks$dist_to_enh)+1) - log(assigned_peaks$avgdenh+1)
 	}
 	
