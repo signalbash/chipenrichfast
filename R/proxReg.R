@@ -47,6 +47,9 @@
 #' a tab-delimited text file with header and first column being the geneset ID
 #' or name, and the second column being Entrez Gene IDs. For an example custom
 #' gene set file, see the vignette.
+#' @param randomizations One of: 'shuffle', 'unif', 'bylength', 'byenh'. These were used to
+#' test for Type I error under the null hypothesis. A general user will never have to
+#' use these.
 #' @param reglocation One of: 'tss', 'enhancer'. Details in the "Regulatory locations" section
 #' @param qc_plots A logical variable that enables the automatic generation of
 #' plots for quality control.
@@ -123,7 +126,7 @@
 #' 			genome = 'hg19', genesets=gs_path, out_name=NULL)
 #'
 #' # Get the list of peaks that were assigned to genes and their distances to 
-#' regulatory regions.
+#' # regulatory regions.
 #' assigned_peaks = results$peaks
 #'
 #' # Get the results of enrichment testing.
