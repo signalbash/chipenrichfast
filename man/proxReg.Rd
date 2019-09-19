@@ -43,6 +43,10 @@ a tab-delimited text file with header and first column being the geneset ID
 or name, and the second column being Entrez Gene IDs. For an example custom
 gene set file, see the vignette.}
 
+\item{randomization}{One of: 'shuffle', 'unif', 'bylength', 'byenh'. These were used to
+test for Type I error under the null hypothesis. A general user will never have to
+use these.}
+
 \item{qc_plots}{A logical variable that enables the automatic generation of
 plots for quality control.}
 
@@ -56,10 +60,6 @@ to be considered for enrichment testing.}
 using only up to the maximum number of \emph{physical} cores present, as
 virtual cores do not significantly decrease runtime. Default number of cores
 is set to 1. NOTE: Windows does not support multicore enrichment.}
-
-\item{randomizations}{One of: 'shuffle', 'unif', 'bylength', 'byenh'. These were used to
-test for Type I error under the null hypothesis. A general user will never have to
-use these.}
 }
 \value{
 A list, containing the following items:

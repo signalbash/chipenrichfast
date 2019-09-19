@@ -47,7 +47,7 @@
 #' a tab-delimited text file with header and first column being the geneset ID
 #' or name, and the second column being Entrez Gene IDs. For an example custom
 #' gene set file, see the vignette.
-#' @param randomizations One of: 'shuffle', 'unif', 'bylength', 'byenh'. These were used to
+#' @param randomization One of: 'shuffle', 'unif', 'bylength', 'byenh'. These were used to
 #' test for Type I error under the null hypothesis. A general user will never have to
 #' use these.
 #' @param reglocation One of: 'tss', 'enhancer'. Details in the "Regulatory locations" section
