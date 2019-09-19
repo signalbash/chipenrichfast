@@ -1,3 +1,23 @@
+CHANGES IN VERSION 2.10.0
+-------------------------
+
+NEW FEATURES
+
+    o A new test, proxReg(), tests for genomic region binding proximity to either
+      gene transcription start sites or enhancer regions within gene sets. Used as an
+      addendum to any gene set enrichment test, not exclusive to those in this package.
+
+IMPROVEMENTS
+
+    o Poly-Enrich now uses the likelihood ratio test instead of the Wald test, as 
+      LRT is more robust when using a negative binomial GLM.
+
+BUG FIXES
+
+    o Poly-Enrich Approximate method that uses the score test now uses the correct
+      formula.
+
+
 CHANGES IN VERSION 2.4.0
 -------------------------
 

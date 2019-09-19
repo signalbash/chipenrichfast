@@ -27,6 +27,7 @@ Imports:
 	IRanges,
 	lattice,
 	latticeExtra,
+	MASS,
 	methods,
 	mgcv,
 	org.Dm.eg.db,

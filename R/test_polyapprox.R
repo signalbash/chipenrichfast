@@ -4,9 +4,9 @@ test_polyapprox = function(geneset, gpw, n_cores) {
 	# i.e. A specific one.
 	gpw = subset(gpw, gpw$gene_id %in% geneset@all.genes)
 	
-	fitspl = mgcv::gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
-	gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
-
+    fitspl = mgcv::gam(num_peaks~s(log10_length,bs='cr'),data=gpw,family="nb")
+    gpw$spline = as.numeric(predict(fitspl, gpw, type="terms"))
+    
     #Need to use glm.nb to be able to use glm.scoretest later
     nullfit = MASS::glm.nb(num_peaks~spline,data=gpw)
 
@@ -32,6 +32,35 @@ test_polyapprox = function(geneset, gpw, n_cores) {
 	return(results)
 }
 
+glm.scoretest <- function(fit, x2, dispersion=NULL) #Directly lifted from statmod package,
+#    because asking for more dependencies is asking for more chances for errors.
+#    Score test for new covariate in glm
+#    Gordon Smyth
+#    27 March 2009. Last modified 20 Mar 2010.
+{
+    w <- fit$weights
+    r <- fit$residuals
+    if(any(w <= 0)) {
+        r <- r[w>0]
+        x2 <- x2[w>0]
+        w <- w[w>0]
+    }
+    if (is.null(dispersion)) {
+        fixed.dispersion <- (fit$family$family %in% c("poisson","binomial"))
+        if(fixed.dispersion)
+        dispersion <- 1
+        else if(fit$df.residual > 0) {
+            dispersion <- sum(w*r^2)/fit$df.residual
+        } else {
+            stop("No residual df available to estimate dispersion")
+        }
+    }
+    ws <- sqrt(w)
+    x2.1w <- qr.resid(fit$qr,ws*x2)
+    zw <- ws*r
+    colSums(as.matrix(x2.1w*zw))/sqrt(colSums(as.matrix(x2.1w * x2.1w)))/sqrt(dispersion)
+}
+
 single_polyapprox = function(go_id, geneset, gpw, method, nullmodel) {
 	# Genes in the geneset
 	go_genes = geneset@set.gene[[go_id]]
@@ -54,7 +83,7 @@ single_polyapprox = function(go_id, geneset, gpw, method, nullmodel) {
     r_pval = NA
     
     tryCatch(
-    {r_effect = statmod::glm.scoretest(nullmodel, as.numeric(b_genes));
+    {r_effect = glm.scoretest(nullmodel, as.numeric(b_genes));
         r_pval = 2*pnorm(abs(r_effect),lower.tail = F)
     },
     error = {function(e) {warning(
