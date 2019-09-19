@@ -285,6 +285,20 @@ results.hybrid = results$results
 print(results.hybrid[1:5,1:5])
 ```
 
+### `proxReg()`
+
+The proximity to regulatory region (proxReg) test is an addendum to any gene set enrichment test, not just exclusive to the methods in this package. It tests if the peaks tend to bind closer to farther to gene transcription start sites or enhancer regions in the gene sets. Currently, testing to proximity to enhancer regions is only compatible with the hg19 genome. Its purpose is to include further information to an analysis, as a gene set enrichment test alone may not give information about if a region is binding in a promoter or enhancer region.
+
+ProxReg first calculates the distance between the midpoints of peaks to the nearest transcription start site or the nearest enhancer region midpoint for each genomic region. Each genomic region is then assigned to the gene with the nearest transcription start site. The distances are then group based on if the genes are in a the gene set or not, and a signed Wilcoxon rank-sum test is used to calculate if the regions are closer or farther in the gene set than average.
+
+```{r, warning = FALSE, message = FALSE}
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results.prox = proxReg(peaks_E2F4, reglocation = 'tss',
+ 			genome = 'hg19', genesets=gs_path, out_name=NULL)
+results.prox = results$results
+print(results.prox[1:5,1:5])
+```
+
 ## QC Plots
 
 Each enrich function outputs QC plots if `qc_plots = TRUE`. There are also stand-alone functions to make the QC plots without the need for GSE testing. The QC plots can be used to help determine which locus definition to use, or which enrichment method is more appropriate.
@@ -387,4 +401,6 @@ R.P. Welch^, C. Lee^, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott
 
 R.G. Cavalcante, C. Lee, R.P. Welch, S. Patil, T. Weymouth, L.J. Scott, and M.A. Sartor. "Broad-Enrich: functional interpretation of large sets of broad genomic regions." Bioinformatics (2014) 30(17):i393-i400 [doi:10.1093/bioinformatics/btu444](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu444)
 
-C.T. Lee , R.G. Cavalcante, T. Qin, S. Patil, S. Wang, C. Lee, M.A. Sartor. “Poly-Enrich: Extensions to the ChIPEnrich method and updates to tools.” In preparation.
+C.T. Lee , R.G. Cavalcante, C. Lee, T. Qin, S. Patil, S. Wang, Z. Tsai, A.P. Boyle, M.A. Sartor. “Poly-Enrich: Count-based Methods for Gene Set Enrichment Testing with Genomic Regions.” In review.
+
+C.T. Lee, K. Wang, T. Qin, M.A. Sartor. "Testing proximity of genomic regions to transcription start sites and enhancers complements gene set enrichment testing." In preparation.
