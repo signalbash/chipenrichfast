@@ -70,8 +70,8 @@ single_proxReg = function(go_id, geneset, peaks, regloc) {
 			
 			# Results from the Wilcoxon test
 			r_effect = -z; #We want closer to be positive effect
-			r_pval = 2 * min(pnorm(z), 
-							 pnorm(z, lower.tail = FALSE))
+            r_pval = 2 * min(stats::pnorm(z),
+                             stats::pnorm(z, lower.tail = FALSE))
 			},
 			error = {function(e) {warning(
 				sprintf("Error in geneset: %s. NAs given", go_id))

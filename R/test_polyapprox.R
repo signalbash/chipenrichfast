@@ -84,7 +84,7 @@ single_polyapprox = function(go_id, geneset, gpw, method, nullmodel) {
     
     tryCatch(
     {r_effect = glm.scoretest(nullmodel, as.numeric(b_genes));
-        r_pval = 2*pnorm(abs(r_effect),lower.tail = F)
+        r_pval = 2*stats::pnorm(abs(r_effect),lower.tail = F)
     },
     error = {function(e) {warning(
         sprintf("Error in geneset: %s. NAs given", go_id))

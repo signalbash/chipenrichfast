@@ -58,7 +58,7 @@ single_polyenrich = function(go_id, geneset, gpw, fitspl, method, model, nullLR)
     {fit = mgcv::gam(final_model,data=cbind(gpw,goterm=as.numeric(b_genes)),family="nb")
         # Results from the logistic regression
         r_effect = coef(fit)[2];
-        r_pval = pchisq(2*(mgcv::logLik.gam(fit)-nullLR),1,lower.tail = F)
+        r_pval = stats::pchisq(2*(mgcv::logLik.gam(fit)-nullLR),1,lower.tail = F)
     },
     error = {function(e) {warning(
         sprintf("Error in geneset: %s. NAs given", go_id))
