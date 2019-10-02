@@ -252,7 +252,9 @@ proxReg = function(
                                             return(ifelse(length(a)==0,NA,a))
                                         })
         if (any(is.na(assigned_peaks$avgdenh))) { #Impute the missing genes as average of the others
-            assigned_peaks$avgdenh[is.na(assigned_peaks$avgdenh)] = mean(assigned_peaks$avgdenh, na.rm = T)
+        	dlm = lm(avgdenh ~ log_gene_ll, data = assigned_peaks)
+            assigned_peaks$avgdenh[is.na(assigned_peaks$avgdenh)] = stats::predict.lm(dlm, assigned_peaks[is.na(assigned_peaks$avgdenh),])
+     		rm(dlm)
         }
 		assigned_peaks$scaled_denh = log(abs(assigned_peaks$dist_to_enh)+1) - log(assigned_peaks$avgdenh+1)
 	}
