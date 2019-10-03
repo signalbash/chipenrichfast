@@ -134,29 +134,29 @@
 #' The columns are:
 #'
 #' \describe{
-#'   \item{peak_id}{ is an ID given to unique combinations of chromosome, peak start, and peak end. }
-#'   \item{chr}{ is the chromosome the peak originated from. }
-#'   \item{peak_start}{ is start position of the peak. }
-#'   \item{peak_end}{ is end position of the peak. }
-#'   \item{peak_midpoint}{ is the midpoint of the peak. }
-#'   \item{gene_id}{ is the Entrez ID of the gene to which the peak was assigned. }
-#'   \item{gene_symbol}{ is the official gene symbol for the gene_id (above). }
-#'   \item{gene_locus_start}{ is the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-#'   \item{gene_locus_end}{ is the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-#'   \item{nearest_tss}{ is the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
-#'   \item{nearest_tss_gene}{ is the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
-#'   \item{nearest_tss_gene_strand}{ is the strand of the gene with the closest TSS. }
+#'   \item{peak_id}{ an ID given to unique combinations of chromosome, peak start, and peak end. }
+#'   \item{chr}{ the chromosome the peak originated from. }
+#'   \item{peak_start}{ start position of the peak. }
+#'   \item{peak_end}{ end position of the peak. }
+#'   \item{peak_midpoint}{ the midpoint of the peak. }
+#'   \item{gene_id}{ the Entrez ID of the gene to which the peak was assigned. }
+#'   \item{gene_symbol}{ the official gene symbol for the gene_id (above). }
+#'   \item{gene_locus_start}{ the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+#'   \item{gene_locus_end}{ the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+#'   \item{nearest_tss}{ the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
+#'   \item{nearest_tss_gene}{ the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
+#'   \item{nearest_tss_gene_strand}{ the strand of the gene with the closest TSS. }
 #' }}
 #'
 #' \item{peaks_per_gene }{
 #' A data frame of the count of peaks per gene. The columns are:
 #'
 #' \describe{
-#'   \item{gene_id}{ is the Entrez Gene ID. }
-#'   \item{length}{ is the length of the gene's locus (depending on which locus definition you chose.)}
-#'   \item{log10_length}{ is the log10(locus length) for the gene.}
-#'   \item{num_peaks}{ is the number of peaks that were assigned to the gene, given the current locus definition. }
-#'   \item{peak}{ is whether or not the gene has a peak. }
+#'   \item{gene_id}{ the Entrez Gene ID. }
+#'   \item{length}{ the length of the gene's locus (depending on which locus definition you chose.)}
+#'   \item{log10_length}{ the log10(locus length) for the gene.}
+#'   \item{num_peaks}{ the number of peaks that were assigned to the gene, given the current locus definition. }
+#'   \item{peak}{ whether or not the gene has a peak. }
 #' }}
 #'
 #' \item{results }{

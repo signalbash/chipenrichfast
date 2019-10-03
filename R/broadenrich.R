@@ -117,14 +117,14 @@
 #' The columns are:
 #'
 #' \describe{
-#'   \item{peak_id}{ is an ID given to unique combinations of chromosome, peak start, and peak end. }
-#'   \item{chr}{ is the chromosome the peak originated from. }
-#'   \item{peak_start}{ is start position of the peak. }
-#'   \item{peak_end}{ is end position of the peak. }
-#'   \item{gene_id}{ is the Entrez ID of the gene to which the peak was assigned. }
-#'   \item{gene_symbol}{ is the official gene symbol for the gene_id (above). }
-#'   \item{gene_locus_start}{ is the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-#'   \item{gene_locus_end}{ is the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+#'   \item{peak_id}{an ID given to unique combinations of chromosome, peak start, and peak end. }
+#'   \item{chr}{the chromosome the peak originated from. }
+#'   \item{peak_start}{start position of the peak. }
+#'   \item{peak_end}{end position of the peak. }
+#'   \item{gene_id}{the Entrez ID of the gene to which the peak was assigned. }
+#'   \item{gene_symbol}{the official gene symbol for the gene_id (above). }
+#'   \item{gene_locus_start}{the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+#'   \item{gene_locus_end}{the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
 #'   \item{overlap_start}{ the start position of the peak overlap with the gene locus.}
 #'   \item{overlap_end}{ the end position of the peak overlap with the gene locus.}
 #'   \item{peak_overlap}{ the base pair overlap of the peak with the gene locus.}
@@ -134,13 +134,13 @@
 #' A data frame of the count of peaks per gene. The columns are:
 #'
 #' \describe{
-#'   \item{gene_id}{ is the Entrez Gene ID. }
-#'   \item{length}{ is the length of the gene's locus (depending on which locus definition you chose.)}
-#'   \item{log10_length}{ is the log10(locus length) for the gene.}
-#'   \item{num_peaks}{ is the number of peaks that were assigned to the gene, given the current locus definition. }
-#'   \item{peak}{ is whether or not the gene is considered to have a peak, as defined by \code{num_peak_threshold}. }
-#'   \item{peak_overlap}{ is the number of base pairs of the gene covered by a peak.}
-#'   \item{ratio}{ is the proportion of the gene covered by a peak.}
+#'   \item{gene_id}{the Entrez Gene ID. }
+#'   \item{length}{the length of the gene's locus (depending on which locus definition you chose.)}
+#'   \item{log10_length}{the log10(locus length) for the gene.}
+#'   \item{num_peaks}{the number of peaks that were assigned to the gene, given the current locus definition. }
+#'   \item{peak}{whether or not the gene is considered to have a peak, as defined by \code{num_peak_threshold}. }
+#'   \item{peak_overlap}{the number of base pairs of the gene covered by a peak.}
+#'   \item{ratio}{the proportion of the gene covered by a peak.}
 #' }}
 #'
 #' \item{results }{
@@ -149,17 +149,17 @@
 #' frame.) The columns are:
 #'
 #' \describe{
-#'   \item{Geneset.ID}{ is the identifier for a given gene set from the selected database.  For example, GO:0000003. }
+#'   \item{Geneset.ID}{the identifier for a given gene set from the selected database.  For example, GO:0000003. }
 #'   \item{Geneset.Type}{ specifies from which database the Geneset.ID originates.  For example, "Gene Ontology Biological Process."}
 #'   \item{Description}{ gives a definition of the geneset. For example, "reproduction."}
-#'   \item{P.Value}{ is the probability of observing the degree of enrichment of the gene set given the null hypothesis that peaks are not associated with any gene sets.}
-#'   \item{FDR}{ is the false discovery rate proposed by Bejamini \& Hochberg for adjusting the p-value to control for family-wise error rate.}
-#'   \item{Odds.Ratio}{ is the estimated odds that peaks are associated with a given gene set compared to the odds that peaks are associated with other gene sets, after controlling for locus length and/or mappability.  An odds ratio greater than 1 indicates enrichment, and less than 1 indicates depletion.}
-#'   \item{N.Geneset.Genes}{ is the number of genes in the gene set.}
-#'   \item{N.Geneset.Peak.Genes}{ is the number of genes in the genes set that were assigned at least one peak.}
-#'   \item{Geneset.Avg.Gene.Length}{ is the average length of the genes in the gene set.}
-#'   \item{Geneset.Avg.Gene.Coverage}{ is the mean proportion of the gene loci in the gene set covered by a peak.}
-#'   \item{Geneset.Peak.Genes}{ is the list of genes from the gene set that had at least one peak assigned.}
+#'   \item{P.Value}{the probability of observing the degree of enrichment of the gene set given the null hypothesis that peaks are not associated with any gene sets.}
+#'   \item{FDR}{the false discovery rate proposed by Bejamini \& Hochberg for adjusting the p-value to control for family-wise error rate.}
+#'   \item{Odds.Ratio}{the estimated odds that peaks are associated with a given gene set compared to the odds that peaks are associated with other gene sets, after controlling for locus length and/or mappability.  An odds ratio greater than 1 indicates enrichment, and less than 1 indicates depletion.}
+#'   \item{N.Geneset.Genes}{the number of genes in the gene set.}
+#'   \item{N.Geneset.Peak.Genes}{the number of genes in the genes set that were assigned at least one peak.}
+#'   \item{Geneset.Avg.Gene.Length}{the average length of the genes in the gene set.}
+#'   \item{Geneset.Avg.Gene.Coverage}{the mean proportion of the gene loci in the gene set covered by a peak.}
+#'   \item{Geneset.Peak.Genes}{the list of genes from the gene set that had at least one peak assigned.}
 #'
 #' }}
 #'
