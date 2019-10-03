@@ -287,9 +287,9 @@ print(results.hybrid[1:5,1:5])
 
 ### `proxReg()`
 
-The proximity to regulatory region (proxReg) test is an addendum to any gene set enrichment test, not just exclusive to the methods in this package. It tests if the peaks tend to bind closer to farther to gene transcription start sites or enhancer regions in the gene sets. Currently, testing to proximity to enhancer regions is only compatible with the hg19 genome. Its purpose is to include further information to an analysis, as a gene set enrichment test alone may not give information about if a region is binding in a promoter or enhancer region.
+The proximity to regulatory regions (proxReg) test is a complementary test to any gene set enrichment test on a set of genomic regions, not just exclusive to the methods in this package. It tests if the genomic regions tend to be closer to (or farther from) gene transcription start sites or enhancer regions in each gene set tested. Currently, testing proximity to enhancer regions is only compatible with the hg19 genome. The purpose of ProxReg is to provide additional information for interpreting gene set enrichment test results, as a gene set enrichment test alone does not give information about whether the genomic regions occur near promoter or enhancer regions.
 
-ProxReg first calculates the distance between the midpoints of peaks to the nearest transcription start site or the nearest enhancer region midpoint for each genomic region. Each genomic region is then assigned to the gene with the nearest transcription start site. The distances are then group based on if the genes are in a the gene set or not, and a signed Wilcoxon rank-sum test is used to calculate if the regions are closer or farther in the gene set than average.
+ProxReg first calculates the distance between the midpoints of peaks and the nearest transcription start site or the nearest enhancer region midpoint for each genomic region. Each genomic region is then assigned to the gene with the nearest transcription start site. The distances are then classified according to whether the gene is in the gene set or not, and a signed Wilcoxon rank-sum test is used to calculate if the regions are closer or farther in the gene set than average.
 
 ```{r, warning = FALSE, message = FALSE}
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
