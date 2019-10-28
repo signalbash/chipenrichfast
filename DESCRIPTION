@@ -1,6 +1,6 @@
 Package: chipenrich
 Type: Package
-Title: Gene Set Enrichment For ChIP-seq Peak Data
+Title: Gene Set Enrichment for Sets of Genomic Regions (e.g. ChIP-seq data)
 Version: 2.9.3
 Date: 2019-06-08
 Authors@R: c(
