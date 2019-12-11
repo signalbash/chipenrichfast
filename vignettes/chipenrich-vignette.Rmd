@@ -27,6 +27,8 @@ The `chipenrich` package includes different enrichment methods for different use
 library(chipenrich)
 ```
 
+Due to several required dependencies, installation may take some time if the dependencies are not already installed.
+
 ## Peaks
 
 A ChIP-seq peak is a genomic region that represents a transcription factor binding event or the presence of a histone complex with a particular histone modification. Typically peaks are called with a peak caller (such as [MACS2](https://github.com/taoliu/MACS) or [PePr](https://github.com/shawnzhangyx/PePr/)) and represent relative enrichment of reads in a sample where the antibody is present versus input. Typically, peaks are output by a peak caller in [`BED`-like](https://genome.ucsc.edu/FAQ/FAQformat.html) format.
@@ -179,6 +181,20 @@ GO:0006631	207
 GO:0006631	208
 GO:0006631	215
 GO:0006631	225
+```
+
+If a gene set from another database is in the form of a list with an array of genes (e.g. EGSEA PMID: 29333246), you can convert it into the neccessary form by the following and input the path directly to the `genesets` parameter. Note: Converting from R to text back to R is quite redundant and we are planning to be able to bypass this step.
+
+```{r eval = F}
+library(EGSEAdata)
+egsea.data("mouse")
+temp = Mm.H #Or some other gene sets
+geneset = do.call(rbind,
+				  lapply(1:length(temp), function(index) {
+				  	data.frame(gs_id = rep(names(temp)[index], length(temp[[index]])),
+															 gene_id = unlist(strsplit(temp[[index]],split = " ")),
+															 stringsAsFactors = F)}))
+write.table(geneset, "./custom_geneset.txt", quote=F, sep="\t",row.names = F, col.names = T)
 ```
 
 ## Mappability
