@@ -355,14 +355,19 @@ polyenrich = function(
 		write.table(ppg, file = filename_ppg, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote count of peaks per gene to: ", filename_ppg)
 
-		if (qc_plots) {
-			filename_qcplots = file.path(out_path, sprintf("%s_qcplots.png", out_name))
-			grDevices::png(filename_qcplots)
-				print(..plot_polyenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
-				print(..plot_dist_to_tss(peakobj, tss))
-			grDevices::dev.off()
-			message("Wrote QC plots to: ",filename_qcplots)
-		}
+        if (qc_plots) {
+            filename_qcplots = file.path(out_path, sprintf("%s_qcplots-1.png", out_name))
+            grDevices::png(filename_qcplots)
+                print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
+            grDevices::dev.off()
+            message("Wrote QC plots to: ",filename_qcplots)
+
+            filename_qcplots = file.path(out_path, sprintf("%s_qcplots-2.png", out_name))
+            grDevices::png(filename_qcplots)
+                print(..plot_dist_to_tss(peakobj, tss))
+            grDevices::dev.off()
+            message("Wrote QC plots to: ",filename_qcplots)
+        }
 	}
 
 	######################################################
