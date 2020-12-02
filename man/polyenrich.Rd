@@ -24,7 +24,7 @@ acceptable column names.}
 \item{out_name}{Prefix string to use for naming output files. This should not
 contain any characters that would be illegal for the system being used (Unix,
 Windows, etc.) The default value is "polyenrich", and a file "polyenrich_results.tab"
-is produced. If \code{qc_plots} is set, then a file "polyenrich_qcplots.png"
+is produced. If \code{qc_plots} is set, then a file "polyenrich_qcplots.pdf"
 is produced containing a number of quality control plots. If \code{out_name}
 is set to NULL, no files are written, and results then must be retrieved from
 the list returned by \code{polyenrich}.}
@@ -51,9 +51,14 @@ example custom locus definition file, see the vignette.}
 \item{method}{A character string specifying the method to use for enrichment
 testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.}
 
+\item{multiAssign}{A boolean value for performing a multiassignment of peaks.
+Default is \code{NULL}. When selecting \code{polyenrich_weighted} method and  
+\code{locusdef} equals to \code{enhancer} or \code{enhancer_plus5kb}, this 
+\code{multiAssign} will be automatically set as \code{TRUE}.}
+
 \item{weighting}{A character string specifying the weighting method if method is
-chosen to be 'polyenrich_weighted'. Current options are: 'signalValue',
-'logsignalValue', and 'multiAssign'.}
+chosen to be 'polyenrich_weighted'. Current options are: 'signalValue' and
+'logsignalValue'.}
 
 \item{mappability}{One of \code{NULL}, a file path to a custom mappability file,
 or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
@@ -71,7 +76,7 @@ to be considered for enrichment testing.}
 to be considered for enrichment testing.}
 
 \item{randomization}{One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
-See the Randomizations section above.}
+See the Randomizations section below.}
 
 \item{n_cores}{The number of cores to use for enrichment testing. We recommend
 using only up to the maximum number of \emph{physical} cores present, as
@@ -93,29 +98,29 @@ position of the gene, and the distance from the peak to the TSS.
 The columns are:
 
 \describe{
-  \item{peak_id}{ an ID given to unique combinations of chromosome, peak start, and peak end. }
-  \item{chr}{ the chromosome the peak originated from. }
-  \item{peak_start}{ start position of the peak. }
-  \item{peak_end}{ end position of the peak. }
-  \item{peak_midpoint}{ the midpoint of the peak. }
-  \item{gene_id}{ the Entrez ID of the gene to which the peak was assigned. }
-  \item{gene_symbol}{ the official gene symbol for the gene_id (above). }
-  \item{gene_locus_start}{ the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-  \item{gene_locus_end}{ the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-  \item{nearest_tss}{ the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
-  \item{nearest_tss_gene}{ the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
-  \item{nearest_tss_gene_strand}{ the strand of the gene with the closest TSS. }
+  \item{peak_id}{ is an ID given to unique combinations of chromosome, peak start, and peak end. }
+  \item{chr}{ is the chromosome the peak originated from. }
+  \item{peak_start}{ is start position of the peak. }
+  \item{peak_end}{ is end position of the peak. }
+  \item{peak_midpoint}{ is the midpoint of the peak. }
+  \item{gene_id}{ is the Entrez ID of the gene to which the peak was assigned. }
+  \item{gene_symbol}{ is the official gene symbol for the gene_id (above). }
+  \item{gene_locus_start}{ is the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+  \item{gene_locus_end}{ is the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+  \item{nearest_tss}{ is the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
+  \item{nearest_tss_gene}{ is the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
+  \item{nearest_tss_gene_strand}{ is the strand of the gene with the closest TSS. }
 }}
 
 \item{peaks_per_gene }{
 A data frame of the count of peaks per gene. The columns are:
 
 \describe{
-  \item{gene_id}{ the Entrez Gene ID. }
-  \item{length}{ the length of the gene's locus (depending on which locus definition you chose.)}
-  \item{log10_length}{ the log10(locus length) for the gene.}
-  \item{num_peaks}{ the number of peaks that were assigned to the gene, given the current locus definition. }
-  \item{peak}{ whether or not the gene has a peak. }
+  \item{gene_id}{ is the Entrez Gene ID. }
+  \item{length}{ is the length of the gene's locus (depending on which locus definition you chose.)}
+  \item{log10_length}{ is the log10(locus length) for the gene.}
+  \item{num_peaks}{ is the number of peaks that were assigned to the gene, given the current locus definition. }
+  \item{peak}{ is whether or not the gene has a peak. }
 }}
 
 \item{results }{
@@ -138,11 +143,11 @@ frame.) The columns are:
 }}
 }
 \description{
-Poly-Enrich is also designed for narrow peaks, for experiments with 100,000s of
-peaks, or in cases where the number of binding sites per gene affects its regulation.
-If unsure whether to use chipenrich or polyenrich, then we recommend hybridenrich.
-For more details, see the 'Poly-Enrich Method' section below. For help choosing a method,
-see the 'Choosing A Method' section below, or see the vignette.
+Poly-Enrich is designed for narrow peaks, but where there are
+100,000s of peaks which results in nearly every gene locus containing a peak.
+For example, ChIP-seq experiments for transcription factors. For more details,
+see the 'Poly-Enrich Method' section below. For help choosing a method, see
+the 'Choosing A Method' section below, or see the vignette.
 }
 \section{Poly-Enrich Method}{
 
@@ -163,8 +168,6 @@ Poly-Enrich also allows weighting of individual peaks. Currently the options are
 narrowPeak format or a user-supplied column, normalized to have mean 1.}
  \item{'logsignalValue:'}{ weighs each peak based on the log Signal Value given in the
 narrowPeak format or a user-supplied column, normalized to have mean 1.}
- \item{'multiAssign:'}{ weighs each peak by the inverse of the number of genes
-it is assigned to.}
 }
 }
 
@@ -178,10 +181,10 @@ example, ChIP-seq experiments for histone modifications.}
 \item{chipenrich():}{ is designed for use with 1,000s or 10,000s of narrow
 peaks which results in fewer gene loci containing a peak overall. For example,
 ChIP-seq experiments for transcription factors.}
-\item{polyenrich():}{ is also designed for narrow peaks, for experiments with
-100,000s of peaks, or in cases where the number of binding sites per gene affects
-its regulation. If unsure whether to use chipenrich or polyenrich, then we recommend
-hybridenrich.}
+\item{polyenrich():}{ is also designed for narrow peaks, but where there are
+100,000s of peaks which results in nearly every gene locus containing a peak.
+For example, ChIP-seq experiments for transcription factors. Generally works better
+for experiments with more than 40,000 peaks.}
  \item{hybridenrich():}{ is a combination of chipenrich and polyenrich, to be
 used when one is unsure which is the optimal method. }
 }
@@ -228,4 +231,8 @@ assigned_peaks = results$peaks
 # Get the results of enrichment testing.
 enrich = results$results
 
+}
+\seealso{
+Other enrichment functions: \code{\link{broadenrich}},
+  \code{\link{chipenrich}}
 }
