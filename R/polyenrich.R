@@ -22,9 +22,6 @@
 #' narrowPeak format or a user-supplied column, normalized to have mean 1.}
 #'  \item{'logsignalValue:'}{ weighs each peak based on the log Signal Value given in the
 #' narrowPeak format or a user-supplied column, normalized to have mean 1.}
-#'  \item{'multiAssign:'}{ weighs each peak by the inverse of the number of genes
-#' it is assigned to.}
-#' }
 #'
 #' @section Choosing A Method:
 #' The following guidelines are intended to help select an enrichment function:
@@ -78,7 +75,7 @@
 #' @param out_name Prefix string to use for naming output files. This should not
 #' contain any characters that would be illegal for the system being used (Unix,
 #' Windows, etc.) The default value is "polyenrich", and a file "polyenrich_results.tab"
-#' is produced. If \code{qc_plots} is set, then a file "polyenrich_qcplots.png"
+#' is produced. If \code{qc_plots} is set, then a file "polyenrich_qcplots.pdf"
 #' is produced containing a number of quality control plots. If \code{out_name}
 #' is set to NULL, no files are written, and results then must be retrieved from
 #' the list returned by \code{polyenrich}.
@@ -99,9 +96,13 @@
 #' example custom locus definition file, see the vignette.
 #' @param method A character string specifying the method to use for enrichment
 #' testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.
+#' @param multiAssign A boolean value for performing a multiassignment of peaks.
+#' Default is \code{NULL}. When selecting \code{polyenrich_weighted} method and  
+#' \code{locusdef} equals to \code{enhancer} or \code{enhancer_plus5kb}, this 
+#' \code{multiAssign} will be automatically set as \code{TRUE}. 
 #' @param weighting A character string specifying the weighting method if method is
-#' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue',
-#' 'logsignalValue', and 'multiAssign'.
+#' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue' and
+#' 'logsignalValue'.
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
 #' or an \code{integer} for a valid read length given by \code{supported_read_lengths}.
 #' If a file, it should contain a header with two column named 'gene_id' and 'mappa'.
@@ -114,7 +115,7 @@
 #' @param max_geneset_size Sets the maximum number of genes a gene set may have
 #' to be considered for enrichment testing.
 #' @param randomization One of \code{NULL}, 'complete', 'bylength', or 'bylocation'.
-#' See the Randomizations section above.
+#' See the Randomizations section below.
 #' @param n_cores The number of cores to use for enrichment testing. We recommend
 #' using only up to the maximum number of \emph{physical} cores present, as
 #' virtual cores do not significantly decrease runtime. Default number of cores
@@ -134,29 +135,29 @@
 #' The columns are:
 #'
 #' \describe{
-#'   \item{peak_id}{ an ID given to unique combinations of chromosome, peak start, and peak end. }
-#'   \item{chr}{ the chromosome the peak originated from. }
-#'   \item{peak_start}{ start position of the peak. }
-#'   \item{peak_end}{ end position of the peak. }
-#'   \item{peak_midpoint}{ the midpoint of the peak. }
-#'   \item{gene_id}{ the Entrez ID of the gene to which the peak was assigned. }
-#'   \item{gene_symbol}{ the official gene symbol for the gene_id (above). }
-#'   \item{gene_locus_start}{ the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-#'   \item{gene_locus_end}{ the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
-#'   \item{nearest_tss}{ the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
-#'   \item{nearest_tss_gene}{ the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
-#'   \item{nearest_tss_gene_strand}{ the strand of the gene with the closest TSS. }
+#'   \item{peak_id}{ is an ID given to unique combinations of chromosome, peak start, and peak end. }
+#'   \item{chr}{ is the chromosome the peak originated from. }
+#'   \item{peak_start}{ is start position of the peak. }
+#'   \item{peak_end}{ is end position of the peak. }
+#'   \item{peak_midpoint}{ is the midpoint of the peak. }
+#'   \item{gene_id}{ is the Entrez ID of the gene to which the peak was assigned. }
+#'   \item{gene_symbol}{ is the official gene symbol for the gene_id (above). }
+#'   \item{gene_locus_start}{ is the start position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+#'   \item{gene_locus_end}{ is the end position of the locus for the gene to which the peak was assigned (specified by the locus definition used.) }
+#'   \item{nearest_tss}{ is the closest TSS to this peak (for any gene, not necessarily the gene this peak was assigned to.) }
+#'   \item{nearest_tss_gene}{ is the gene having the closest TSS to the peak (should be the same as gene_id when using the nearest TSS locus definition.) }
+#'   \item{nearest_tss_gene_strand}{ is the strand of the gene with the closest TSS. }
 #' }}
 #'
 #' \item{peaks_per_gene }{
 #' A data frame of the count of peaks per gene. The columns are:
 #'
 #' \describe{
-#'   \item{gene_id}{ the Entrez Gene ID. }
-#'   \item{length}{ the length of the gene's locus (depending on which locus definition you chose.)}
-#'   \item{log10_length}{ the log10(locus length) for the gene.}
-#'   \item{num_peaks}{ the number of peaks that were assigned to the gene, given the current locus definition. }
-#'   \item{peak}{ whether or not the gene has a peak. }
+#'   \item{gene_id}{ is the Entrez Gene ID. }
+#'   \item{length}{ is the length of the gene's locus (depending on which locus definition you chose.)}
+#'   \item{log10_length}{ is the log10(locus length) for the gene.}
+#'   \item{num_peaks}{ is the number of peaks that were assigned to the gene, given the current locus definition. }
+#'   \item{peak}{ is whether or not the gene has a peak. }
 #' }}
 #'
 #' \item{results }{
@@ -177,6 +178,8 @@
 #'   \item{Geneset.Peak.Genes}{ is the list of genes from the gene set that had at least one peak assigned.}
 #'
 #' }}
+#'
+#' @family enrichment functions
 #'
 #' @examples
 #'
@@ -210,6 +213,7 @@ polyenrich = function(
 		'GOMF'),
 	locusdef = "nearest_tss",
 	method = 'polyenrich',
+	multiAssign = NULL,
     weighting = NULL,
 	mappability = NULL,
 	qc_plots = TRUE,
@@ -276,29 +280,41 @@ polyenrich = function(
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
-
+    
     ######################################################
     # If using weights but not polyenrich_weighted, stop
     if (!is.null(weighting) & method != "polyenrich_weighted") {
         stop("You need to use method = polyenrich_weighted if choosing weighting!")
     }
-
+    
     ######################################################
     # If using the weighted method, add the weights column
+    # if (method == "polyenrich_weighted") {
+    #     if (is.null(weighting)) {
+    #         # No weights specified
+    #         stop("No weight options selected!")
+    #     } else if (!all(weighting %in% c("logsignalValue","signalValue","multiAssign"))) {
+    #         # Unsupported weights
+    #         stop(sprintf("Unsupported weights: %s",
+    #             paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue","multiAssign")))],collapse=", ")))
+    #     }
+        
+    #     assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
+    #     ppg = calc_genes_peak_weight(assigned_peaks, ppg)
+    # }
+    multiAssign = FALSE
     if (method == "polyenrich_weighted") {
-        if (is.null(weighting)) {
-            # No weights specified
-            stop("No weight options selected!")
-        } else if (!all(weighting %in% c("logsignalValue","signalValue","multiAssign"))) {
+        if (is.null(weighting) & (locusdef == "enhancer" | locusdef == "enhancer_plus5kb")) {
+            multiAssign = TRUE
+        } else if (!all(weighting %in% c("logsignalValue","signalValue"))) {
             # Unsupported weights
             stop(sprintf("Unsupported weights: %s",
-                paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue","multiAssign")))],collapse=", ")))
+                paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue")))],collapse=", ")))
         }
-
-        assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
+        
+        assigned_peaks = calc_peak_weights(assigned_peaks, weighting, multiAssign)
         ppg = calc_genes_peak_weight(assigned_peaks, ppg)
     }
-
 	######################################################
 	# Enrichment
 	results = list()
@@ -355,19 +371,14 @@ polyenrich = function(
 		write.table(ppg, file = filename_ppg, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote count of peaks per gene to: ", filename_ppg)
 
-        if (qc_plots) {
-            filename_qcplots = file.path(out_path, sprintf("%s_qcplots-1.png", out_name))
-            grDevices::png(filename_qcplots)
-                print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
-            grDevices::dev.off()
-            message("Wrote QC plots to: ",filename_qcplots)
-
-            filename_qcplots = file.path(out_path, sprintf("%s_qcplots-2.png", out_name))
-            grDevices::png(filename_qcplots)
-                print(..plot_dist_to_tss(peakobj, tss))
-            grDevices::dev.off()
-            message("Wrote QC plots to: ",filename_qcplots)
-        }
+		if (qc_plots) {
+			filename_qcplots = file.path(out_path, sprintf("%s_qcplots.pdf", out_name))
+			grDevices::pdf(filename_qcplots)
+				print(..plot_polyenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
+				print(..plot_dist_to_tss(peakobj, tss))
+			grDevices::dev.off()
+			message("Wrote QC plots to: ",filename_qcplots)
+		}
 	}
 
 	######################################################
