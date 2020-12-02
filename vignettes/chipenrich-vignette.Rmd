@@ -287,6 +287,8 @@ results.pe = results$results
 print(results.pe[1:5,1:5])
 ```
 
+Poly-Enrich also allows weighting of individual peaks. Currently the options are: `signalValue` and `logsignalValue`. `signalValue` weighs each peak based on the Signal Value given in the narrowPeak format or a user-supplied column, normalized to have mean 1. `logsignalValue` weighs each peak based on the log Signal Value given in the narrowPeak format or a user-supplied column, normalized to have mean 1. When use weighted Poly-Enrich, `method` should use `polyenrich_weighted`. When selecting `polyenrich_weighted` method and `locusdef` equals to `enhancer` or `enhancer_plus5kb`, the `multiAssign` will be automatically set as `TRUE`.
+
 ### `hybridenrich()`
 
 The hybrid method is used when one is unsure of which method, between ChIP-Enrich or Poly-Enrich, is the optimal method.  It will be more conservative than either test for an individual gene set, but is usually more powerful overall. 
