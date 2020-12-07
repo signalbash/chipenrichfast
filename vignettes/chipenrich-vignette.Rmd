@@ -12,14 +12,16 @@ vignette: >
 
 # Introduction
 
-Gene set enrichment (GSE) testing enables the interpretation of lists of differentially expressed genes (e.g. from RNA-seq), or lists of peaks (e.g. from ChIP-seq), in terms of pathways and other biologically meaningful sets of genes. The `chipenrich` package was originally designed to perform GSE for ChIP-seq peaks, but it can also be used for genomic regions with different biological meaning. The primary innovation of `chipenrich` is its accounting for biases that are known to affect the Type I error of such testing. In particular, the length of a gene's regulatory region affects the probability that a peak will be assigned to it, the number of peaks that will be assigned to it, or the proportion of it covered by peaks.
+Gene set enrichment (GSE) testing enables the interpretation of lists of genes (e.g. from RNA-seq), or lists of genomic regions (e.g. from ChIP-seq), in terms of pathways and other biologically meaningful sets of genes. The `chipenrich` package is designed for GSE testing of large sets of genomic regions with different properties. The primary innovation of `chipenrich` is its accounting for biases that are known to affect the Type I error of such testing, and other properties of the data. It offers many options for gene set databases, and several other methods/options: tests for wide versus narrow genomic regions, a thousand versus > a million genomic regions, regions in promoters vs enhancers vs gene bodies, or accounting for the strength/score of each genomic region.
 
 The `chipenrich` package includes different enrichment methods for different use cases:
 
-* `broadenrich()` is designed for use with broad peaks that may intersect multiple gene loci, and cumulatively cover greater than 5\% of the genome. For example, ChIP-seq experiments for histone modifications.
-* `chipenrich()` is designed for use with 1,000s or 10,000s of narrow peaks which results in fewer gene loci containing a peak overall. For example, ChIP-seq experiments for transcription factors.
-* `polyenrich()` is also designed for narrow peaks, for experiments with 100,000s of peaks, or in cases where the number of binding sites per gene affects its regulation. If unsure whether to use chipenrich or polyenrich, then we recommend hybridenrich.
-* `hybridenrich()` is used when one is unsure of which method, between ChIP-Enrich or Poly-Enrich, is the optimal method. It will be more conservative than either test for an individual gene set, but is usually more powerful overall. 
+* `broadenrich()` is designed for use with broad peaks that may intersect multiple gene loci, and cumulatively cover greater than 5% of the genome. For example, most ChIP-seq experiments for histone modifications.
+* `chipenrich()` is designed for use with 1,000s or 10,000s of narrow genomic regions which results in a relatively small percent of genes being assigned a genomic region. For example, many ChIP-seq experiments for transcription factors.
+* `polyenrich()` is also designed for narrow peaks, but for experiments with > ~50,000 genomic regions, or in cases where the number of binding sites per gene is thought to be important. If unsure whether to use chipenrich or polyenrich, then we recommend hybridenrich.
+* `hybridenrich()` is used when one is unsure of which method, between ChIP-Enrich or Poly-Enrich, is the optimal method. It is slightly more conservative than either test for an individual gene set, but is usually more powerful overall.
+
+We recommend using polyenrich(method='polyenrich-weighted', multiAssign=TRUE, .) with any enhancer locus definition. See example below for more details.    
 
 # Concepts and Usage
 
@@ -31,9 +33,9 @@ Due to several required dependencies, installation may take some time if the dep
 
 ## Peaks
 
-A ChIP-seq peak is a genomic region that represents a transcription factor binding event or the presence of a histone complex with a particular histone modification. Typically peaks are called with a peak caller (such as [MACS2](https://github.com/taoliu/MACS) or [PePr](https://github.com/shawnzhangyx/PePr/)) and represent relative enrichment of reads in a sample where the antibody is present versus input. Typically, peaks are output by a peak caller in [`BED`-like](https://genome.ucsc.edu/FAQ/FAQformat.html) format.
+A ChIP-seq peak is a genomic region that represents a transcription factor binding event or the presence of a histone complex with a particular histone modification. Typically peaks are called with a peak caller (such as  [MACS2](https://github.com/taoliu/MACS) or [PePr](https://github.com/shawnzhangyx/PePr/)) and represent relative enrichment of reads in a sample where the antibody is present versus input. Typically, peaks are output by a peak caller in [`BED`-like](https://genome.ucsc.edu/FAQ/FAQformat.html) format.
 
-The primary user input for `chipenrich()`, `broadenrich()`, or `polyenrich()` are the peaks called from reads in a ChIP-seq experiment. Lists of genomic regions having other biological meaning can be used, but we shall continue to refer to 'peaks'. Peaks can be input as either a file path or a `data.frame`.
+User input for `chipenrich()`, `broadenrich()`, or `polyenrich()` may be peaks called from a ChIP-seq or ATAC-seq experiment or other large sets of genomic regions (e.g. from a family of repetitive elements or hydroxymethylation experiments) but we shall continue to refer to the input genomic regions as 'peaks' for simplicity. Peaks can be input as either a file path or a `data.frame`.
 
 If a file path, the following formats are fully supported via their file extensions: `.bed`, `.broadPeak`, `.narrowPeak`, `.gff3`, `.gff2`, `.gff`, and `.bedGraph` or `.bdg`. BED3 through BED6 files are supported under the `.bed` extension ([BED specification](https://genome.ucsc.edu/FAQ/FAQformat.html)). Files without these extensions are supported under the conditions that the first 3 columns correspond to `chr`, `start`, and `end` and that there is either no header column, or it is commented out. Files may be compressed with `gzip`, and so might end in `.narrowPeak.gz`, for example. For files with extension support, the `rtracklayer::import()` function is used to read peaks, so adherence to the mentioned file formats is necessary.
 
@@ -59,13 +61,13 @@ supported_genomes()
 
 ## Locus Definitions
 
-A locus definition is a way of defining a gene regulatory region, and enables us to associate peaks with genes. The terms 'gene', 'gene regulatory region', and 'gene locus' are used interchangeably in the vignette. A trivial locus definition might be the gene bodies from the transcription start sites (TSS) to the transcript end sites (TES) for each gene. A locus definition can also express how one expects a transcription factor to regulate genes. For example, a locus definition defined as 1kb upstream and downstream of a TSS (the `1kb` definition) would capture TFs binding in proximal-promoter regions.
+A gene locus definition is a way of defining the gene regulatory regions, and enables us to associate peaks with genes. The terms 'gene regulatory region' and 'gene locus' are used interchangeably in the vignette. An example is the '5kb' gene locus definition, which assigns the 5000 bp immediately up- and down- stream of transcription start sites (TSS) to the respective gene. A locus definition can also express from where one expects a transcription factor or histone modification to regulate genes. For example, a locus definition defined as 1kb upstream and downstream of a TSS (the 1kb definition) would capture TFs binding in proximal-promoter regions.
 
 ### Built-in locus definitions
 
 A number of locus definitions representing different regulatory paradigms are included in the package:
 
-* `nearest_tss`: The locus is the region spanning the midpoints between the TSSs of adjacent genes.
+* `nearest_tss`: The locus is the region spanning the midpoints between the TSSs of adjacent genes. Thus, each genomic region is assigned to the gene with the nearest TSS.
 * `nearest_gene`: The locus is the region spanning the midpoints between the boundaries of each gene, where a gene is defined as the region between the furthest upstream TSS and furthest downstream TES for that gene. If gene loci overlap, the midpoint of the overlap is used as a border. If a gene locus is nested in another, the larger locus is split in two.
 * `exon`: Each gene has multiple loci corresponding to its exons. Overlaps between different genes are allowed.
 * `intron`: Each gene has multiple loci corresponding to its introns. Overlaps between different genes are allowed.
@@ -236,7 +238,7 @@ As stated in the introduction, the `chipenrich` package includes three classes o
 
 ### `broadenrich()`
 
-Broad-Enrich is designed for use with broad peaks that may intersect multiple gene loci, and cumulatively cover greater than 5\% of the genome. For example, ChIP-seq experiments for histone modifications.
+Broad-Enrich is designed for use with broad peaks that may intersect multiple gene loci, and/or cumulatively cover greater than 5\% of the genome. For example, ChIP-seq experiments for histone modifications or large sets of copy number alterations.
 
 The Broad-Enrich method uses the cumulative peak coverage of genes in its logistic regression model for enrichment: `GO ~ ratio + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `ratio` is a numeric vector indicating the ratio of the gene covered by peaks, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between gene coverage and locus length.
 
@@ -250,7 +252,7 @@ print(results.be[1:5,1:5])
 
 ### `chipenrich()`
 
-ChIP-Enrich is designed for use with 1,000s or 10,000s of narrow peaks which results in fewer gene loci containing a peak overall. For example, ChIP-seq experiments for transcription factors.
+ChIP-Enrich is designed for use with 1,000s or 10,000s of narrow genomic regions which results in a relatively small percent of genes being assigned a genomic region. For example, many ChIP-seq experiments for transcription factors.
 
 The ChIP-Enrich method uses the presence of a peak in its logistic regression model for enrichment: `peak ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `peak` is a binary vector indicating the presence of a peak in a gene, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between the presence of a peak and locus length.
 
@@ -287,11 +289,22 @@ results.pe = results$results
 print(results.pe[1:5,1:5])
 ```
 
-Poly-Enrich also allows weighting of individual peaks. Currently the options are: `signalValue` and `logsignalValue`. `signalValue` weighs each peak based on the Signal Value given in the narrowPeak format or a user-supplied column, normalized to have mean 1. `logsignalValue` weighs each peak based on the log Signal Value given in the narrowPeak format or a user-supplied column, normalized to have mean 1. When use weighted Poly-Enrich, `method` should use `polyenrich_weighted`. When selecting `polyenrich_weighted` method and `locusdef` equals to `enhancer` or `enhancer_plus5kb`, the `multiAssign` will be automatically set as `TRUE`.
+Poly-Enrich is strongly recommended when using either the 'enhancer' or 'enhancer_plus5kb' gene locus definition, because only polyenrich is able to properly split the weight of genomic regions that are assigned to multiple genes (multiAssign=TRUE). Like chipenrich, it is designed for narrow peaks, but for experiments with > ~50,000 genomic regions, or in cases where the number of binding sites per gene is thought to be important. 
+
+Poly-Enrich also allows weighting of individual genomic regions based on a score. Currently the options are: `signalValue` and `logsignalValue`. `signalValue` weighs each peak based on the Signal Value given in the narrowPeak format or a user-supplied column, while `logsignalValue` take the log of these values. To use weighted Poly-Enrich, use method = `polyenrich_weighted`. When using the `enhancer` or `enhancer_plus5kb` locus definition, we recommend selecting the `polyenrich_weighted` method, which in this case will automatically set multiAssign as `TRUE`.
+
+```{r, warning = FALSE, message = FALSE}
+gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, 
+  method="polyenrich_weighted", locusdef = "enhancer_plus5kb", 
+  qc_plots = FALSE, out_name = NULL, n_cores = 1)
+results.pe = results$results
+print(results.pe[1:5,1:5])
+```
 
 ### `hybridenrich()`
 
-The hybrid method is used when one is unsure of which method, between ChIP-Enrich or Poly-Enrich, is the optimal method.  It will be more conservative than either test for an individual gene set, but is usually more powerful overall. 
+The hybrid method is used when one is unsure of which method, between ChIP-Enrich or Poly-Enrich, is the optimal method, and the most statistically powerful results are desired for each gene set.  The runtime for this method, however, is ~2X that of the others.
 
 The hybrid p-value is given as `2*min(chipenrich_pvalue, polyenrich_pvalue)`. This test will retain the same Type 1 level and will be a consistent test if one of chipenrich or polyenrich is consistent. This can be extended to any number of tests, but currently we only allow a hybrid test for chipenrich and polyenrich. For more information about chipenrich or polyenrich, see their respective sections.
 
@@ -312,10 +325,12 @@ ProxReg first calculates the distance between the midpoints of peaks and the nea
 ```{r, warning = FALSE, message = FALSE}
 gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
 results.prox = proxReg(peaks_E2F4, reglocation = 'tss',
- 			genome = 'hg19', genesets=gs_path, out_name=NULL)
-results.prox = results$results
-print(results.prox[1:5,1:5])
+                       genome = 'hg19', genesets=gs_path, out_name=NULL)
+results.prox = results.prox$results
+print(results.prox[1:5,c(1,2,4,5,6,7)])
 ```
+
+The last column of ProxReg results indicates whether this geneset is farther or closer to the regulation region. In the above example, these five genesets are significantly farther from promoter regions.
 
 ## QC Plots
 
