@@ -1,19 +1,20 @@
 Package: chipenrich
 Type: Package
 Title: Gene Set Enrichment For ChIP-seq Peak Data
-Version: 2.11.0
-Date: 2019-06-08
+Version: 2.15.1
+Date: 2021-03-26
 Authors@R: c(
 	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
-	person(c("Raymond","G."),"Cavalcante",role = c("aut","cre"),email = "rcavalca@umich.edu"),
+	person(c("Raymond","G."),"Cavalcante",role = c("aut"),email = "rcavalca@umich.edu"),
+	person("Kai","Wang",role = c("cre"),email = "wangdaha@umich.edu"),
 	person("Chris","Lee",role = c("aut"),email = "leetaiyi@umich.edu"),
 	person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
 	person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
 Description: ChIP-Enrich and Poly-Enrich perform gene set enrichment testing
-    using peaks called from a ChIP-seq experiment. The method empirically
-    corrects for confounding factors such as the length of genes,
-    and the mappability of the sequence surrounding genes.
+	using peaks called from a ChIP-seq experiment. The method empirically
+	corrects for confounding factors such as the length of genes,
+	and the mappability of the sequence surrounding genes.
 biocViews: ImmunoOncology, ChIPSeq, Epigenetics, FunctionalGenomics, GeneSetEnrichment, HistoneModification, Regression
 License: GPL-3
 Imports:
@@ -57,35 +58,35 @@ Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Collate:
-    'assign_peaks.R'
-    'test_broadenrich.R'
-    'peaks_per_gene.R'
-    'read.R'
-    'randomize.R'
-    'setup.R'
-    'supported.R'
-    'utils.R'
-    'constants.R'
-    'plot_gene_coverage.R'
-    'broadenrich.R'
-    'test_chipapprox.R'
-    'test_chipenrich.R'
-    'test_chipenrich_slow.R'
-    'test_fisher.R'
-    'test_binomial.R'
-    'test_approx.R'
-    'plot_chipenrich_spline.R'
-    'plot_dist_to_tss.R'
-    'chipenrich.R'
-    'chipenrich_package_doc.R'
-    'test_polyapprox.R'
-    'test_polyenrich_weighted.R'
-    'test_polyenrich_slow.R'
-    'test_polyenrich.R'
-    'plot_polyenrich_spline.R'
-    'polyenrich.R'
-    'hybrid.R'
-    'peak_weights.R'
-    'peaks2genes.R'
-    'test_proxReg.R'
-    'proxReg.R'
+	'assign_peaks.R'
+	'test_broadenrich.R'
+	'peaks_per_gene.R'
+	'read.R'
+	'randomize.R'
+	'setup.R'
+	'supported.R'
+	'utils.R'
+	'constants.R'
+	'plot_gene_coverage.R'
+	'broadenrich.R'
+	'test_chipapprox.R'
+	'test_chipenrich.R'
+	'test_chipenrich_slow.R'
+	'test_fisher.R'
+	'test_binomial.R'
+	'test_approx.R'
+	'plot_chipenrich_spline.R'
+	'plot_dist_to_tss.R'
+	'chipenrich.R'
+	'chipenrich_package_doc.R'
+	'test_polyapprox.R'
+	'test_polyenrich_weighted.R'
+	'test_polyenrich_slow.R'
+	'test_polyenrich.R'
+	'plot_polyenrich_spline.R'
+	'polyenrich.R'
+	'hybrid.R'
+	'peak_weights.R'
+	'peaks2genes.R'
+	'test_proxReg.R'
+	'proxReg.R'
