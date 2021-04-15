@@ -1,6 +1,6 @@
 ---
 title: "`chipenrich`: Gene Set Enrichment For ChIP-seq Peak Data"
-author: "Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor"
+author: "Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Kai Wang, Laura J. Scott, Maureen A. Sartor"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document
@@ -25,8 +25,13 @@ We recommend using polyenrich(method='polyenrich-weighted', multiAssign=TRUE, .)
 
 # Concepts and Usage
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 library(chipenrich)
+```
+
+```{r include=FALSE}
+devtools::load_all("C:/Users/wangdaha/Documents/chipenrich/")
+devtools::load_all("C:/Users/wangdaha/Documents/chipenrich.data/")
 ```
 
 Due to several required dependencies, installation may take some time if the dependencies are not already installed.
@@ -191,11 +196,7 @@ If a gene set from another database is in the form of a list with an array of ge
 library(EGSEAdata)
 egsea.data("mouse")
 temp = Mm.H #Or some other gene sets
-geneset = do.call(rbind,
-				  lapply(1:length(temp), function(index) {
-				  	data.frame(gs_id = rep(names(temp)[index], length(temp[[index]])),
-															 gene_id = unlist(strsplit(temp[[index]],split = " ")),
-															 stringsAsFactors = F)}))
+geneset = do.call(rbind,lapply(1:length(temp), function(index) {data.frame(gs_id = rep(names(temp)[index], length(temp[[index]])),gene_id = unlist(strsplit(temp[[index]],split = " ")),stringsAsFactors = F)}))
 write.table(geneset, "./custom_geneset.txt", quote=F, sep="\t",row.names = F, col.names = T)
 ```
 
@@ -243,9 +244,8 @@ Broad-Enrich is designed for use with broad peaks that may intersect multiple ge
 The Broad-Enrich method uses the cumulative peak coverage of genes in its logistic regression model for enrichment: `GO ~ ratio + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `ratio` is a numeric vector indicating the ratio of the gene covered by peaks, and `s(log10_length)` is a binomial cubic smoothing spline which adjusts for the relationship between gene coverage and locus length.
 
 ```{r, warning = FALSE, message = FALSE}
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = broadenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = gs_path,
-	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores=1)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = broadenrich(peaks = peaks_H3K4me3_GM12878, genome = 'hg19', genesets = "biocarta_pathway", locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores=1)
 results.be = results$results
 print(results.be[1:5,1:5])
 ```
@@ -258,19 +258,16 @@ The ChIP-Enrich method uses the presence of a peak in its logistic regression mo
 
 ```{r, warning = FALSE, message = FALSE}
 # Without mappability
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = "biocarta_pathway",locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.ce = results$results
 print(results.ce[1:5,1:5])
 ```
 
 ```{r, warning = FALSE, message = FALSE}
 # With mappability
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-	locusdef = "nearest_tss", mappability=24, qc_plots = FALSE,
-	out_name = NULL,n_cores=1)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = "biocarta_pathway", locusdef = "nearest_tss", mappability=24, qc_plots = FALSE,out_name = NULL,n_cores=1)
 results.cem = results$results
 print(results.cem[1:5,1:5])
 ```
@@ -282,22 +279,19 @@ Poly-Enrich is also designed for narrow peaks, for experiments with 100,000s of 
 The Poly-Enrich method uses the number of peaks in genes in its negative binomial regression model for enrichment: `num_peaks ~ GO + s(log10_length)`. Here, `GO` is a binary vector indicating whether a gene is in the gene set being tested, `num_peaks` is a numeric vector indicating the number of peaks in each gene, and `s(log10_length)` is a negative binomial cubic smoothing spline which adjusts for the relationship between the number of peaks in a gene and locus length.
 
 ```{r, warning = FALSE, message = FALSE}
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,  method = 'polyenrich',
-	locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = "biocarta_pathway", method = 'polyenrich', locusdef = "nearest_tss", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.pe = results$results
 print(results.pe[1:5,1:5])
 ```
 
-Poly-Enrich is strongly recommended when using either the 'enhancer' or 'enhancer_plus5kb' gene locus definition, because only polyenrich is able to properly split the weight of genomic regions that are assigned to multiple genes (multiAssign=TRUE). Like chipenrich, it is designed for narrow peaks, but for experiments with > ~50,000 genomic regions, or in cases where the number of binding sites per gene is thought to be important. 
+Poly-Enrich can also be used for linking human distal enhancer regions to their target genes, which are not necessarily the adjacent genes. We optimized human distal enhancer to target gene locus definitions (locusdef="enhancer" or locusdef="enhancer_plus5kb"). locusdef="enhancer" uses only distal regions >5kb from a TSS, while locusdef="enhancer_plus5kb" combines distal enhancers (>5kb from a TSS) with promoters (<=5kb from a TSS) to capture all genomic regions. Poly-Enrich is strongly recommended when using either the 'enhancer' or 'enhancer_plus5kb' gene locus definition, because only polyenrich is able to properly split the weight of genomic regions that are assigned to multiple genes (multiAssign=TRUE). The performance of Poly-Enrich using the enhancer locusdefs can be found in our recent study (details in reference 5). Like chipenrich, polyenrich is designed for narrow peaks, but for experiments with > ~50,000 genomic regions, or in cases where the number of binding sites per gene is thought to be important.
 
-Poly-Enrich also allows weighting of individual genomic regions based on a score. Currently the options are: `signalValue` and `logsignalValue`. `signalValue` weighs each peak based on the Signal Value given in the narrowPeak format or a user-supplied column, while `logsignalValue` take the log of these values. To use weighted Poly-Enrich, use method = `polyenrich_weighted`. When using the `enhancer` or `enhancer_plus5kb` locus definition, we recommend selecting the `polyenrich_weighted` method, which in this case will automatically set multiAssign as `TRUE`.
+Poly-Enrich also allows weighting of individual genomic regions based on a score, which can be useful for differential methylation enrichment analysis and ChIP-seq. Currently the options are: `signalValue` and `logsignalValue`. `signalValue` weighs each genomic region or peak based on the Signal Value given in the narrowPeak format or a user-supplied column, while `logsignalValue` takes the log of these values. To use weighted Poly-Enrich, use method = `polyenrich_weighted`. When using the `enhancer` or `enhancer_plus5kb` locus definition, we recommend selecting the `polyenrich_weighted` method, which in this case will automatically set multiAssign as `TRUE`.
 
 ```{r, warning = FALSE, message = FALSE}
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path, 
-  method="polyenrich_weighted", locusdef = "enhancer_plus5kb", 
-  qc_plots = FALSE, out_name = NULL, n_cores = 1)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = polyenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = "biocarta_pathway", method="polyenrich_weighted", locusdef = "enhancer_plus5kb", qc_plots = FALSE, out_name = NULL, n_cores = 1)
 results.pe = results$results
 print(results.pe[1:5,1:5])
 ```
@@ -309,9 +303,8 @@ The hybrid method is used when one is unsure of which method, between ChIP-Enric
 The hybrid p-value is given as `2*min(chipenrich_pvalue, polyenrich_pvalue)`. This test will retain the same Type 1 level and will be a consistent test if one of chipenrich or polyenrich is consistent. This can be extended to any number of tests, but currently we only allow a hybrid test for chipenrich and polyenrich. For more information about chipenrich or polyenrich, see their respective sections.
 
 ```{r, warning = FALSE, message = FALSE}
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = hybridenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
-    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = hybridenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = "biocarta_pathway", locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1)
 results.hybrid = results$results
 print(results.hybrid[1:5,1:5])
 ```
@@ -323,14 +316,11 @@ The proximity to regulatory regions (proxReg) test is a complementary test to an
 ProxReg first calculates the distance between the midpoints of peaks and the nearest transcription start site or the nearest enhancer region midpoint for each genomic region. Each genomic region is then assigned to the gene with the nearest transcription start site. The distances are then classified according to whether the gene is in the gene set or not, and a signed Wilcoxon rank-sum test is used to calculate if the regions are closer or farther in the gene set than average.
 
 ```{r, warning = FALSE, message = FALSE}
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results.prox = proxReg(peaks_E2F4, reglocation = 'tss',
-                       genome = 'hg19', genesets=gs_path, out_name=NULL)
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results.prox = proxReg(peaks_E2F4, reglocation = 'tss',	genome = 'hg19', genesets="biocarta_pathway", out_name=NULL)
 results.prox = results.prox$results
-print(results.prox[1:5,c(1,2,4,5,6,7)])
+print(results.prox[1:5,1:7])
 ```
-
-The last column of ProxReg results indicates whether this geneset is farther or closer to the regulation region. In the above example, these five genesets are significantly farther from promoter regions.
 
 ## QC Plots
 
@@ -419,8 +409,8 @@ The return value of `chipenrich()`, `broadenrich()`, or `polyenrich()` with a se
 
 ```{r, warning = FALSE, message = FALSE}
 # Assessing if alpha = 0.05
-gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
-results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = gs_path,
+#gs_path = system.file('extdata','vignette_genesets.txt', package='chipenrich')
+results = chipenrich(peaks = peaks_E2F4, genome = 'hg19', genesets = "biocarta_pathway",
 	locusdef = "nearest_tss", qc_plots = FALSE, randomization = 'complete',
     out_name = NULL, n_cores = 1)
 alpha = sum(results$results$P.value < 0.05) / nrow(results$results)
@@ -430,10 +420,13 @@ print(alpha)
 
 # References
 
-R.P. Welch^, C. Lee^, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor. "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. [doi:10.1093/nar/gku463](https://academic.oup.com/nar/article-lookup/doi/10.1093/nar/gku463)
+1. R.P. Welch^, C. Lee^, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor. "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. [doi:10.1093/nar/gku463](https://academic.oup.com/nar/article-lookup/doi/10.1093/nar/gku463)
 
-R.G. Cavalcante, C. Lee, R.P. Welch, S. Patil, T. Weymouth, L.J. Scott, and M.A. Sartor. "Broad-Enrich: functional interpretation of large sets of broad genomic regions." Bioinformatics (2014) 30(17):i393-i400 [doi:10.1093/bioinformatics/btu444](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu444)
+2. R.G. Cavalcante, C. Lee, R.P. Welch, S. Patil, T. Weymouth, L.J. Scott, and M.A. Sartor. "Broad-Enrich: functional interpretation of large sets of broad genomic regions." Bioinformatics (2014) 30(17):i393-i400 [doi:10.1093/bioinformatics/btu444](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu444)
 
-C.T. Lee , R.G. Cavalcante, C. Lee, T. Qin, S. Patil, S. Wang, Z. Tsai, A.P. Boyle, M.A. Sartor. “Poly-Enrich: Count-based Methods for Gene Set Enrichment Testing with Genomic Regions.” In review.
+3. C.T. Lee , R.G. Cavalcante, C. Lee, T. Qin, S. Patil, S. Wang, Z. Tsai, A.P. Boyle, M.A. Sartor. "Poly-Enrich: Count-based Methods for Gene Set Enrichment Testing with Genomic Regions." NAR genomics and bioinformatics 2.1 (2020): lqaa006. [doi.org/10.1093/nargab/lqaa006
+](https://academic.oup.com/nargab/article/2/1/lqaa006/5728474)
 
-C.T. Lee, K. Wang, T. Qin, M.A. Sartor. "Testing proximity of genomic regions to transcription start sites and enhancers complements gene set enrichment testing." In preparation.
+4. C.T. Lee, K. Wang, T. Qin, M.A. Sartor. "Testing proximity of genomic regions to transcription start sites and enhancers complements gene set enrichment testing." Frontiers in genetics 11 (2020): 199. [doi.org/10.3389/fgene.2020.00199](https://www.frontiersin.org/articles/10.3389/fgene.2020.00199/full)
+
+5. T. Qin, C.T. Lee, R.G. Cavalcante, P. Orchard, H. Yao, H. Zhang, S. Wang, S. Patil, A.P. Boyle, M.A. Sartor, "Comprehensive enhancer-target gene assignments improve gene set level interpretation of genome-wide regulatory data." (2020) bioRxiv. [doi.org/10.1101/2020.10.22.351049](https://www.biorxiv.org/content/10.1101/2020.10.22.351049v1)
