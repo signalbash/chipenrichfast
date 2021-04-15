@@ -1,3 +1,8 @@
+CHANGES IN VERSION 2.16.0
+-------------------------
+
+    o Transition to Kai Wang as maintainer.
+
 CHANGES IN VERSION 2.10.0
 -------------------------
 
@@ -9,7 +14,7 @@ NEW FEATURES
 
 IMPROVEMENTS
 
-    o Poly-Enrich now uses the likelihood ratio test instead of the Wald test, as 
+    o Poly-Enrich now uses the likelihood ratio test instead of the Wald test, as
       LRT is more robust when using a negative binomial GLM.
 
 BUG FIXES
@@ -24,12 +29,12 @@ CHANGES IN VERSION 2.4.0
 NEW FEATURES
 
     o A new function, peaks2genes(), to run the analysis up to, but not including,
-      the enrichment testing. Useful for checking QC plots, check qualities of 
+      the enrichment testing. Useful for checking QC plots, check qualities of
       peak-to-gene assignments, and easier custom tests.
 
 SIGNIFICANT USER-LEVEL CHANGES
 
-    o The hybridenrich() method now returns the same format as chipenrich() and 
+    o The hybridenrich() method now returns the same format as chipenrich() and
       polyenrich()
 
 IMPROVEMENTS
