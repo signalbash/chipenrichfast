@@ -4,12 +4,23 @@
 \alias{chipenrich}
 \title{Run ChIP-Enrich on narrow genomic regions}
 \usage{
-chipenrich(peaks, out_name = "chipenrich", out_path = getwd(),
-  genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
-  locusdef = "nearest_tss", method = "chipenrich",
-  mappability = NULL, fisher_alt = "two.sided", qc_plots = TRUE,
-  min_geneset_size = 15, max_geneset_size = 2000,
-  num_peak_threshold = 1, randomization = NULL, n_cores = 1)
+chipenrich(
+  peaks,
+  out_name = "chipenrich",
+  out_path = getwd(),
+  genome = supported_genomes(),
+  genesets = c("GOBP", "GOCC", "GOMF"),
+  locusdef = "nearest_tss",
+  method = "chipenrich",
+  mappability = NULL,
+  fisher_alt = "two.sided",
+  qc_plots = TRUE,
+  min_geneset_size = 15,
+  max_geneset_size = 2000,
+  num_peak_threshold = 1,
+  randomization = NULL,
+  n_cores = 1
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
@@ -222,6 +233,8 @@ enrich = results$results
 
 }
 \seealso{
-Other enrichment functions: \code{\link{broadenrich}}
+Other enrichment functions: 
+\code{\link{broadenrich}()},
+\code{\link{polyenrich}()}
 }
 \concept{enrichment functions}

@@ -4,10 +4,18 @@
 \alias{peaks2genes}
 \title{Run the test process up to, but not including the enrichment tests.}
 \usage{
-peaks2genes(peaks, out_name = "readyToEnrich", out_path = getwd(),
-  genome = supported_genomes(), locusdef = "nearest_tss",
-  weighting = NULL, mappability = NULL, qc_plots = TRUE,
-  num_peak_threshold = 1, randomization = NULL)
+peaks2genes(
+  peaks,
+  out_name = "readyToEnrich",
+  out_path = getwd(),
+  genome = supported_genomes(),
+  locusdef = "nearest_tss",
+  weighting = NULL,
+  mappability = NULL,
+  qc_plots = TRUE,
+  num_peak_threshold = 1,
+  randomization = NULL
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like

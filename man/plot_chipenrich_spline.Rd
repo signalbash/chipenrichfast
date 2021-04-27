@@ -4,9 +4,14 @@
 \alias{plot_chipenrich_spline}
 \title{QC plot for ChIP-Enrich}
 \usage{
-plot_chipenrich_spline(peaks, locusdef = "nearest_tss",
-  genome = supported_genomes(), mappability = NULL, legend = TRUE,
-  xlim = NULL)
+plot_chipenrich_spline(
+  peaks,
+  locusdef = "nearest_tss",
+  genome = supported_genomes(),
+  mappability = NULL,
+  legend = TRUE,
+  xlim = NULL
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like

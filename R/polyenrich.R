@@ -22,6 +22,7 @@
 #' narrowPeak format or a user-supplied column, normalized to have mean 1.}
 #'  \item{'logsignalValue:'}{ weighs each peak based on the log Signal Value given in the
 #' narrowPeak format or a user-supplied column, normalized to have mean 1.}
+#' }
 #'
 #' @section Choosing A Method:
 #' The following guidelines are intended to help select an enrichment function:
@@ -97,9 +98,9 @@
 #' @param method A character string specifying the method to use for enrichment
 #' testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.
 #' @param multiAssign A boolean value for performing a multiassignment of peaks.
-#' Default is \code{NULL}. When selecting \code{polyenrich_weighted} method and  
-#' \code{locusdef} equals to \code{enhancer} or \code{enhancer_plus5kb}, this 
-#' \code{multiAssign} will be automatically set as \code{TRUE}. 
+#' Default is \code{NULL}. When selecting \code{polyenrich_weighted} method and
+#' \code{locusdef} equals to \code{enhancer} or \code{enhancer_plus5kb}, this
+#' \code{multiAssign} will be automatically set as \code{TRUE}.
 #' @param weighting A character string specifying the weighting method if method is
 #' chosen to be 'polyenrich_weighted'. Current options are: 'signalValue' and
 #' 'logsignalValue'.
@@ -280,13 +281,13 @@ polyenrich = function(
 	######################################################
 	# Compute peaks per gene table
 	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
-    
+
     ######################################################
     # If using weights but not polyenrich_weighted, stop
     if (!is.null(weighting) & method != "polyenrich_weighted") {
         stop("You need to use method = polyenrich_weighted if choosing weighting!")
     }
-    
+
     ######################################################
     # If using the weighted method, add the weights column
     # if (method == "polyenrich_weighted") {
@@ -298,7 +299,7 @@ polyenrich = function(
     #         stop(sprintf("Unsupported weights: %s",
     #             paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue","multiAssign")))],collapse=", ")))
     #     }
-        
+
     #     assigned_peaks = calc_peak_weights(assigned_peaks, weighting)
     #     ppg = calc_genes_peak_weight(assigned_peaks, ppg)
     # }
@@ -311,7 +312,7 @@ polyenrich = function(
             stop(sprintf("Unsupported weights: %s",
                 paste(weighting[which(!(weighting %in% c("logsignalValue","signalValue")))],collapse=", ")))
         }
-        
+
         assigned_peaks = calc_peak_weights(assigned_peaks, weighting, multiAssign)
         ppg = calc_genes_peak_weight(assigned_peaks, ppg)
     }

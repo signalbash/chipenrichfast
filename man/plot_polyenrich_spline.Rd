@@ -4,9 +4,15 @@
 \alias{plot_polyenrich_spline}
 \title{QC plot for Poly-Enrich}
 \usage{
-plot_polyenrich_spline(peaks, locusdef = "nearest_tss",
-  genome = supported_genomes(), mappability = NULL, legend = TRUE,
-  xlim = NULL, ylim = NULL)
+plot_polyenrich_spline(
+  peaks,
+  locusdef = "nearest_tss",
+  genome = supported_genomes(),
+  mappability = NULL,
+  legend = TRUE,
+  xlim = NULL,
+  ylim = NULL
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like

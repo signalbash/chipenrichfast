@@ -4,11 +4,20 @@
 \alias{broadenrich}
 \title{Run Broad-Enrich on broad genomic regions}
 \usage{
-broadenrich(peaks, out_name = "broadenrich", out_path = getwd(),
-  genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
-  locusdef = "nearest_tss", mappability = NULL, qc_plots = TRUE,
-  min_geneset_size = 15, max_geneset_size = 2000,
-  randomization = NULL, n_cores = 1)
+broadenrich(
+  peaks,
+  out_name = "broadenrich",
+  out_path = getwd(),
+  genome = supported_genomes(),
+  genesets = c("GOBP", "GOCC", "GOMF"),
+  locusdef = "nearest_tss",
+  mappability = NULL,
+  qc_plots = TRUE,
+  min_geneset_size = 15,
+  max_geneset_size = 2000,
+  randomization = NULL,
+  n_cores = 1
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
@@ -212,6 +221,8 @@ enrich = results$results
 
 }
 \seealso{
-Other enrichment functions: \code{\link{chipenrich}}
+Other enrichment functions: 
+\code{\link{chipenrich}()},
+\code{\link{polyenrich}()}
 }
 \concept{enrichment functions}

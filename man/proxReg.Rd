@@ -4,11 +4,19 @@
 \alias{proxReg}
 \title{Run Proximity Regulation test on a set of narrow genomic regions}
 \usage{
-proxReg(peaks, out_name = "proxReg", out_path = getwd(),
-  genome = supported_genomes(), reglocation = "tss",
-  genesets = c("GOBP", "GOCC", "GOMF"), randomization = NULL,
-  qc_plots = TRUE, min_geneset_size = 15, max_geneset_size = 2000,
-  n_cores = 1)
+proxReg(
+  peaks,
+  out_name = "proxReg",
+  out_path = getwd(),
+  genome = supported_genomes(),
+  reglocation = "tss",
+  genesets = c("GOBP", "GOCC", "GOMF"),
+  randomization = NULL,
+  qc_plots = TRUE,
+  min_geneset_size = 15,
+  max_geneset_size = 2000,
+  n_cores = 1
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like

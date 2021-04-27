@@ -4,11 +4,23 @@
 \alias{polyenrich}
 \title{Run Poly-Enrich on narrow genomic regions}
 \usage{
-polyenrich(peaks, out_name = "polyenrich", out_path = getwd(),
-  genome = supported_genomes(), genesets = c("GOBP", "GOCC", "GOMF"),
-  locusdef = "nearest_tss", method = "polyenrich", weighting = NULL,
-  mappability = NULL, qc_plots = TRUE, min_geneset_size = 15,
-  max_geneset_size = 2000, randomization = NULL, n_cores = 1)
+polyenrich(
+  peaks,
+  out_name = "polyenrich",
+  out_path = getwd(),
+  genome = supported_genomes(),
+  genesets = c("GOBP", "GOCC", "GOMF"),
+  locusdef = "nearest_tss",
+  method = "polyenrich",
+  multiAssign = NULL,
+  weighting = NULL,
+  mappability = NULL,
+  qc_plots = TRUE,
+  min_geneset_size = 15,
+  max_geneset_size = 2000,
+  randomization = NULL,
+  n_cores = 1
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
@@ -52,8 +64,8 @@ example custom locus definition file, see the vignette.}
 testing. Current options are \code{polyenrich} and \code{polyenrich_weighted}.}
 
 \item{multiAssign}{A boolean value for performing a multiassignment of peaks.
-Default is \code{NULL}. When selecting \code{polyenrich_weighted} method and  
-\code{locusdef} equals to \code{enhancer} or \code{enhancer_plus5kb}, this 
+Default is \code{NULL}. When selecting \code{polyenrich_weighted} method and
+\code{locusdef} equals to \code{enhancer} or \code{enhancer_plus5kb}, this
 \code{multiAssign} will be automatically set as \code{TRUE}.}
 
 \item{weighting}{A character string specifying the weighting method if method is
@@ -143,11 +155,11 @@ frame.) The columns are:
 }}
 }
 \description{
-Poly-Enrich is designed for narrow peaks, but where there are
-100,000s of peaks which results in nearly every gene locus containing a peak.
-For example, ChIP-seq experiments for transcription factors. For more details,
-see the 'Poly-Enrich Method' section below. For help choosing a method, see
-the 'Choosing A Method' section below, or see the vignette.
+Poly-Enrich is also designed for narrow peaks, for experiments with 100,000s of
+peaks, or in cases where the number of binding sites per gene affects its regulation.
+If unsure whether to use chipenrich or polyenrich, then we recommend hybridenrich.
+For more details, see the 'Poly-Enrich Method' section below. For help choosing a method,
+see the 'Choosing A Method' section below, or see the vignette.
 }
 \section{Poly-Enrich Method}{
 
@@ -181,10 +193,10 @@ example, ChIP-seq experiments for histone modifications.}
 \item{chipenrich():}{ is designed for use with 1,000s or 10,000s of narrow
 peaks which results in fewer gene loci containing a peak overall. For example,
 ChIP-seq experiments for transcription factors.}
-\item{polyenrich():}{ is also designed for narrow peaks, but where there are
-100,000s of peaks which results in nearly every gene locus containing a peak.
-For example, ChIP-seq experiments for transcription factors. Generally works better
-for experiments with more than 40,000 peaks.}
+\item{polyenrich():}{ is also designed for narrow peaks, for experiments with
+100,000s of peaks, or in cases where the number of binding sites per gene affects
+its regulation. If unsure whether to use chipenrich or polyenrich, then we recommend
+hybridenrich.}
  \item{hybridenrich():}{ is a combination of chipenrich and polyenrich, to be
 used when one is unsure which is the optimal method. }
 }
@@ -233,6 +245,8 @@ enrich = results$results
 
 }
 \seealso{
-Other enrichment functions: \code{\link{broadenrich}},
-  \code{\link{chipenrich}}
+Other enrichment functions: 
+\code{\link{broadenrich}()},
+\code{\link{chipenrich}()}
 }
+\concept{enrichment functions}

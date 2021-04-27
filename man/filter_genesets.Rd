@@ -4,8 +4,12 @@
 \alias{filter_genesets}
 \title{Function to filter genesets by locus definition and size}
 \usage{
-filter_genesets(gs_obj, ldef_obj, min_geneset_size = 15,
-  max_geneset_size = 2000)
+filter_genesets(
+  gs_obj,
+  ldef_obj,
+  min_geneset_size = 15,
+  max_geneset_size = 2000
+)
 }
 \arguments{
 \item{gs_obj}{A valid GeneSet object}

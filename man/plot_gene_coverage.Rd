@@ -4,9 +4,14 @@
 \alias{plot_gene_coverage}
 \title{QC plot for Broad-Enrich}
 \usage{
-plot_gene_coverage(peaks, locusdef = "nearest_tss",
-  genome = supported_genomes(), mappability = NULL, legend = TRUE,
-  xlim = NULL)
+plot_gene_coverage(
+  peaks,
+  locusdef = "nearest_tss",
+  genome = supported_genomes(),
+  mappability = NULL,
+  legend = TRUE,
+  xlim = NULL
+)
 }
 \arguments{
 \item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like

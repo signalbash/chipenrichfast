@@ -4,8 +4,7 @@
 \alias{setup_genesets}
 \title{Function to setup genesets}
 \usage{
-setup_genesets(gs_codes, ldef_obj, genome, min_geneset_size,
-  max_geneset_size)
+setup_genesets(gs_codes, ldef_obj, genome, min_geneset_size, max_geneset_size)
 }
 \arguments{
 \item{gs_codes}{A character vector of geneset databases to be tested for
