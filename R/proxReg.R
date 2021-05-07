@@ -217,7 +217,6 @@ proxReg = function(
 	# Assign peaks to genes.
 	message("Assigning peaks to genes with assign_peaks(...) ..")
 	assigned_peaks = assign_peaks(peakobj, ldef, tss)
-	
 	# Creating a column for adjusted DTSS
 	if ("tss" %in% reglocation) {
 		assigned_peaks$log_dtss = log(abs(assigned_peaks$dist_to_tss)+1)
@@ -225,7 +224,6 @@ proxReg = function(
 		pred_log_dtss = as.numeric(mgcv::predict.gam(chipenrich.data::spline.log_dtss.90ENCODE, assigned_peaks, type="link"))
 		assigned_peaks$scaled_dtss = assigned_peaks$log_dtss-pred_log_dtss
 	}
-	
 	# Creating a column for enhancer distances
 	if ("enhancer" %in% reglocation) {
 		enhancers = chipenrich.data::enhancer.hg19
@@ -253,11 +251,14 @@ proxReg = function(
 										function(x) {a = gene.enh.desc$avg_denh_emp[gene.enh.desc$gene_id == x]
                                             return(ifelse(length(a)==0,NA,a))
                                         })
+
         if (any(is.na(assigned_peaks$avgdenh))) { #Impute the missing genes as average of the others
-        	dlm = lm(avgdenh ~ log_gene_ll, data = assigned_peaks)
+        		message("Aha, is this the part that not working?")
+        	dlm = stats::lm(avgdenh ~ log_gene_ll, data = assigned_peaks)
             assigned_peaks$avgdenh[is.na(assigned_peaks$avgdenh)] = stats::predict.lm(dlm, assigned_peaks[is.na(assigned_peaks$avgdenh),])
      		rm(dlm)
         }
+        
 		assigned_peaks$scaled_denh = log(abs(assigned_peaks$dist_to_enh)+1) - log(assigned_peaks$avgdenh+1)
 	}
 	
