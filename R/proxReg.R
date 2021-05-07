@@ -161,8 +161,8 @@ proxReg = function(
 	}
 	
 	# Set genome to hg due to enhancer-specific 
-	if ("enhancer" %in% reglocation & genome != "hg19") {
-		stop("Genome must be hg19 to use enhancer regulatory location")
+	if ("enhancer" %in% reglocation & genome != "hg19" & genome != "hg38") {
+		stop("Genome must be hg19 or hg38 to use enhancer regulatory location")
 	}
 	
 	genome = match.arg(genome)
@@ -184,8 +184,8 @@ proxReg = function(
 	# Setup locus definitions, genesets, and mappability
 	
 	#Stop if enhancer reglocation is selected and genome is not hg19
-	if (reglocation == "enhancer" & genome != "hg19") {
-		stop("Enhancer regulatory location only compatible with hg19 genome")
+	if (reglocation == "enhancer" & genome != "hg19" & genome != "hg38") {
+		stop("Enhancer regulatory location only compatible with hg19 or hg38 genome")
 	}
 	
 	#Locus definition will always be NTSS for this
@@ -228,8 +228,8 @@ proxReg = function(
 	
 	# Creating a column for enhancer distances
 	if ("enhancer" %in% reglocation) {
-		enhancers = chipenrich.data::enhancer.dnase_thurman.0
-		gene.enh.desc = chipenrich.data::gene.enh.desc
+		enhancers = chipenrich.data::enhancer.hg19
+		gene.enh.desc = chipenrich.data::gene.enh.desc.hg19
 		peakobj2 = GenomicRanges::makeGRangesFromDataFrame(assigned_peaks,
 					seqnames.field = "chr", start.field = "peak_start",end.field = "peak_end")
 		peak_mids = IRanges::mid(GenomicRanges::ranges(peakobj2))
