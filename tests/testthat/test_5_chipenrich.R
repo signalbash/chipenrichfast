@@ -160,17 +160,11 @@ test_that('Test polyenrich weighted method with logsignalValue', {
     expect_equal(class(results), 'list')
 })
 
-test_that('Test polyenrich weighted method with multiAssign', {
-    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = 'multiAssign',
-    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
-
-    expect_equal(class(results), 'list')
-})
 
 test_that('Test polyenrich weighted method with signalValue AND multiAssign', {
-    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = c('signalValue','multiAssign'),
-    locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
-
+    results = suppressWarnings(polyenrich(peaks = peaks_plus_sv, genome = 'hg19', genesets = gs_path, method = 'polyenrich_weighted', weighting = 'signalValue',
+    multiAssign = TRUE, locusdef = "nearest_tss", qc_plots = F, out_name = NULL, n_cores = 1))
+    
     expect_equal(class(results), 'list')
 })
 
