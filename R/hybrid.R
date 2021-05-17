@@ -118,9 +118,7 @@ hybridenrich <- function(	peaks,
     num_peak_threshold = 1,
     randomization = NULL,
     n_cores = 1,
-    uuid=NULL
 ) {
-    message("UUID is:",uuid)
     genome = match.arg(genome)
     
     n_cores = reset_ncores_for_windows(n_cores)
