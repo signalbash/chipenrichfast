@@ -117,7 +117,7 @@ hybridenrich <- function(	peaks,
     max_geneset_size = 2000,
     num_peak_threshold = 1,
     randomization = NULL,
-    n_cores = 1,
+    n_cores = 1
 ) {
     genome = match.arg(genome)
     
