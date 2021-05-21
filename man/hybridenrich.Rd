@@ -19,8 +19,7 @@ hybridenrich(
   max_geneset_size = 2000,
   num_peak_threshold = 1,
   randomization = NULL,
-  n_cores = 1,
-  uuid = NULL
+  n_cores = 1
 )
 }
 \arguments{
