@@ -1,9 +1,15 @@
-# ChIP-Enrich
+# chipenrichfast
 
-[![Travis-CI Build Status](https://travis-ci.org/sartorlab/chipenrich.svg?branch=master)](https://travis-ci.org/sartorlab/chipenrich)[![Coverage Status](https://coveralls.io/repos/github/sartorlab/chipenrich/badge.svg?branch=master)](https://coveralls.io/github/sartorlab/chipenrich?branch=master)
+Faster version of the chipenrich (https://github.com/sartorlab/chipenrich) R package for gene set enrichment testing using ChIP-seq data.
 
-R package for gene set enrichment testing using ChIP-seq data.
+Uses vectorised code and pre-filtering of genesets to cut down on run time.
 
-# Description
+## Usage
+```
+devtools::install_github("signalbash/chipenrichfast")
 
-ChIP-Enrich performs gene set enrichment testing using peaks called from a ChIP-seq experiment. The method empirically corrects for confounding factors such as the length of genes, and the mappability of the sequence surrounding genes.
+##replace input_peaks with a GRanges or data.frame with peak locations
+
+chipenrichfast::chipenrich(peaks=input_peaks, genome='hg38', genesets="GOBP")
+
+```
