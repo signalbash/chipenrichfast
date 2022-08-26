@@ -19,11 +19,13 @@ chipenrich(
   max_geneset_size = 2000,
   num_peak_threshold = 1,
   randomization = NULL,
-  n_cores = 1
+  n_cores = 1,
+  peaks_background = NULL,
+  pre_filter = TRUE
 )
 }
 \arguments{
-\item{peaks}{Either a file path or a \code{data.frame} of peaks in BED-like
+\item{peaks}{Either a file path a \code{GRanges} or a \code{data.frame} of peaks in BED-like
 format. If a file path, the following formats are fully supported via their
 file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
 or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
@@ -60,7 +62,8 @@ a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
 must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
 example custom locus definition file, see the vignette.}
 
-\item{method}{A character string specifying the method to use for enrichment
+\item{method}{REDUNDANT IN CHIPENRICHFAST.
+A character string specifying the method to use for enrichment
 testing. Must be one of ChIP-Enrich ('chipenrich') (default), or
 Fisher's exact test ('fet').}
 
@@ -74,8 +77,7 @@ For an example custom mappability file, see the vignette. Default value is NULL.
 for Fisher's exact test, and must be one of 'two-sided' (default), 'greater',
 or 'less'.}
 
-\item{qc_plots}{A logical variable that enables the automatic generation of
-plots for quality control.}
+\item{qc_plots}{REDUNDANT IN CHIPENRICHFAST.}
 
 \item{min_geneset_size}{Sets the minimum number of genes a gene set may have
 to be considered for enrichment testing.}
@@ -94,6 +96,19 @@ See the Randomizations section below.}
 using only up to the maximum number of \emph{physical} cores present, as
 virtual cores do not significantly decrease runtime. Default number of cores
 is set to 1. NOTE: Windows does not support multicore enrichment.}
+
+\item{peaks_background}{Either a file path a \code{GRanges} or a \code{data.frame} of peaks in BED-like
+format. Used as "background" to calculate enrichment.
+If a file path, the following formats are fully supported via their
+file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
+or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
+without these extensions are supported under the conditions that the first 3
+columns correspond to 'chr', 'start', and 'end' and that there is either no
+header column, or it is commented out. If a \code{data.frame} A BEDX+Y style}
+
+\item{pre_filter}{A logical variable that enables pre-filtering of peaks based
+on the clusterProfiler \code{enrichGO} function, using nearest promoters
+to assign a gene to a peak}
 }
 \value{
 A list, containing the following items:
@@ -231,10 +246,5 @@ assigned_peaks = results$peaks
 # Get the results of enrichment testing.
 enrich = results$results
 
-}
-\seealso{
-Other enrichment functions: 
-\code{\link{broadenrich}()},
-\code{\link{polyenrich}()}
 }
 \concept{enrichment functions}

@@ -54,7 +54,7 @@
 #' by the total number of tests. Users may want to perform multiple randomizations
 #' for a set of peaks and take the median of the \code{alpha} values.
 #'
-#' @param peaks Either a file path or a \code{data.frame} of peaks in BED-like
+#' @param peaks Either a file path a \code{GRanges} or a \code{data.frame} of peaks in BED-like
 #' format. If a file path, the following formats are fully supported via their
 #' file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
 #' or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
@@ -85,7 +85,8 @@
 #' a custom locus definition. NOTE: Must be for a \code{supported_genome()}, and
 #' must have columns 'chr', 'start', 'end', and 'gene_id' or 'geneid'. For an
 #' example custom locus definition file, see the vignette.
-#' @param method A character string specifying the method to use for enrichment
+#' @param method REDUNDANT IN CHIPENRICHFAST.
+#' A character string specifying the method to use for enrichment
 #' testing. Must be one of ChIP-Enrich ('chipenrich') (default), or
 #'Fisher's exact test ('fet').
 #' @param mappability One of \code{NULL}, a file path to a custom mappability file,
@@ -96,8 +97,7 @@
 #' @param fisher_alt If method is 'fet', this option indicates the alternative
 #' for Fisher's exact test, and must be one of 'two-sided' (default), 'greater',
 #' or 'less'.
-#' @param qc_plots A logical variable that enables the automatic generation of
-#' plots for quality control.
+#' @param qc_plots REDUNDANT IN CHIPENRICHFAST.
 #' @param min_geneset_size Sets the minimum number of genes a gene set may have
 #' to be considered for enrichment testing.
 #' @param max_geneset_size Sets the maximum number of genes a gene set may have
@@ -111,6 +111,17 @@
 #' using only up to the maximum number of \emph{physical} cores present, as
 #' virtual cores do not significantly decrease runtime. Default number of cores
 #' is set to 1. NOTE: Windows does not support multicore enrichment.
+#' @param peaks_background Either a file path a \code{GRanges} or a \code{data.frame} of peaks in BED-like
+#' format. Used as "background" to calculate enrichment.
+#' If a file path, the following formats are fully supported via their
+#' file extensions: .bed, .broadPeak, .narrowPeak, .gff3, .gff2, .gff, and .bedGraph
+#' or .bdg. BED3 through BED6 files are supported under the .bed extension. Files
+#' without these extensions are supported under the conditions that the first 3
+#' columns correspond to 'chr', 'start', and 'end' and that there is either no
+#' header column, or it is commented out. If a \code{data.frame} A BEDX+Y style
+#' @param pre_filter A logical variable that enables pre-filtering of peaks based
+#' on the clusterProfiler \code{enrichGO} function, using nearest promoters
+#' to assign a gene to a peak
 #'
 #' @return A list, containing the following items:
 #'
@@ -189,10 +200,7 @@
 #' enrich = results$results
 #'
 #' @export
-#' @include constants.R utils.R supported.R setup.R randomize.R
-#' @include read.R assign_peaks.R peaks_per_gene.R
-#' @include plot_dist_to_tss.R plot_chipenrich_spline.R
-#' @include test_approx.R test_binomial.R test_fisher.R test_chipenrich_slow.R test_chipenrich.R test_chipapprox.R
+#' @import chipenrich
 chipenrich = function(
 	peaks,
 	out_name = "chipenrich",
@@ -211,11 +219,13 @@ chipenrich = function(
 	max_geneset_size = 2000,
 	num_peak_threshold = 1,
 	randomization = NULL,
-	n_cores = 1
+	n_cores = 1,
+	peaks_background = NULL,
+	pre_filter = TRUE
 ) {
 	genome = match.arg(genome)
 
-	n_cores = reset_ncores_for_windows(n_cores)
+	n_cores = chipenrich:::reset_ncores_for_windows(n_cores)
 
 	############################################################################
 	# Collect options for opts output
@@ -231,19 +241,19 @@ chipenrich = function(
 	############################################################################
 	# Setup locus definitions, genesets, and mappability
 
-	ldef_list = setup_locusdef(locusdef, genome, randomization)
+	ldef_list = chipenrich:::setup_locusdef(locusdef, genome, randomization)
 	ldef = ldef_list[['ldef']]
 	tss = ldef_list[['tss']]
 
-	geneset_list = setup_genesets(gs_codes = genesets, ldef_obj = ldef, genome = genome, min_geneset_size = min_geneset_size, max_geneset_size = max_geneset_size)
+	geneset_list = chipenrich:::setup_genesets(gs_codes = genesets, ldef_obj = ldef, genome = genome, min_geneset_size = min_geneset_size, max_geneset_size = max_geneset_size)
 
-	mappa = setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
+	mappa = chipenrich:::setup_mappa(mappa_code = mappability, genome = genome, ldef_code = locusdef, ldef_obj = ldef)
 
 	############################################################################
 	# CHECK method and get() it if okay
-	testf = get_test_method(method)
-	test_func = get(testf)
-	method_name = METHOD_NAMES[[method]]
+	#testf = chipenrich:::get_test_method(method)
+	#test_func = get(testf)
+	#method_name = METHOD_NAMES[[method]]
 
 	############################################################################
 	############################################################################
@@ -255,55 +265,69 @@ chipenrich = function(
 	# Read in and format peaks (from data.frame or file)
 	if (class(peaks) == "data.frame") {
 		message('Reading peaks from data.frame...')
-		peakobj = load_peaks(peaks)
+		peakobj = chipenrich:::load_peaks(peaks)
+	} else if (class(peaks) == "GRanges") {
+	  # convert to data.frame and load as per above
+	  peakobj = chipenrich:::load_peaks(as.data.frame(peaks))
 	} else if (class(peaks) == "character") {
-		peakobj = read_bed(peaks)
+		peakobj = chipenrich:::read_bed(peaks)
 	}
-
+	if(!is.null(peaks_background)){
+	  if (class(peaks_background) == "data.frame") {
+	    message('Reading background from data.frame...')
+	    peakobj.bg = chipenrich:::load_peaks(peaks_background)
+	  } else if (class(peaks) == "character") {
+	    peakobj.bg = chipenrich:::read_bed(peaks_background)
+	  } else if(class(peaks_background) == "GRanges"){
+	    peakobj.bg = chipenrich:::load_peaks(as.data.frame(peaks_background))
+	  }
+	}
 	# Number of peaks in data.
 	num_peaks = length(peakobj)
 
 	######################################################
 	# Assign peaks to genes.
 	message("Assigning peaks to genes with assign_peaks(...) ..")
-	assigned_peaks = assign_peaks(peakobj, ldef, tss)
+	assigned_peaks = chipenrich:::assign_peaks(peakobj, ldef, tss)
+	ldef_list = chipenrich:::setup_locusdef(locusdef, genome, randomization)
+	ldef = ldef_list[['ldef']]
+	tss = ldef_list[['tss']]
 
+	if(!is.null(peaks_background)){
+	  assigned_peaks.bg = chipenrich:::assign_peaks(peakobj.bg, ldef, tss)
+	  assigned_peaks.bg$width = chipenrich:::assigned_peaks.bg$peak_end - assigned_peaks.bg$peak_start
+	  bg_peaks = aggregate(width ~ gene_id, assigned_peaks.bg, sum)
+	  ldef@dframe = ldef@dframe[ldef@dframe$gene_id %in% bg_peaks$gene_id,]
+	  ldef@granges = ldef@granges[ldef@granges$gene_id %in% bg_peaks$gene_id]
+
+	  #geneset = filter_genesets(geneset, ldef)
+	}
 	######################################################
 	# Compute peaks per gene table
-	ppg = num_peaks_per_gene(assigned_peaks, ldef, mappa)
+	ppg = chipenrich:::num_peaks_per_gene(assigned_peaks, ldef, mappa)
+
+	if(!is.null(peaks_background)){
+	  ppg$length = bg_peaks$width[match(ppg$gene_id, bg_peaks$gene_id)]
+	  ppg$log10_length = log10(ppg$length)
+	}
 
 	# Add relevant columns to ppg depending on the method
-	if(method == 'chipapprox_old') {
-		message("Calculating weights for approximate method..")
-		ppg = calc_approx_weights(ppg,mappa)
-	}
+
+	message("Calculating weights for approximate method..")
+	ppg = chipenrich:::calc_approx_weights(ppg,mappa)
+
 
 	######################################################
 	# Enrichment
 	results = list()
 	for (gobj in geneset_list) {
-		message(sprintf("Test: %s",method_name))
+	  if(!is.null(peaks_background)){
+	    gobj = chipenrich:::filter_genesets(gobj, ldef)
+	  }
+		message(sprintf("Test: %s", "test_chipenrichfast"))
 		message(sprintf("Genesets: %s",gobj@type))
 		message("Running tests..")
-		if (testf == "test_chipenrich_slow") {
-			rtemp = test_func(gobj,ppg,n_cores)
-		}
-		if (testf == "test_fisher_exact") {
-			rtemp = test_func(gobj,ppg,alternative=fisher_alt)
-		}
-		if (testf == "test_binomial") {
-			rtemp = test_func(gobj,ppg)
-		}
-		if (testf == "test_approx") {
-			rtemp = test_func(gobj,ppg,nwp=FALSE,n_cores)
-		}
-		if (testf == "test_chipenrich") {
-			rtemp = test_func(gobj,ppg,n_cores)
-		}
-        if (testf == "test_chipapprox") {
-            rtemp = test_func(gobj,ppg,n_cores)
-        }
-
+		rtemp = test_chipenrich_fast(gobj,ppg,n_cores=n_cores,peak=peakobj,pre_filter=pre_filter,genome=genome)
 		# Annotate with geneset descriptions.
 		rtemp$"Description" = as.character(mget(rtemp$Geneset.ID, gobj@set.name, ifnotfound=NA))
 		rtemp$"Geneset.Type" = gobj@type
@@ -316,7 +340,7 @@ chipenrich = function(
 	# Post-process enrichment
 	# Order columns, add enriched/depleted column as needed, remove bad tests,
 	# sort by p-value, rename rownames to integers
-	enrich = post_process_enrichments(enrich)
+	enrich = chipenrich:::post_process_enrichments(enrich)
 
 	######################################################
 	# Write result objects to files
@@ -337,19 +361,6 @@ chipenrich = function(
 		write.table(ppg, file = filename_ppg, row.names = FALSE, quote = FALSE, sep = "\t")
 		message("Wrote count of peaks per gene to: ", filename_ppg)
 
-		if (qc_plots) {
-			filename_qcplots = file.path(out_path, sprintf("%s_qcplots-1.png", out_name))
-			grDevices::png(filename_qcplots)
-				print(..plot_chipenrich_spline(gpw = ppg, mappability = mappability, num_peaks = num_peaks))
-			grDevices::dev.off()
-            message("Wrote QC plots to: ",filename_qcplots)
-
-            filename_qcplots = file.path(out_path, sprintf("%s_qcplots-2.png", out_name))
-            grDevices::png(filename_qcplots)
-                print(..plot_dist_to_tss(peakobj, tss))
-            grDevices::dev.off()
-			message("Wrote QC plots to: ",filename_qcplots)
-		}
 	}
 
 	######################################################
