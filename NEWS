@@ -1,0 +1,427 @@
+CHANGES IN VERSION 2.16.0
+-------------------------
+
+    o Transition to Kai Wang as maintainer.
+
+CHANGES IN VERSION 2.10.0
+-------------------------
+
+NEW FEATURES
+
+    o A new test, proxReg(), tests for genomic region binding proximity to either
+      gene transcription start sites or enhancer regions within gene sets. Used as an
+      addendum to any gene set enrichment test, not exclusive to those in this package.
+
+IMPROVEMENTS
+
+    o Poly-Enrich now uses the likelihood ratio test instead of the Wald test, as
+      LRT is more robust when using a negative binomial GLM.
+
+BUG FIXES
+
+    o Poly-Enrich Approximate method that uses the score test now uses the correct
+      formula.
+
+
+CHANGES IN VERSION 2.4.0
+-------------------------
+
+NEW FEATURES
+
+    o A new function, peaks2genes(), to run the analysis up to, but not including,
+      the enrichment testing. Useful for checking QC plots, check qualities of
+      peak-to-gene assignments, and easier custom tests.
+
+SIGNIFICANT USER-LEVEL CHANGES
+
+    o The hybridenrich() method now returns the same format as chipenrich() and
+      polyenrich()
+
+IMPROVEMENTS
+
+    o Vignette now describes all available gene sets
+
+
+BUG FIXES
+
+    o Fixed multiAssign weighting method to use the correct weights.
+
+CHANGES IN VERSION 2.2.0
+-------------------------
+
+NEW FEATURES
+
+    o polyenrich now supports weighting peaks by signal value
+
+    o A hybrid test, hybridenrich() is available for those unsure of which test,
+      between chipenrich() and polyenrich() to use.
+
+    o A function to join two different results files, hybrid.join(), and it will
+      give an adjusted set of p-values and FDR-adjusted p-values using the two.
+
+    o A new approximation method using the Score test is available for
+      quick results for chipenrich and polyenrich. Only recommended for
+      significantly enriched results, and not depleted results. ~30x faster.
+
+IMPROVEMENTS
+
+    o Several updates to the vignette
+
+CHANGES IN VERSION 2.0.0
+-------------------------
+
+NEW FEATURES
+
+    o A new method for enrichment, polyenrich() is designed for gene set enrichment
+      of experiments where the presence of multiple peaks in a gene is accounted
+      for in the model. Use the polyenrich() function for this method.
+
+    o New features resulting from chipenrich.data 2.0.0:
+
+        o New genomes in chipenrich.data: danRer10, dm6, hg38, rn5, and rn6.
+
+        o Reactome for fly in chipenrich.data.
+
+        o Added locus definitions, GO gene sets, and Reactome gene sets for zebrafish.
+
+        o All genomes have the following locus definitions: nearest_tss, nearest_gene,
+          exon, intron, 1kb, 5kb, 10kb, 1kb_outside_upstream, 5kb_outside_upstream,
+          10kb_outside_upstream, 1kb_outside, 5kb_outside, and 10kb_outside.
+
+IMPROVEMENTS
+
+    o The chipenrich method is now significantly faster. Chris Lee figured out
+      that spline calculations in chipenrich are not required for each gene set.
+      Now a spline is calculated as peak ~ s(log10_length) and used for all gene
+      sets. The correlation between the resulting p-values is nearly always 1.
+      Unfortunately, this approach cannot be used for broadenrich().
+
+        o The chipenrich(..., method='chipenrich', ...) function automatically
+          uses this faster method.
+
+    o Clarified documentation for the supported_locusdefs() to give explanations
+      for what each locus definition is.
+
+    o Use sys.call() to report options used in chipenrich() in opts.tab output. We
+      previously used as.list(environment()) which would also output entire
+      data.frames if peaks were loaded in as a data.frame.
+
+    o Various updates to the vignette to reflect new features.
+
+SIGNIFICANT USER-LEVEL CHANGES
+
+    o As a result of updates to chipenrich.data, ENRICHMENT RESULTS MAY DIFFER
+      between chipenrich 1.Y.Z and chipenrich 2.Y.Z. This is because revised
+      versions of all genomes have been used to update LocusDefinitions, and
+      GO and Reactome gene sets have been updated to more recent versions.
+
+    o The broadenrich method is now its own function, broadenrich(), instead
+      of chipenrich(..., method = 'broadenrich', ...).
+
+    o User interface for mappability has been streamlined. 'mappability' parameter
+      in broadenrich(), chipenrich(), and polyenrich() functions replaces the
+      three parameters previously used: 'use_mappability', 'mappa_file', and
+      'read_length'. The unified 'mappability' parameter can be 'NULL', a file path,
+      or a string indicating the read length for mappability, e.g. '24'.
+
+    o A formerly hidden API for randomizations to assess Type I Error rates for
+      data sets is now exposed to the user. Each of the enrich functions has a
+      'randomization' parameter. See documentation and vignette for details.
+
+    o Many functions with the 'genome' parameter had a default of 'hg19', which
+      was not ideal. Now users must specify a genome and it is checked against
+      supported_genomes().
+
+    o Input files are read according to their file extension. Supported extensions
+      are bed, gff3, wig, bedGraph, narrowPeak, and broadPeak. Arbitrary extensions
+      are also supported, but there can be no header, and the first three columns
+      must be chr, start, and end.
+
+SIGNIFICANT BACKEND CHANGES
+
+    o Harmonize all code touching LocusDefinition and tss objects to reflect
+      changes in chipenrich.data 2.0.0.
+
+        o Alter setup_ldef() function to add symbol column. If a valid genome is
+          used use orgDb to get eg2symbol mappings and fill in for the user. Users
+          can give their own symbol column which will override using orgDb. Finally,
+          if neither symbol column or valid genome is used, symbols are set to NA.
+
+        o Any instance of 'geneid' or 'names' to refer to Entrez Gene IDs are now
+          'gene_id' for consistency.
+
+    o Refactor read_bed() function as a wrapper for rtracklayer::import().
+
+        o Automatic extension handling of BED3-6, gff3, wig, or bedGraph.
+
+        o With some additional code, automatic extension handling of narrowPeak
+          and broadPeak.
+
+        o Backwards compatible with arbitrary extensions: this still assumes that
+          the first three columns are chr, start, end.
+
+        o The purpose of this refactor is to enable additional covariates for the
+          peaks for possible use in future methods.
+
+    o Refactor load_peaks() to use GenomicRanges::makeGRangesFromDataFrame().
+
+    o Filtering gene sets is now based on the locus definition, and can be done
+      from below (min) or above (max). Defaults are 15 and 2000, respectively.
+
+    o Randomizations are all done on the LocusDefinition object.
+
+    o Added lots of unit tests to increase test coverage.
+
+    o Make Travis builds use sartorlab/chipenrich.data version of data package
+      for faster testing.
+
+DEPRECATED AND DEFUNCT
+
+    o Calling the broadenrich method with chipenrich(..., method = 'broadenrich', ...)
+      is no longer valid. Instead, use broadenrich().
+
+    o Various utility functions that were used in the original development have
+      been removed. Users never saw or used them.
+
+BUG FIXES
+
+    o Fixed bug in randomization with length bins where artifactually, randomizations
+      would sort genes on Entrez ID introducing problems in Type I error rate.
+
+    o Fixed a bug where the dependent variable used in the enrichment model
+      was used to name the rows of the enrichment results. This could be confusing
+      for users. Now, rownames are simply integers.
+
+    o Fixed a bug that expected the result of read_bed() to be a list of IRanges
+      from initial development. Big speed bump.
+
+CHANGES IN VERSION 1.12.1
+-------------------------
+
+BUG FIXES
+
+    o Fixed a bug in the check for proper organism + geneset combinations. Prevented
+      combinations that are actually valid from running.
+
+CHANGES IN VERSION 1.12.0
+-------------------------
+
+IMPROVEMENTS
+
+    o Improve supported_*() functions to report and check combinations of genome,
+      organism, genesets, locusdef, and mappability read length.
+
+    o Cleanup DESCRIPTION and NAMESPACE to avoid loading entire packages.
+
+    o Assigning peaks using GenomicRanges object rather than than list of IRanges.
+
+    o Follow data() best practices.
+
+USER-INVISIBLE CHANGES
+
+    o Transition documentation to roxygen2 blocks.
+
+    o Improve commenting in chipenrich() function.
+
+    o Rewrite package vignette in Rmarkdown and render with knitr.
+
+CHANGES IN VERSION 1.4.0
+------------------------
+
+NEW FEATURES
+
+    o A new method, broadenrich, is available in the chipenrich function which is
+      designed for gene set enrichment on broad genomic regions, such as peaks resulting
+      from histone modificaiton based ChIP-seq experiments.
+
+    o Methods chipenrich and broadenrich are available in multicore versions (on every
+      platform except Windows). The user selects the number of cores when calling
+      the chipenrich function.
+
+    o Peaks downloaded from the ENCODE Consortium as .broadPeak or .narrowPeak files
+      are supported directly.
+
+    o Peaks downloaded from the modENCODE Consortium as .bed.gff or .bed.gff3 files are
+      also supported directly.
+
+    o Support for D. melanogaster (dm3) genome and enrichment testing for GO terms
+      from all three branches (GOBP, GOCC, and GOMF).
+
+    o New gene sets from Reactome (http://www.reactome.org) for human, mouse, and rat.
+
+    o New example histone data set, peaks_H3K4me3_GM12878, based on hg19.
+
+    o New locus definitions including: introns, 10kb within TSS, and 10kb upstream of TSS.
+
+
+CHANGES IN VERSION 1.0
+----------------------
+
+PKG FEATURES
+
+    o chipenrich performs gene set enrichment tests on peaks called from
+      a ChIP-seq experiment
+
+    o chipenrich empirically corrects for confounding factors such as
+      the length of genes and mappability of sequence surrounding genes
+
+    o Use multiple definitions of a gene "locus" when testing for enrichment,
+      or provide your own definition
+
+    o Test for enrichment using chipenrich or Fisher's exact test (should only
+      be used for datasets where peaks are close to TSSs, see docs)
+
+    o Test multiple sets of genesets (Gene Ontology, KEGG, Biocarta, OMIM, etc.)
+
+    o Multiple plots to describe binding distance and likelihood of a peak
+      as a function of gene length
+
+    o Support for human (hg19), mouse (mm9), and rat (rn4) genomes
+
+    o Many conveniences such as seeing which peaks were assigned to genes,
+      their position relative to those genes and their TSS, etc.
+
+    o See how many peaks were assigned to each gene along with the length and
+      mappability of the gene
+
+
+CHANGES IN VERSION 0.99.2
+-------------------------
+
+USER-VISIBLE CHANGES
+
+    o Updated examples for various functions to be runnable (removed donttest)
+    o Updated DESCRIPTION to use Imports: rather than Depends:
+    o Updated license to GPL-3
+    o Updated NEWS file for bioconductor guidelines
+
+BUG FIXES
+
+    o Added a correction for the case where a small gene set has a peak in
+      every gene. This has the result of making a very few number of tests
+      slightly conservative, at the benefit of actually being able to return
+      a p-value for them.
+
+CHANGES IN VERSION 0.99.1
+-------------------------
+
+USER-VISIBLE CHANGES
+
+    o Minor updates to documentation for Bioconductor
+
+CHANGES IN VERSION 0.99.0
+-------------------------
+
+NEW FEATURES
+
+    o Initial submission to Bioconductor
+
+CHANGES IN VERSION 0.9.6
+------------------------
+
+NEW FEATURES
+
+    o Added peaks per gene as a returned object / output file
+
+CHANGES IN VERSION 0.9.5
+------------------------
+
+BUG FIXES
+
+    o Update to handle bioconductor/IRange's new "functionality" for distanceToNearest and distance
+
+USER-VISIBLE CHANGES
+
+    o Changed sorting of results to put enriched terms first (sorted by p-value), then depleted (also sorted by p-value)
+
+CHANGES IN VERSION 0.9.4
+------------------------
+
+USER-VISIBLE CHANGES
+
+    o Minor changes to vignette and documentation
+
+CHANGES IN VERSION 0.9.3
+------------------------
+
+NEW FEATURES
+
+    o Addition of rat genome
+
+BUG FIXES
+
+    o chipenrich() will correctly open both .bed and .bed.gz files now
+
+CHANGES IN VERSION 0.9.2
+------------------------
+
+NEW FEATURES
+
+    o Added ability for user to input their own locus definition file (pass the full path to a file as the locusdef argument)
+    o Added a data frame to the results object that gives the arguments/values passed to chipenrich, also written to file *_opts.tab
+    o For FET and chipenrich methods, the outcome variable can be recoded to be >= 1 peak, 2 peaks, 3 peaks, etc. using the num_peak_threshold parameter
+    o Added a parameter to set the maximum size of gene set that should be tested (defaults to 2000)
+
+USER-VISIBLE CHANGES
+
+    o Previously only peak midpoints were given in the peak --> gene assignments file, now the original peak start/ends are also given
+    o Updated help/man with new parameters and more information about the results
+
+BUG FIXES
+
+    o Fixed an issue where status in results was not enriched if the odds ratio was infinite, and depleted if the odds ratio was exactly zero
+
+CHANGES IN VERSION 0.9.1
+------------------------
+
+NEW FEATURES
+
+    o Added a QC plot for expected # of peaks and actual # of peaks vs. gene locus length. This will be automatically created if qc_plots is TRUE, or the plots can be created using the plot_expected_peaks function.
+    o Distance to TSS is now signed for upstream (-) and downstream (+) of TSS
+    o Column added to indicate whether the geneset is enriched or depleted
+
+CHANGES IN VERSION 0.9
+----------------------
+
+NEW FEATURES
+
+    o Added support for reading BED files natively
+
+BUG FIXES
+
+    o Fixed bug where invalid geneset in chipenrich() wasn't detected properly
+
+CHANGES IN VERSION 0.8
+----------------------
+BUG FIXES
+
+    o Fixed crash when mappability contained an NA (will be removed from DB in future version)
+
+CHANGES IN VERSION 0.7
+----------------------
+
+USER-VISIBLE CHANGES
+
+    o Updated binomial test to sum gene locus lengths to get genome length and remove genes that are not present in the set of genes being tested
+    o Updated spline fit plot to take into account mappability if requested (log mappable locus length plotted instead of simply log locus length)
+    o Removed SAMPLEABLE_GENOME* constants since they are no longer needed
+    o Updated help files to reflect changes to plot_spline_length and chipenrich functions
+
+BUG FIXES
+
+    o Fixed bug where results for multiple gene set types (e.g. doing BioCarta and KEGG together) were not sorted by p-value
+
+CHANGES IN VERSION 0.6
+----------------------
+
+BUG FIXES
+
+    o Fixed bug where 1kb/5kb locusdefs could fail if not all peaks were assigned to a gene
+
+CHANGES IN VERSION 0.5
+----------------------
+
+USER-VISIBLE CHANGES
+
+    o Updated help to explain new mappability model
+    o Changed how mappability is handled - now multiplies gene locus length by mappability, rather than adjusting as a spline term

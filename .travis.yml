@@ -1,0 +1,23 @@
+# Sample .travis.yml for R projects
+
+language: r
+r:
+  - devel
+sudo: false
+cache: packages
+bioc_required: true
+
+warnings_are_errors: false
+
+r_github_packages:
+  - sartorlab/chipenrich.data
+  - jimhester/covr
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+  slack: sartorlab:C04eRjCj1hqMOhkcy4p2bFuG
+
+after_success:
+  - Rscript -e 'covr::coveralls()'

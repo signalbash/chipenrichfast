@@ -1,0 +1,28 @@
+Package: chipenrichfast
+Type: Package
+Title: Faster Gene Set Enrichment For ChIP-seq Peak Data
+Version: 0.99.0
+Date: 2022-08-26
+Authors@R: person("Brandon", "Signal",
+	email="brandon.signal@gmail.com",
+	role=c("aut", "cre"))
+Description: Faster version of chipenrich that uses vectorised code 
+  and prefiltering of GO terms. 
+  ChIP-Enrich performs gene set enrichment testing
+	using peaks called from a ChIP-seq experiment. The method empirically
+	corrects for confounding factors such as the length of genes,
+	and the mappability of the sequence surrounding genes.
+License: GPL-3
+Imports: AnnotationDbi, BiocGenerics, chipenrich, chipenrich.data, 
+         ChIPseeker,clusterProfiler, GenomeInfoDb,
+         GenomicRanges, grDevices, grid, IRanges, lattice, latticeExtra,
+         MASS, methods, mgcv, org.Hs.eg.db,
+         org.Mm.eg.db, parallel, plyr, rms, rtracklayer,
+         S4Vectors (>= 0.23.10), stats, stringr, utils
+Suggests: BiocStyle, devtools, knitr, rmarkdown, roxygen2, testthat
+Depends: R (>= 3.4.0)
+LazyLoad: yes
+Maintainer: Brandon Signal <brandon.signal@gmail.com>
+RoxygenNote: 7.2.1
+VignetteBuilder: knitr
+
